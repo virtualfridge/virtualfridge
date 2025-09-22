@@ -21,6 +21,26 @@
 
 ### **3.2. Use Case Diagram**
 
+```plantuml
+left to right direction
+:Lower to middle class family: --|> User
+:Person wanting to reduce food waste: --|> User
+rectangle "Virtual Fridge" {
+usecase authentication as "Authentication"
+usecase groceries as "Input groceries"
+usecase recipes as "Get recipe suggestions"
+usecase expiration as "Receive notifications when items close to expiry"
+usecase nutrition as "View nutrition information"
+}
+expiration .> authentication : includes
+groceries .> authentication : includes
+User -- authentication
+User -- groceries
+User -- recipes
+User -- expiration
+User -- nutrition
+```
+
 
 ### **3.3. Actors Description**
 1. **[WRITE_NAME_HERE]**: ...
