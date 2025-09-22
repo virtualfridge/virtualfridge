@@ -1,0 +1,24 @@
+This file is used to generate the usecase diagram with plantuml. To generate it from the command line run
+```bash
+java -jar plantuml.jar usecasediagram.txt
+```
+Make sure you [download PlantUML first](https://plantuml.com/download)
+@startuml
+left to right direction
+:Lower to middle class family: --|> User
+:Person wanting to reduce food waste: --|> User
+rectangle "Virtual Fridge" {
+usecase authentication as "Authentication"
+usecase groceries as "Input groceries"
+usecase recipes as "Get recipe suggestions"
+usecase expiration as "Receive notifications when items close to expiry"
+usecase nutrition as "View nutrition information"
+}
+expiration .> authentication : includes
+groceries .> authentication : includes
+User -- authentication
+User -- groceries
+User -- recipes
+User -- expiration
+User -- nutrition
+@enduml
