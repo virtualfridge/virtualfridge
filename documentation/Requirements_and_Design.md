@@ -21,7 +21,7 @@
 
 ### **3.2. Use Case Diagram**
 
-```plantuml
+@startuml
 left to right direction
 :Lower to middle class family: --|> User
 :Person wanting to reduce food waste: --|> User
@@ -39,7 +39,7 @@ User -- groceries
 User -- recipes
 User -- expiration
 User -- nutrition
-```
+@enduml
 
 
 ### **3.3. Actors Description**
