@@ -9,8 +9,9 @@
 ---
 
 ## 2. Project Description
+Virtual Fridge is a smart companion for your kitchen, designed to help you stay organized, reduce food waste, and make healthier choices. By scanning barcodes, the app automatically tracks what products you've bought and keeps an up-to-date inventory of what's in your fridge. It sends timely notifications when items are nearing their expiration date, ensuring you use them before they go bad.
 
-[WRITE_PROJECT_DESCRIPTION_HERE]
+Beyond just tracking, Virtual Fridge helps you get the most out of your groceries. It suggests recipes based on the ingredients you already have, helping you save money while minimizing waste. You can also view detailed nutritional information for the foods in your fridge, making it easier to plan balanced meals. With Virtual Fridge, your kitchen becomes smarter, your meals more creative, and your lifestyle more sustainable.
 
 ---
 
@@ -21,7 +22,7 @@
 
 ### **3.2. Use Case Diagram**
 
-![](diagrams/out/usecase.png)
+![](images/usecase.png)
 
 ### **3.3. Actors Description**
 1. **[WRITE_NAME_HERE]**: ...
@@ -114,12 +115,12 @@
 
 ### **4.5. Dependencies Diagram**
 
-![](diagrams/out/dependencies.png)
+![](images/dependencies.png)
 
 
 ### **4.6. Use Case Sequence Diagram (5 Most Major Use Cases)**
 1. [**[WRITE_NAME_HERE]**](#uc1)\
-![](diagrams/out/usecaseSequence.png)
+![](images/usecaseSequence.png)
 
 [SEQUENCE_DIAGRAM_HERE]
 2. ...
