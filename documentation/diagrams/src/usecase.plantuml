@@ -2,6 +2,7 @@
 /'java -jar plantuml.jar usecasediagram.txt'/
 /'Make sure you [download PlantUML first](https://plantuml.com/download)'/
 @startuml
+!theme plain
 left to right direction
 :Lower to middle class family: --|> User
 :Person wanting to reduce food waste: --|> User

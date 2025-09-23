@@ -1,4 +1,5 @@
 @startuml
+!theme plain
 left to right direction
 component "Frontend" as Frontend
 component "Backend" as Backend
