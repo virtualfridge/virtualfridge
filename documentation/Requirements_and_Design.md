@@ -120,7 +120,7 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 ### **4.6. Use Case Sequence Diagram (5 Most Major Use Cases)**
 1. [**Generate Recipe Suggestions**](#uc1)
 
-![](images/generateRecipeSequence.svc)
+![](images/generateRecipeSequence.svg)
 
 2. ...
 
