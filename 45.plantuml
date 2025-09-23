@@ -1,0 +1,51 @@
+@startuml
+title Virtual Fridge Dependency Diagram
+left to right direction
+
+skinparam rectangle {
+  BackgroundColor White
+  BorderColor Black
+}
+
+' External modules
+rectangle "Google Notifications" as gnoti
+rectangle "Google Notifications" as gnoti2
+rectangle "Google Auth" as gauth
+rectangle "OCR" as ocr
+rectangle "Barcode Scanner" as bscan
+rectangle "Open Food Facts" as off
+rectangle "Recipe API" as rapi
+rectangle "Deepseek" as dseek
+
+' Frontend and backend
+rectangle "Frontend" as fe
+package "Backend" {
+  rectangle "User" as user
+  rectangle "FoodItem" as food
+  rectangle "Recipe" as recipe
+}
+database "DB" as db
+rectangle "Cron" as cron
+
+' Dependencies (left to right)
+ocr --> fe
+bscan --> fe
+gauth --> fe
+
+fe --> user
+fe --> food
+fe --> recipe
+
+user --> db
+food --> db
+
+user --> gauth
+food --> off
+recipe --> rapi
+recipe --> dseek
+
+db --> cron
+cron --> gnoti
+gnoti2 --> fe
+
+@enduml
