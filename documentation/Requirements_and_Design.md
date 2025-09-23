@@ -21,7 +21,7 @@
 
 ### **3.2. Use Case Diagram**
 
-![](usecaseDiagram.png)
+![](diagrams/out/usecase.png)
 
 ### **3.3. Actors Description**
 1. **[WRITE_NAME_HERE]**: ...
@@ -114,9 +114,13 @@
 
 ### **4.5. Dependencies Diagram**
 
+![](diagrams/out/dependencies.png)
+
 
 ### **4.6. Use Case Sequence Diagram (5 Most Major Use Cases)**
 1. [**[WRITE_NAME_HERE]**](#uc1)\
+![](diagrams/out/usecaseSequence.png)
+
 [SEQUENCE_DIAGRAM_HERE]
 2. ...
 

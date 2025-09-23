@@ -1,8 +1,6 @@
-This file is used to generate the usecase diagram with plantuml. To generate it from the command line run
-```bash
-java -jar plantuml.jar usecasediagram.txt
-```
-Make sure you [download PlantUML first](https://plantuml.com/download)
+/'This file is used to generate the usecase diagram with plantuml. To generate it from the command line run'/
+/'java -jar plantuml.jar usecasediagram.txt'/
+/'Make sure you [download PlantUML first](https://plantuml.com/download)'/
 @startuml
 left to right direction
 :Lower to middle class family: --|> User

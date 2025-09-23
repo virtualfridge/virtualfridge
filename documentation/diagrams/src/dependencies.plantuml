@@ -1,0 +1,8 @@
+@startuml
+left to right direction
+component "Frontend" as Frontend
+component "Backend" as Backend
+component "Database" as DB
+Frontend --> Backend
+Backend --> DB
+@enduml
