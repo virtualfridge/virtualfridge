@@ -1,0 +1,22 @@
+@startuml
+actor User
+participant Frontend
+participant Backend
+database Database
+User -> Frontend: Clicks "Find Recipes"
+Frontend -> Backend: Get recipes request
+Backend -> Database: Get fridge contents
+Backend <-- Database: Fridge contents
+Backend -> "Recipe API": Get recipes with matching ingredients
+"Recipe API" --> Backend: API response
+
+alt Found recipe(s)
+Backend --> Frontend: Sorted recipe list
+Frontend --> User: Display recipes
+
+else Did not find recipes
+Backend --> Frontend: Error message
+Frontend --> User: Display "No recipes found"
+
+end
+@enduml

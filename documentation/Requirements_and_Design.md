@@ -21,7 +21,6 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 
 ### **3.2. Use Case Diagram**
-
 ![](images/usecase.png)
 
 ### **3.3. Actors Description**
@@ -119,10 +118,10 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 
 ### **4.6. Use Case Sequence Diagram (5 Most Major Use Cases)**
-1. [**[WRITE_NAME_HERE]**](#uc1)\
-![](images/usecaseSequence.png)
+1. [**Generate Recipe Suggestions**](#uc1)
 
-[SEQUENCE_DIAGRAM_HERE]
+![](images/generateRecipeSequence.svc)
+
 2. ...
 
 
