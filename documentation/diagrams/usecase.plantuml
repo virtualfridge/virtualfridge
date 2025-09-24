@@ -4,20 +4,33 @@
 @startuml
 !theme plain
 left to right direction
-:Lower to middle class family: --|> User
-:Person wanting to reduce food waste: --|> User
-rectangle "Virtual Fridge" {
-usecase authentication as "Authentication"
-usecase groceries as "Input groceries"
-usecase recipes as "Get recipe suggestions"
-usecase expiration as "Receive notifications when items close to expiry"
-usecase nutrition as "View nutrition information"
+actor User
+rectangle "Virtual Fridge" << System >> {
+  usecase logOcr as "Log Food via OCR"
+  usecase logFood as "Log Food"
+  usecase logBarcode as "Log Food via Barcode"
+
+
+  logBarcode .> logFood : << extend >>
+  logOcr .> logFood: << extend >>
+
+  usecase viewNutrition as "View Nutritional facts"
+  usecase signUp as "Sign up with Google"
+  usecase viewFridge as "View Fridge"
+  usecase generateRecipes as "Generate Recipe Suggestions"
 }
-expiration .> authentication : includes
-groceries .> authentication : includes
-User -- authentication
-User -- groceries
-User -- recipes
-User -- expiration
-User -- nutrition
+User -- signUp
+User -- logFood
+User -- viewFridge
+User -- generateRecipes
+User -- viewNutrition
+rectangle openFoodFacts as "Open Food Facts API"
+rectangle googleAuth as "Google Authentication"
+rectangle recipeApi as "TheMealDB API"
+rectangle barcodeScanner as "Barcode Scanner"
+generateRecipes -- recipeApi
+viewNutrition -- openFoodFacts
+signUp -- googleAuth
+logBarcode -- barcodeScanner
+logFood -- openFoodFacts
 @enduml
