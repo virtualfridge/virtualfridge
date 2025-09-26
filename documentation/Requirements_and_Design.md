@@ -365,9 +365,6 @@ Failure scenario(s):
 
 ![](images/viewNutritionDiagram.png)
 
-6. [**Expiry Notification**](#uc6)
-// TODO
-
 ### **4.7. Design and Ways to Test Non-Functional Requirements**
 1. [**Barcode Scanning Response Time**](#nfr1)
 **Idea**: Measure the time from when a user initiates the scan to when the food data is displayed.
