@@ -4,7 +4,7 @@
 
 | **Change Date**   | **Modified Sections** | **Rationale** |
 | ----------------- | --------------------- | ------------- |
-| _Nothing to show_ |
+| 20/09/25          | Initial Commit
 
 ---
 
@@ -34,8 +34,7 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 ![](images/usecase.svg)
 
 ### **3.3. Actors Description**
-1. **[WRITE_NAME_HERE]**: ...
-2. **[WRITE_NAME_HERE]**: ...
+1. Users: The users of the virtual fridge application are individuals and households who want to manage their food inventory more efficiently. They rely on the app to keep track of what items are currently in their fridge or pantry, monitor expiration dates, reduce food waste, and plan meals based on available ingredients. Users may include busy professionals, students, families, or anyone looking for convenience, organization, and cost savings in their daily food management.
 
 ### **3.4. Use Case Description**
 - Use cases for feature 1: Authentication
@@ -192,7 +191,7 @@ Failure scenario(s):
 
 **Description**: The system notifies the user when a stored food item is nearing its expiry date. Users can configure how many hours or days before expiry they would like to be notified.
 
-**Primary actor(s)**: User
+**Primary actor(s)**: Users: The users of the virtual fridge application are individuals and households who want to manage their food inventory more efficiently. They rely on the app to keep track of what items are currently in their fridge or pantry, monitor expiration dates, reduce food waste, and plan meals based on available ingredients. Users may include busy professionals, students, families, or anyone looking for convenience, organization, and cost savings in their daily food management.
 
 Main success scenario:
 1. From the settings menu, User selects “Expiry Notifications.”
