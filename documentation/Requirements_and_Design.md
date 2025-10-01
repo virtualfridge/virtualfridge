@@ -375,16 +375,16 @@ Failure scenario(s):
 
 ### **4.7. Design and Ways to Test Non-Functional Requirements**
 1. [**Barcode Scanning Response Time**](#nfr1)
-**Idea**: Measure the time from when a user initiates the scan to when the food data is displayed.
-**Method**: Use a stopwatch or logging timestamps in the app during multiple tests with different devices and lighting conditions.
-**Goal**: Ensure the average scan time is ≤ 5 seconds.
+  - **Idea**: Measure the time from when a user initiates the scan to when the food data is displayed.
+  - **Method**: Use a stopwatch or logging timestamps in the app during multiple tests with different devices and lighting conditions.
+  - **Goal**: Ensure the average scan time is ≤ 5 seconds.
 
 2. [**Image Recognition Accuracy**](#nfr2)
-**Idea**: Prepare a test set of food images (with and without barcodes).
-**Method**: Log the number of correctly identified items versus total items.
-**Goal**: Confirm accuracy is ≥ 95%, accounting for lighting, angle, and occlusion variations.
+  - **Idea**: Prepare a test set of food images (with and without barcodes).
+  - **Method**: Log the number of correctly identified items versus total items.
+  - **Goal**: Confirm accuracy is ≥ 95%, accounting for lighting, angle, and occlusion variations.
 
 3. [**Mobile App Load Time**](#nfr3)
-**Idea**: Track the time from app launch to full interactivity on Android devices.
-**Method**: Perform multiple launches on different devices and network conditions.
-**Goal**: Confirm that the app consistently loads in ≤ 2.5 seconds.
+  - **Idea**: Track the time from app launch to full interactivity on Android devices.
+  - **Method**: Perform multiple launches on different devices and network conditions.
+  - **Goal**: Confirm that the app consistently loads in ≤ 2.5 seconds.
