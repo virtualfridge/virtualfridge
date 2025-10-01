@@ -4,6 +4,8 @@ jobs:
   generate_plantuml:
     runs-on: ubuntu-latest
     name: plantuml
+    permissions:
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v1
