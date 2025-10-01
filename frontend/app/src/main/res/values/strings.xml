@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CPEN 321 - M1</string>
+    <string name="auth_message">Please sign in to continue.</string>
+    <string name="welcome">Welcome!</string>
+    <string name="hobbies">Hobbies</string>
+    <string name="select_hobbies">Select your hobbies:</string>
+    <string name="saving">Saving…</string>
+    <string name="hobbies_updated">Hobbies updated successfully!</string>
+    <string name="failed_update_hobbies">Failed to update hobbies</string>
+    <string name="failed_load_hobbies">Failed to load hobbies</string>
+    <string name="profile">Profile</string>
+    <string name="complete_profile">Complete Your Profile</string>
+    <string name="back">Back</string>
+    <string name="profile_picture">Profile Picture</string>
+    <string name="edit_profile_picture">Edit Profile Picture</string>
+    <string name="selected_chip">Selected</string>
+    <string name="google_logo">Google Logo</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_up_with_google">Sign up with Google</string>
+    <string name="manage_profile">Manage Profile</string>
+    <string name="manage_hobbies">Manage Hobbies</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_confirmation">Are you sure you want to delete your account and data?\nThis action cannot be undone. Your Google account will not be affected.</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="name">Name</string>
+    <string name="email">Email</string>
+    <string name="bio">Bio</string>
+    <string name="bio_description">Tell us about yourself to get started</string>
+    <string name="bio_placeholder">Tell us about yourself...</string>
+    <string name="save">Save</string>
+    <string name="skip">Skip</string>
+    <string name="loading">Loading...</string>
+    <string name="checking_authentication">Checking authentication...</string>
+    <string name="successful_bio_update">Bio updated successfully!</string>
+</resources>

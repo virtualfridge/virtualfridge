@@ -1,0 +1,20 @@
+services:
+  db:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    volumes:
+      - db:/data/db
+  app:
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      PORT: ${PORT}
+    depends_on:
+      - db
+volumes:
+  db:
