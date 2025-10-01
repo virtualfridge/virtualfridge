@@ -1,6 +1,5 @@
 services:
   db:
-    # TODO: check tag
     image: mongo:latest
     ports:
       - 27017:27017
@@ -14,8 +13,6 @@ services:
       MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      # DB_USER: ${{DB_USER}}
-      # DB_PASS: ${{DB_PASS}}
       PORT: ${PORT}
     depends_on:
       - db
