@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-import { AuthController } from './auth.controller';
-import { AuthenticateUserRequest, authenticateUserSchema } from './auth.types';
-import { validateBody } from './validation.middleware';
+import { AuthController } from '../controllers/auth';
+import { AuthenticateUserRequest, authenticateUserSchema } from '../types/auth';
+import { validateBody } from '../middleware/validation';
 
 const router = Router();
 const authController = new AuthController();

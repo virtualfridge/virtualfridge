@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { GetProfileResponse, UpdateProfileRequest } from './user.types';
-import logger from './logger.util';
-import { MediaService } from './media.service';
-import { userModel } from './user.model';
+import { GetProfileResponse, UpdateProfileRequest } from '../types/user';
+import logger from '../util/logger';
+import { MediaService } from '../services/media';
+import { userModel } from '../models/user';
 
 export class UserController {
   getProfile(req: Request, res: Response<GetProfileResponse>) {

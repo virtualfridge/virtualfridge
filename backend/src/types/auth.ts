@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { IUser } from './user.types';
+import { IUser } from './user';
 
 // Zod schemas
 // ------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { sanitizeArgs, sanitizeInput } from './sanitizeInput.util';
+import { sanitizeArgs, sanitizeInput } from './sanitizeInput';
 
 const logger = {
   info: (message: string, ...args: unknown[]) => {

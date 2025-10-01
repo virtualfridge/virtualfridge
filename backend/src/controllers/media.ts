@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 
-import logger from './logger.util';
-import { MediaService } from './media.service';
-import { UploadImageRequest, UploadImageResponse } from './media.types';
-import { sanitizeInput } from './sanitizeInput.util';
+import logger from '../util/logger';
+import { MediaService } from '../services/media';
+import { UploadImageRequest, UploadImageResponse } from '../types/media';
+import { sanitizeInput } from '../util/sanitizeInput';
 
 export class MediaController {
   async uploadImage(
