@@ -28,9 +28,9 @@ database "DB" as db
 rectangle "Cron" as cron
 
 ' Dependencies (left to right)
-ocr --> fe
-bscan --> fe
-gauth --> fe
+fe --> ocr
+fe --> bscan
+fe --> gauth
 
 fe --> user
 fe --> food

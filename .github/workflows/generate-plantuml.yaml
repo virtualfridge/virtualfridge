@@ -4,6 +4,8 @@ jobs:
   generate_plantuml:
     runs-on: ubuntu-latest
     name: plantuml
+    permissions:
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v1
@@ -13,6 +15,7 @@ jobs:
         id: plantuml
         uses: grassedge/generate-plantuml-action@v1.5
         with:
+          path: documentation/images
           message: "Render PlantUML files"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
