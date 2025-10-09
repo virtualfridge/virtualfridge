@@ -2,31 +2,32 @@ package com.cpen321.usermanagement.di
 
 import com.cpen321.usermanagement.data.repository.AuthRepository
 import com.cpen321.usermanagement.data.repository.AuthRepositoryImpl
+import com.cpen321.usermanagement.data.repository.BarcodeRepository
+import com.cpen321.usermanagement.data.repository.BarcodeRepositoryImpl
 import com.cpen321.usermanagement.data.repository.ProfileRepository
 import com.cpen321.usermanagement.data.repository.ProfileRepositoryImpl
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+abstract class RepositoryModule {
 
-    @Provides
-    @Singleton
-    fun provideAuthRepository(
-        authRepositoryImpl: AuthRepositoryImpl
-    ): AuthRepository {
-        return authRepositoryImpl
-    }
+    // --- Bind repositories to their implementations ---
+    @Binds
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
 
-    @Provides
-    @Singleton
-    fun provideProfileRepository(
-        profileRepositoryImpl: ProfileRepositoryImpl
-    ): ProfileRepository {
-        return profileRepositoryImpl
-    }
+    @Binds
+    abstract fun bindProfileRepository(
+        impl: ProfileRepositoryImpl
+    ): ProfileRepository
+
+    @Binds
+    abstract fun bindBarcodeRepository(
+        impl: BarcodeRepositoryImpl
+    ): BarcodeRepository
 }
