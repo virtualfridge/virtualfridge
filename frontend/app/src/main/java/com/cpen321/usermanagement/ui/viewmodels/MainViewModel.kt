@@ -1,5 +1,6 @@
 package com.cpen321.usermanagement.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.repository.BarcodeRepository
@@ -54,6 +55,26 @@ class MainViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     setScanError("Failed to send barcode: ${error.message ?: "Unknown error"}")
+                }
+            )
+        }
+    }
+
+    // --- Test sending a static barcode (e.g., Nutella) ---
+    fun testSendBarcode() {
+        viewModelScope.launch {
+            val testBarcode = "3017620425035" // Nutella barcode
+            Log.d("BarcodeTest", "Sending test barcode: $testBarcode")
+
+            val result = barcodeRepository.sendBarcode(testBarcode)
+            result.fold(
+                onSuccess = {
+                    Log.d("BarcodeTest", "Successfully sent test barcode")
+                    setSuccessMessage("Test barcode sent successfully!")
+                },
+                onFailure = { error ->
+                    Log.e("BarcodeTest", "Failed to send test barcode: ${error.message}", error)
+                    setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
                 }
             )
         }

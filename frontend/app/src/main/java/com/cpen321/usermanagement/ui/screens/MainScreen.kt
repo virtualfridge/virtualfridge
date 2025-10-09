@@ -39,7 +39,8 @@ fun MainScreen(
             mainViewModel.handleScannedBarcode(barcode)
         },
         onSuccessMessageShown = mainViewModel::clearSuccessMessage,
-        onErrorMessageShown = mainViewModel::clearScanError
+        onErrorMessageShown = mainViewModel::clearScanError,
+        mainViewModel = mainViewModel // <-- pass here
     )
 }
 
@@ -53,7 +54,9 @@ private fun MainContent(
     onBarcodeDetected: (String) -> Unit,
     onSuccessMessageShown: () -> Unit,
     onErrorMessageShown: () -> Unit,
+    mainViewModel: MainViewModel, // <-- add this
     modifier: Modifier = Modifier
+
 ) {
     Scaffold(
         modifier = modifier,
@@ -72,7 +75,8 @@ private fun MainContent(
             paddingValues = paddingValues,
             showScanner = showScanner,
             onScanClick = onScanRequested,
-            onBarcodeDetected = onBarcodeDetected
+            onBarcodeDetected = onBarcodeDetected,
+            mainViewModel = mainViewModel
         )
     }
 }
@@ -148,7 +152,8 @@ private fun MainBody(
     showScanner: Boolean,
     onScanClick: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel
 ) {
     Box(
         modifier = modifier
@@ -165,13 +170,28 @@ private fun MainBody(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 WelcomeMessage()
                 Spacer(modifier = Modifier.height(16.dp))
+
+                // Scan Barcode Button
                 Button(onClick = onScanClick) {
                     Text("Scan Barcode")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Test Barcode Button
+                Button(
+                    onClick = {
+                        val testBarcode = "3017620425035" // Example barcode
+                        mainViewModel.handleScannedBarcode(testBarcode)
+                    }
+                ) {
+                    Text("Send Test Barcode")
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun WelcomeMessage(modifier: Modifier = Modifier) {
