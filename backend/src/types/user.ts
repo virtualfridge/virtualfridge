@@ -14,17 +14,49 @@ export interface IUser extends Document {
   hobbies: string[];
   createdAt: Date;
   updatedAt: Date;
+  dietaryPreferences?: DietaryPreferences;
+  notificationPreferences?: NotificationPreferences;
 }
+
+// TODO: expand/reduce as necessary
+export type DietaryPreferences = {
+  vegetarian?: boolean;
+  vegan?: boolean;
+  halal?: boolean;
+  keto?: boolean;
+};
+
+// TODO: expand/reduce as necessary
+export type NotificationPreferences = {
+  enableNotifications: boolean;
+  expiryThresholdDays?: number;
+  notificationTime?: number;
+};
 
 // Zod schemas
 // ------------------------------------------------------------
 export const createUserSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   name: z.string().min(1),
   googleId: z.string().min(1),
   profilePicture: z.string().optional(),
   bio: z.string().max(500).optional(),
   hobbies: z.array(z.string()).default([]),
+  dietaryPreferences: z
+    .object({
+      vegetarian: z.boolean().optional(),
+      vegan: z.boolean().optional(),
+      halal: z.boolean().optional(),
+      keto: z.boolean().optional(),
+    })
+    .optional(),
+  notificationPreferences: z
+    .object({
+      enableNotifications: z.boolean(),
+      expiryThresholdDays: z.uint32().optional(),
+      notificationTime: z.uint32().optional(),
+    })
+    .optional(),
 });
 
 export const updateProfileSchema = z.object({
@@ -37,6 +69,21 @@ export const updateProfileSchema = z.object({
     })
     .optional(),
   profilePicture: z.string().min(1).optional(),
+  dietaryPreferences: z
+    .object({
+      vegetarian: z.boolean().optional(),
+      vegan: z.boolean().optional(),
+      halal: z.boolean().optional(),
+      keto: z.boolean().optional(),
+    })
+    .optional(),
+  notificationPreferences: z
+    .object({
+      enableNotifications: z.boolean(),
+      expiryThresholdDays: z.uint32().optional(),
+      notificationTime: z.uint32().optional(),
+    })
+    .optional(),
 });
 
 // Request types
