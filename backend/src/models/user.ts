@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { z } from 'zod';
 
-import { HOBBIES } from '../util/constants';
+import { HOBBIES } from '../config/constants';
 import {
   createUserSchema,
   GoogleUserInfo,
