@@ -1,4 +1,7 @@
 import mongoose, { Document } from 'mongoose';
+import z from 'zod';
+
+// Model
 
 export interface IFoodItem extends Document {
   _id: mongoose.Types.ObjectId;
@@ -10,30 +13,41 @@ export interface IFoodItem extends Document {
   amountUnit: string; // TODO: consider using a Unit enum for all units
 }
 
-export type NutrientInfo = {
+export interface INutrientInfo {
   value: number;
   unit: string;
   perSourceValue: number;
   perSourceUnit: string;
-};
+}
+
 export type NutritionalInfo = {
-  energy?: NutrientInfo;
-  energyKcal?: NutrientInfo;
-  energyKj?: NutrientInfo;
-  fat?: NutrientInfo;
-  saturatedFat?: NutrientInfo;
-  transFat?: NutrientInfo;
-  cholesterol?: NutrientInfo;
-  salt?: NutrientInfo;
-  sodium?: NutrientInfo;
-  carbohydrates?: NutrientInfo;
-  carbohydratesTotal?: NutrientInfo;
-  fiber?: NutrientInfo;
-  sugars?: NutrientInfo;
-  addedSugars?: NutrientInfo;
-  proteins?: NutrientInfo;
-  vitaminD?: NutrientInfo;
-  calcium?: NutrientInfo;
-  iron?: NutrientInfo;
-  potassium?: NutrientInfo;
+  energy?: INutrientInfo;
+  energyKcal?: INutrientInfo;
+  energyKj?: INutrientInfo;
+  fat?: INutrientInfo;
+  saturatedFat?: INutrientInfo;
+  transFat?: INutrientInfo;
+  cholesterol?: INutrientInfo;
+  salt?: INutrientInfo;
+  sodium?: INutrientInfo;
+  carbohydrates?: INutrientInfo;
+  carbohydratesTotal?: INutrientInfo;
+  fiber?: INutrientInfo;
+  sugars?: INutrientInfo;
+  addedSugars?: INutrientInfo;
+  proteins?: INutrientInfo;
+  vitaminD?: INutrientInfo;
+  calcium?: INutrientInfo;
+  iron?: INutrientInfo;
+  potassium?: INutrientInfo;
 };
+
+// Zod schemas
+// TODO: complete these
+export const createFoodItemSchema = z.object({});
+
+export const updateFoodItemSchema = z.object({});
+
+// Request types
+export type CreateFoodItemRequest = z.infer<typeof createFoodItemSchema>;
+export type UpdateFoodItemRequest = z.infer<typeof updateFoodItemSchema>;
