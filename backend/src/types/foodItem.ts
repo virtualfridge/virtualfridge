@@ -51,3 +51,16 @@ export const updateFoodItemSchema = z.object({});
 // Request types
 export type CreateFoodItemRequest = z.infer<typeof createFoodItemSchema>;
 export type UpdateFoodItemRequest = z.infer<typeof updateFoodItemSchema>;
+export type GetFoodItemRequest = {
+  id: mongoose.Types.ObjectId;
+};
+export type DeleteFoodItemRequest = {
+  id: mongoose.Types.ObjectId;
+};
+
+export type FoodItemResponse = {
+  message: string;
+  data?: {
+    foodItem: IFoodItem;
+  };
+};

@@ -80,9 +80,10 @@ export class FoodItemModel {
       throw new Error('Failed to update foodItem');
     }
   }
-  async delete(foodItemId: mongoose.Types.ObjectId): Promise<void> {
+  async delete(foodItemId: mongoose.Types.ObjectId): Promise<IFoodItem | null> {
     try {
-      await this.foodItem.findByIdAndDelete(foodItemId);
+      const foodItem = await this.foodItem.findByIdAndDelete(foodItemId);
+      return foodItem;
     } catch (error) {
       logger.error('Error deleting foodItem:', error);
       throw new Error('Failed to delete foodItem');
