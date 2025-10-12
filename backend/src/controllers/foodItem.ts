@@ -1,17 +1,17 @@
 import { NextFunction, Request, Response } from 'express';
 import {
-  CreateFoodItemRequest,
-  DeleteFoodItemRequest,
+  CreateFoodItemBody,
+  DeleteFoodItemParams,
   FoodItemResponse,
-  GetFoodItemRequest,
-  UpdateFoodItemRequest,
+  FindFoodItemParams,
+  UpdateFoodItemBody,
 } from '../types/foodItem';
 import { foodItemModel } from '../models/foodItem';
 import logger from '../util/logger';
 
 export class FoodItemController {
   async createFoodItem(
-    req: Request<unknown, unknown, CreateFoodItemRequest>,
+    req: Request<unknown, unknown, CreateFoodItemBody>,
     res: Response<FoodItemResponse>,
     next: NextFunction
   ) {
@@ -35,25 +35,19 @@ export class FoodItemController {
   }
 
   async updateFoodItem(
-    req: Request<unknown, unknown, UpdateFoodItemRequest>,
+    req: Request<unknown, unknown, UpdateFoodItemBody>,
     res: Response<FoodItemResponse>,
     next: NextFunction
   ) {
     try {
-      const { id, ...updateData } = req.body;
+      const newFoodItem = req.body;
 
-      if (!id) {
-        return res
-          .status(400)
-          .json({ message: 'FoodItem ID is required for update.' });
-      }
-
-      const foodItem = await foodItemModel.update(id, updateData);
+      const foodItem = await foodItemModel.update(newFoodItem._id, newFoodItem);
 
       if (!foodItem) {
         return res
           .status(404)
-          .json({ message: `FoodItem with ID ${id} not found.` });
+          .json({ message: `FoodItem with ID ${newFoodItem._id} not found.` });
       }
 
       res.status(200).json({
@@ -62,7 +56,7 @@ export class FoodItemController {
       });
     } catch (error) {
       logger.error(
-        `Failed to update foodItem with ID ${req.body.id || 'N/A'}:`,
+        `Failed to update foodItem with ID ${req.body._id || 'N/A'}:`,
         error
       );
 
@@ -76,26 +70,20 @@ export class FoodItemController {
     }
   }
 
-  async getFoodItem(
-    req: Request<GetFoodItemRequest>,
+  async findFoodItemById(
+    req: Request<FindFoodItemParams>,
     res: Response<FoodItemResponse>,
     next: NextFunction
   ) {
     try {
-      const { id } = req.params;
+      const { _id } = req.params;
 
-      if (!id) {
-        return res
-          .status(400)
-          .json({ message: 'FoodItem ID is required for retrieval.' });
-      }
-
-      const foodItem = await foodItemModel.get(id);
+      const foodItem = await foodItemModel.findById(_id);
 
       if (!foodItem) {
         return res
           .status(404)
-          .json({ message: `FoodItem with ID ${id} not found.` });
+          .json({ message: `FoodItem with ID ${_id} not found.` });
       }
 
       res.status(200).json({
@@ -104,7 +92,7 @@ export class FoodItemController {
       });
     } catch (error) {
       logger.error(
-        `Failed to get foodItem with ID ${req.params.id || 'N/A'}:`,
+        `Failed to get foodItem with ID ${req.params._id || 'N/A'}:`,
         error
       );
 
@@ -119,26 +107,20 @@ export class FoodItemController {
   }
 
   async deleteFoodItem(
-    req: Request<DeleteFoodItemRequest>,
+    req: Request<DeleteFoodItemParams>,
     res: Response<FoodItemResponse>,
     next: NextFunction
   ) {
     try {
       req;
-      const { id } = req.params;
+      const { _id } = req.params;
 
-      if (!id) {
-        return res
-          .status(400)
-          .json({ message: 'FoodItem ID is required for deletion.' });
-      }
-
-      const foodItem = await foodItemModel.delete(id);
+      const foodItem = await foodItemModel.delete(_id);
 
       if (!foodItem) {
         return res
           .status(404)
-          .json({ message: `FoodItem with ID ${id} not found.` });
+          .json({ message: `FoodItem with ID ${_id} not found.` });
       }
 
       res.status(200).json({
@@ -147,7 +129,7 @@ export class FoodItemController {
       });
     } catch (error) {
       logger.error(
-        `Failed to delete foodItem with ID ${req.params.id || 'N/A'}:`,
+        `Failed to delete foodItem with ID ${req.params._id || 'N/A'}:`,
         error
       );
 

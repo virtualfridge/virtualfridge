@@ -2,13 +2,13 @@ import { Router } from 'express';
 import { FoodItemController } from '../controllers/foodItem';
 import { validateBody, validateParams } from '../middleware/validation';
 import {
-  CreateFoodItemRequest,
+  CreateFoodItemBody,
   createFoodItemSchema,
-  DeleteFoodItemRequest,
+  DeleteFoodItemParams,
   deleteFoodItemSchema,
-  GetFoodItemRequest,
-  getFoodItemSchema,
-  UpdateFoodItemRequest,
+  FindFoodItemParams,
+  findFoodItemSchema,
+  UpdateFoodItemBody,
   updateFoodItemSchema,
 } from '../types/foodItem';
 
@@ -17,24 +17,26 @@ const foodItemController = new FoodItemController();
 
 router.post(
   '/',
-  validateBody<CreateFoodItemRequest>(createFoodItemSchema),
+  validateBody<CreateFoodItemBody>(createFoodItemSchema),
   foodItemController.createFoodItem
 );
 
 router.put(
   '/',
-  validateBody<UpdateFoodItemRequest>(updateFoodItemSchema),
+  validateBody<UpdateFoodItemBody>(updateFoodItemSchema),
   foodItemController.updateFoodItem
 );
 
 router.get(
-  '/{:id}',
-  validateParams<GetFoodItemRequest>(getFoodItemSchema),
-  foodItemController.getFoodItem
+  '/:_id',
+  validateParams<FindFoodItemParams>(findFoodItemSchema),
+  foodItemController.findFoodItemById
 );
 
 router.delete(
-  '/{:id}',
-  validateParams<DeleteFoodItemRequest>(deleteFoodItemSchema),
+  '/:_id',
+  validateParams<DeleteFoodItemParams>(deleteFoodItemSchema),
   foodItemController.deleteFoodItem
 );
+
+export default router;

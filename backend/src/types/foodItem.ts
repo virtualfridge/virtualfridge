@@ -1,70 +1,40 @@
-import mongoose, { Document } from 'mongoose';
+import mongoose from 'mongoose';
 import z from 'zod';
 
-// Model
-
-export interface IFoodItem extends Document {
-  _id: mongoose.Types.ObjectId;
-  typeId: mongoose.Types.ObjectId;
-  barcodeId?: string;
-  expirationDate: Date;
-  nutritionalInfo: NutritionalInfo;
-  amount: number;
-  amountUnit: string; // TODO: consider using a Unit enum for all units
-}
-
-export interface INutrientInfo {
-  value: number;
-  unit: string;
-  perSourceValue: number;
-  perSourceUnit: string;
-}
-
-export type NutritionalInfo = {
-  energy?: INutrientInfo;
-  energyKcal?: INutrientInfo;
-  energyKj?: INutrientInfo;
-  fat?: INutrientInfo;
-  saturatedFat?: INutrientInfo;
-  transFat?: INutrientInfo;
-  cholesterol?: INutrientInfo;
-  salt?: INutrientInfo;
-  sodium?: INutrientInfo;
-  carbohydrates?: INutrientInfo;
-  carbohydratesTotal?: INutrientInfo;
-  fiber?: INutrientInfo;
-  sugars?: INutrientInfo;
-  addedSugars?: INutrientInfo;
-  proteins?: INutrientInfo;
-  vitaminD?: INutrientInfo;
-  calcium?: INutrientInfo;
-  iron?: INutrientInfo;
-  potassium?: INutrientInfo;
-};
-
 // Zod schemas
-// TODO: complete these
-export const createFoodItemSchema = z.object({});
 
-export const updateFoodItemSchema = z.object({});
-
-export const getFoodItemSchema = z.object({
-  id: z.custom<mongoose.Types.ObjectId>(),
+export const foodItemSchema = z.object({
+  _id: z.custom<mongoose.Types.ObjectId>(),
+  typeId: z.custom<mongoose.Types.ObjectId>(),
+  barcodeId: z.string().optional(),
+  expirationDate: z.date(),
+  amount: z.number(),
+  amountUnit: z.string(), // TODO: consider using a Unit enum for all units
 });
 
-export const deleteFoodItemSchema = z.object({
-  id: z.custom<mongoose.Types.ObjectId>(),
+export type FoodItem = z.infer<typeof foodItemSchema>;
+
+export const createFoodItemSchema = foodItemSchema.omit({
+  _id: true,
 });
+
+export const updateFoodItemSchema = foodItemSchema
+  .partial()
+  .required({ _id: true });
+
+export const findFoodItemSchema = foodItemSchema.pick({ _id: true });
+
+export const deleteFoodItemSchema = foodItemSchema.pick({ _id: true });
 
 // Request types
-export type CreateFoodItemRequest = z.infer<typeof createFoodItemSchema>;
-export type UpdateFoodItemRequest = z.infer<typeof updateFoodItemSchema>;
-export type GetFoodItemRequest = z.infer<typeof getFoodItemSchema>;
-export type DeleteFoodItemRequest = z.infer<typeof deleteFoodItemSchema>;
+export type CreateFoodItemBody = z.infer<typeof createFoodItemSchema>;
+export type UpdateFoodItemBody = z.infer<typeof updateFoodItemSchema>;
+export type FindFoodItemParams = z.infer<typeof findFoodItemSchema>;
+export type DeleteFoodItemParams = z.infer<typeof deleteFoodItemSchema>;
 
 export type FoodItemResponse = {
   message: string;
   data?: {
-    foodItem: IFoodItem;
+    foodItem: FoodItem;
   };
 };
