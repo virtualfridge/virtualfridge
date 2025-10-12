@@ -4,6 +4,7 @@ import logger from '../util/logger';
 
 // TODO: move nutritional info to the food type definition only and as SSOT
 const foodItemSchema = new Schema<FoodItem>({
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   typeId: { type: mongoose.Schema.Types.ObjectId, required: true },
   barcodeId: { type: String, required: false },
   expirationDate: { type: Date, required: true },
@@ -60,8 +61,20 @@ export class FoodItemModel {
       const foodItem = await this.foodItem.findById(foodItemId);
       return foodItem;
     } catch (error) {
-      logger.error('Error getting foodItem:', error);
-      throw new Error('Failed to get foodItem');
+      logger.error('Error finding foodItem by id:', error);
+      throw new Error('Failed to find foodItem by id');
+    }
+  }
+
+  async findByUserId(
+    userId: mongoose.Types.ObjectId
+  ): Promise<FoodItem | null> {
+    try {
+      const foodItem = await this.foodItem.findOne({ userId });
+      return foodItem;
+    } catch (error) {
+      logger.error('Error finding foodItem by userId:', error);
+      throw new Error('Failed to find foodItem by userId');
     }
   }
 }

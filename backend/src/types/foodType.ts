@@ -3,6 +3,7 @@ import z from 'zod';
 
 // Zod schemas
 
+// Any changes to these schemas should also be made to the corresponding mongoose schemas in models/foodType.ts
 export const nutrientInfoSchema = z.object({
   value: z.number().positive(),
   unit: z.string(),

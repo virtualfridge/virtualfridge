@@ -85,8 +85,8 @@ export class FoodTypeModel {
       const foodType = await this.foodType.findById(foodTypeId);
       return foodType;
     } catch (error) {
-      logger.error('Error getting foodType:', error);
-      throw new Error('Failed to get foodType');
+      logger.error('Error finding foodType by id:', error);
+      throw new Error('Failed to find foodType by id');
     }
   }
 }

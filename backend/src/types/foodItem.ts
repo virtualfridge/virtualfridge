@@ -3,8 +3,10 @@ import z from 'zod';
 
 // Zod schemas
 
+// Any changes to this schema should also be made to the mongoose schema in models/foodItem.ts
 export const foodItemSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
+  userId: z.custom<mongoose.Types.ObjectId>(),
   typeId: z.custom<mongoose.Types.ObjectId>(),
   barcodeId: z.string().optional(),
   expirationDate: z.date(),
