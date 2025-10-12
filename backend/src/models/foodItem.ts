@@ -54,8 +54,7 @@ export class FoodItemModel {
   // TODO: implement these functions
   async create(foodItem: Partial<IFoodItem>): Promise<IFoodItem> {
     try {
-      const validatedData = createFoodItemSchema.parse(foodItem);
-      return await this.foodItem.create(validatedData);
+      return await this.foodItem.create(foodItem);
     } catch (error) {
       logger.error('Error creating foodItem:', error);
       throw new Error('Failed to create foodItem');
@@ -66,10 +65,9 @@ export class FoodItemModel {
     foodItem: Partial<IFoodItem>
   ): Promise<IFoodItem | null> {
     try {
-      const validatedData = updateFoodItemSchema.parse(foodItem);
       const updatedFoodItem = await this.foodItem.findByIdAndUpdate(
         foodItemId,
-        validatedData,
+        foodItem,
         {
           new: true,
         }

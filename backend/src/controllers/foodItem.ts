@@ -77,12 +77,12 @@ export class FoodItemController {
   }
 
   async getFoodItem(
-    req: Request<unknown, unknown, GetFoodItemRequest>,
+    req: Request<GetFoodItemRequest>,
     res: Response<FoodItemResponse>,
     next: NextFunction
   ) {
     try {
-      const { id } = req.body;
+      const { id } = req.params;
 
       if (!id) {
         return res
@@ -104,7 +104,7 @@ export class FoodItemController {
       });
     } catch (error) {
       logger.error(
-        `Failed to get foodItem with ID ${req.body.id || 'N/A'}:`,
+        `Failed to get foodItem with ID ${req.params.id || 'N/A'}:`,
         error
       );
 
@@ -119,12 +119,13 @@ export class FoodItemController {
   }
 
   async deleteFoodItem(
-    req: Request<unknown, unknown, DeleteFoodItemRequest>,
-    res: Response<FoodItemResponse>, // Explicitly `Response` without `FoodItemResponse` data type
+    req: Request<DeleteFoodItemRequest>,
+    res: Response<FoodItemResponse>,
     next: NextFunction
   ) {
     try {
-      const { id } = req.body;
+      req;
+      const { id } = req.params;
 
       if (!id) {
         return res
@@ -146,7 +147,7 @@ export class FoodItemController {
       });
     } catch (error) {
       logger.error(
-        `Failed to delete foodItem with ID ${req.body.id || 'N/A'}:`,
+        `Failed to delete foodItem with ID ${req.params.id || 'N/A'}:`,
         error
       );
 
