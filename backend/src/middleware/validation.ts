@@ -27,3 +27,57 @@ export const validateBody = <T>(schema: z.ZodSchema<T>): RequestHandler => {
     }
   };
 };
+
+export const validateParams = <T>(
+  schema: z.ZodSchema<T>
+): RequestHandler<T> => {
+  return (req: Request<T>, res: Response, next: NextFunction) => {
+    try {
+      req.params = schema.parse(req.params);
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Invalid input data',
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          })),
+        });
+      }
+
+      return res.status(500).json({
+        error: 'Internal server error',
+        message: 'Validation processing failed',
+      });
+    }
+  };
+};
+
+export const validateQuery = <T>(
+  schema: z.ZodSchema<T>
+): RequestHandler<{}, {}, {}, T> => {
+  return (req: Request<{}, {}, {}, T>, res: Response, next: NextFunction) => {
+    try {
+      req.query = schema.parse(req.query);
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return res.status(400).json({
+          error: 'Validation error',
+          message: 'Invalid input data',
+          details: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          })),
+        });
+      }
+
+      return res.status(500).json({
+        error: 'Internal server error',
+        message: 'Validation processing failed',
+      });
+    }
+  };
+};
