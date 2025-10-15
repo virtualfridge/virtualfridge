@@ -41,6 +41,8 @@ rectangle googleAuth as "Google Authentication"
 rectangle barcodeApi as "Barcode API"
 rectangle recipeApi as "Recipe API"
 rectangle nutritionApi as "Nutrition API"
+rectangle ComputerVisionAPI as "Computer Vision API"
+
 
 ' ==== User connections ====
 User -- signUp
@@ -60,5 +62,6 @@ logBarcode -- barcodeApi
 genRecipes -- recipeApi
 viewRecipe -- recipeApi
 viewNutrition -- nutritionApi
+logImage -- ComputerVisionAPI
 
 @enduml
