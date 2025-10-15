@@ -3,8 +3,16 @@ import mongoose from 'mongoose';
 export const connectDB = async (): Promise<void> => {
   try {
     const uri = process.env.MONGODB_URI!;
+    const user = process.env.MONGODB_USER!;
+    const pass = process.env.MONGODB_PASS!;
 
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, {
+      auth: {
+        username: user,
+        password: pass,
+      },
+      authSource: 'admin', // Authentication database - configured automatically by the MongoDB docker image
+    });
 
     console.log(`✅ MongoDB connected successfully`);
 

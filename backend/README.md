@@ -2,13 +2,13 @@
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/en/download/) 18+ installed on your machine
-- [MongoDB](https://www.mongodb.com/) instance running locally or remotely
+- [Docker](https://www.docker.com/get-started/) installed and running on your machine. Either Docker Desktop or Docker CLI will work.
+- [Docker Compose](https://docs.docker.com/compose/install/) installed on your machine.
 
 ## Setup
 
 1. **Install dependencies**:
-
+   Skip this step if you are running the backend with Docker.
    ```
    npm install
    ```
@@ -20,6 +20,8 @@
     JWT_SECRET=your_generated_secret_value
     GOOGLE_CLIENT_ID=google_web_client_id
     MONGODB_URI=mongodb_uri
+    MONGODB_USER=mongodb_username
+    MONGODB_PASS=your_strong_password
    ```
 
 3. **Start development server**: Start development server with ts-node with auto-reload
@@ -29,14 +31,11 @@
 
 ## Build and Run
 
-- **Build**: Compile TypeScript to JavaScript
-  ```
-  npm run build
-  ```
-- **Start production**: Run compiled JavaScript
-  ```
-  npm start
-  ```
+Start and run the Docker containers (run from this directory):
+```bash
+docker compose up
+```
+Note that on some systems `docker compose` might be installed as `docker-compose`
 
 ## API Endpoints
 
