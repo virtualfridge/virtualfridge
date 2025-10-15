@@ -1,36 +1,64 @@
-/'This file is used to generate the usecase diagram with plantuml. To generate it from the command line run'/
-/'java -jar plantuml.jar usecasediagram.txt'/
-/'Make sure you [download PlantUML first](https://plantuml.com/download)'/
 @startuml
 !theme plain
 left to right direction
+
 actor User
-rectangle "Virtual Fridge" << System >> {
-  usecase logOcr as "Log Food via OCR"
+
+rectangle "Virtual Fridge App" << System >> {
+  ' ==== Authentication ====
+  usecase signUp as "Sign Up with Google"
+  usecase signIn as "Sign In with Google"
+  usecase signOut as "Sign Out"
+  usecase deleteAccount as "Delete Account"
+
+  ' ==== Logging Food ====
   usecase logFood as "Log Food"
   usecase logBarcode as "Log Food via Barcode"
+  usecase logImage as "Log Food via Image"
+'   usecase logList as "Log Food via Pre-Made List"
 
+  ' ==== Viewing Food ====
+  usecase viewInventory as "View Food Inventory"
+  usecase sortExp as "Sort by Expiration Date"
+  usecase sortAdded as "Sort by Added Date"
 
-  logBarcode .> logFood : << extend >>
-  logOcr .> logFood: << extend >>
+  ' ==== Recipes & Nutrition ====
+  usecase genRecipes as "Generate Recipe Suggestions"
+  usecase viewRecipe as "View Recipe Details"
+  usecase viewNutrition as "View Nutritional Facts"
 
-  usecase viewNutrition as "View Nutritional facts"
-  usecase signUp as "Sign up with Google"
-  usecase viewFridge as "View Fridge"
-  usecase generateRecipes as "Generate Recipe Suggestions"
+  ' ==== Relationships (moved to right side) ====
+  logFood -left-> logBarcode : <<extend>>
+  logFood -right-> logImage : <<extend>>
+
+  viewInventory -left-> sortExp : <<extend>>
+  viewInventory -right-> sortAdded : <<extend>>
+  genRecipes -right-> viewRecipe : <<extend>>
 }
-User -- signUp
-User -- logFood
-User -- viewFridge
-User -- generateRecipes
-User -- viewNutrition
-rectangle openFoodFacts as "Open Food Facts API"
+
+' ==== External APIs (RHS) ====
 rectangle googleAuth as "Google Authentication"
-rectangle recipeApi as "TheMealDB API"
-rectangle barcodeScanner as "Barcode Scanner"
-generateRecipes -- recipeApi
-viewNutrition -- openFoodFacts
+rectangle barcodeApi as "Barcode API"
+rectangle recipeApi as "Recipe API"
+rectangle nutritionApi as "Nutrition API"
+
+' ==== User connections ====
+User -- signUp
+User -- signIn
+User -- signOut
+User -- deleteAccount
+User -- logFood
+User -- viewInventory
+User -- genRecipes
+User -- viewRecipe
+User -- viewNutrition
+
+' ==== API connections ====
 signUp -- googleAuth
-logBarcode -- barcodeScanner
-logFood -- openFoodFacts
+signIn -- googleAuth
+logBarcode -- barcodeApi
+genRecipes -- recipeApi
+viewRecipe -- recipeApi
+viewNutrition -- nutritionApi
+
 @enduml
