@@ -1,14 +1,14 @@
 import mongoose, { Schema } from 'mongoose';
-import { FoodType, NutrientInfo } from '../types/foodType';
+import { FoodType, NutrientInfo, NutritionalInfo } from '../types/foodType';
 import logger from '../util/logger';
 
 const nutrientInfoOpts = new Schema<NutrientInfo>({
-  value: { type: Number, required: false },
-  unit: { type: String, required: false },
-  perSourceValue: { type: Number, required: false },
-  perSourceUnit: { type: String, required: false },
+  value: { type: Number, required: true },
+  unit: { type: String, required: true },
+  perSourceValue: { type: Number, required: true },
+  perSourceUnit: { type: String, required: true },
 });
-const nutritionalInfoOpts = {
+const nutritionalInfoOpts = new Schema<NutritionalInfo>({
   energy: { type: nutrientInfoOpts, required: false },
   energyKcal: { type: nutrientInfoOpts, required: false },
   energyKj: { type: nutrientInfoOpts, required: false },
@@ -28,12 +28,12 @@ const nutritionalInfoOpts = {
   calcium: { type: nutrientInfoOpts, required: false },
   iron: { type: nutrientInfoOpts, required: false },
   potassium: { type: nutrientInfoOpts, required: false },
-};
+});
 
 const foodTypeSchema = new Schema<FoodType>({
   name: { type: String, required: true },
   shelfLifeDays: { type: Number, required: true },
-  nutritionalInfo: nutritionalInfoOpts,
+  nutritionalInfo: { type: nutritionalInfoOpts, required: false },
 });
 
 export class FoodTypeModel {

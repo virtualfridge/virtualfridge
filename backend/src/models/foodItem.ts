@@ -8,8 +8,7 @@ const foodItemSchema = new Schema<FoodItem>({
   typeId: { type: mongoose.Schema.Types.ObjectId, required: true },
   barcodeId: { type: String, required: false },
   expirationDate: { type: Date, required: true },
-  amount: { type: Number, required: true },
-  amountUnit: { type: String, required: true },
+  percentLeft: { type: Number, required: true },
 });
 
 export class FoodItemModel {

@@ -10,8 +10,7 @@ export const foodItemSchema = z.object({
   typeId: z.custom<mongoose.Types.ObjectId>(),
   barcodeId: z.string().optional(),
   expirationDate: z.date(),
-  amount: z.number(),
-  amountUnit: z.string(), // TODO: consider using a Unit enum for all units
+  percentLeft: z.number().positive().max(100),
 });
 
 export type FoodItem = z.infer<typeof foodItemSchema>;
@@ -22,6 +21,11 @@ export const createFoodItemSchema = foodItemSchema.omit({
 
 export const updateFoodItemSchema = foodItemSchema
   .partial()
+  .omit({
+    userId: true,
+    typeId: true,
+    barcodeId: true,
+  })
   .required({ _id: true });
 
 export const findFoodItemSchema = foodItemSchema.pick({ _id: true });

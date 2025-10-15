@@ -13,31 +13,35 @@ export const nutrientInfoSchema = z.object({
 
 export type NutrientInfo = z.infer<typeof nutrientInfoSchema>;
 
+export const nutritionalInfoSchema = z.object({
+  energy: nutrientInfoSchema.optional(),
+  energyKcal: nutrientInfoSchema.optional(),
+  energyKj: nutrientInfoSchema.optional(),
+  fat: nutrientInfoSchema.optional(),
+  saturatedFat: nutrientInfoSchema.optional(),
+  transFat: nutrientInfoSchema.optional(),
+  cholesterol: nutrientInfoSchema.optional(),
+  salt: nutrientInfoSchema.optional(),
+  sodium: nutrientInfoSchema.optional(),
+  carbohydrates: nutrientInfoSchema.optional(),
+  carbohydratesTotal: nutrientInfoSchema.optional(),
+  fiber: nutrientInfoSchema.optional(),
+  sugars: nutrientInfoSchema.optional(),
+  addedSugars: nutrientInfoSchema.optional(),
+  proteins: nutrientInfoSchema.optional(),
+  vitaminD: nutrientInfoSchema.optional(),
+  calcium: nutrientInfoSchema.optional(),
+  iron: nutrientInfoSchema.optional(),
+  potassium: nutrientInfoSchema.optional(),
+});
+
+export type NutritionalInfo = z.infer<typeof nutritionalInfoSchema>;
+
 export const foodTypeSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
   name: z.string(),
   shelfLifeDays: z.number(),
-  nutritionalInfo: z.object({
-    energy: nutrientInfoSchema.optional(),
-    energyKcal: nutrientInfoSchema.optional(),
-    energyKj: nutrientInfoSchema.optional(),
-    fat: nutrientInfoSchema.optional(),
-    saturatedFat: nutrientInfoSchema.optional(),
-    transFat: nutrientInfoSchema.optional(),
-    cholesterol: nutrientInfoSchema.optional(),
-    salt: nutrientInfoSchema.optional(),
-    sodium: nutrientInfoSchema.optional(),
-    carbohydrates: nutrientInfoSchema.optional(),
-    carbohydratesTotal: nutrientInfoSchema.optional(),
-    fiber: nutrientInfoSchema.optional(),
-    sugars: nutrientInfoSchema.optional(),
-    addedSugars: nutrientInfoSchema.optional(),
-    proteins: nutrientInfoSchema.optional(),
-    vitaminD: nutrientInfoSchema.optional(),
-    calcium: nutrientInfoSchema.optional(),
-    iron: nutrientInfoSchema.optional(),
-    potassium: nutrientInfoSchema.optional(),
-  }),
+  nutritionalInfo: nutritionalInfoSchema.optional(),
 });
 
 export type FoodType = z.infer<typeof foodTypeSchema>;
