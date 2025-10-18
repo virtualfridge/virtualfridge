@@ -7,6 +7,7 @@ import mediaRoutes from './media';
 import usersRoutes from './user';
 import foodItemRoutes from './foodItem';
 import foodTypeRoutes from './foodType';
+import visionRoutes from './vision';
 
 const router = Router();
 
@@ -21,5 +22,7 @@ router.use('/media', authenticateToken, mediaRoutes);
 router.use('/food-item', authenticateToken, foodItemRoutes);
 
 router.use('/food-type', authenticateToken, foodTypeRoutes);
+
+router.use('/vision', authenticateToken, visionRoutes);S
 
 export default router;
