@@ -17,6 +17,7 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     console.log('Received barcode:', barcode);
+    //send barcode
 
     // Call OpenFoodFacts API
     const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
