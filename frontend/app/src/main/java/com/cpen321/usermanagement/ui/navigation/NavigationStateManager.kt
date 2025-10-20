@@ -9,7 +9,7 @@ import javax.inject.Singleton
 sealed class NavigationEvent {
     object NavigateToAuth : NavigationEvent()
     object NavigateToMain : NavigationEvent()
-    object NavigateToProfileCompletion : NavigationEvent()
+//    object NavigateToProfileCompletion : NavigationEvent()
     object NavigateToProfile : NavigationEvent()
     object NavigateToManageProfile : NavigationEvent()
     object NavigateToManageHobbies : NavigationEvent()
@@ -63,13 +63,12 @@ class NavigationStateManager @Inject constructor() {
         when {
             currentRoute == NavRoutes.LOADING -> {
                 when {
-                    isAuthenticated && needsProfileCompletion -> navigateToProfileCompletion()
                     isAuthenticated -> navigateToMain()
                     else -> navigateToAuth()
                 }
             }
             currentRoute.startsWith(NavRoutes.AUTH) && isAuthenticated -> {
-                if (needsProfileCompletion) navigateToProfileCompletion() else navigateToMain()
+                navigateToMain()
             }
         }
     }
@@ -94,10 +93,10 @@ class NavigationStateManager @Inject constructor() {
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.MAIN)
     }
 
-    fun navigateToProfileCompletion() {
-        _navigationEvent.value = NavigationEvent.NavigateToProfileCompletion
-        _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.PROFILE_COMPLETION)
-    }
+//    fun navigateToProfileCompletion() {
+//        _navigationEvent.value = NavigationEvent.NavigateToProfileCompletion
+//        _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.PROFILE_COMPLETION)
+//    }
 
     fun navigateToProfile() {
         _navigationEvent.value = NavigationEvent.NavigateToProfile

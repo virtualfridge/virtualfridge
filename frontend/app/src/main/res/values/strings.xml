@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CPEN 321 - M1</string>
+    <string name="app_name">Virtual Fridge</string>
     <string name="auth_message">Please sign in to continue.</string>
     <string name="welcome">Welcome!</string>
     <string name="hobbies">Hobbies</string>

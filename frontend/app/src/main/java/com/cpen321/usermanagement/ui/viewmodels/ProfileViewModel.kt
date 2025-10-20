@@ -89,9 +89,15 @@ class ProfileViewModel @Inject constructor(
 
     fun deleteProfile() {
         viewModelScope.launch {
-            profileRepository.deleteProfile(_uiState.value.user!! )
+            val user = _uiState.value.user
+            if (user == null) {
+                Log.e("ProfileViewModel", "Cannot delete profile: user is null")
+                return@launch
+            }
+            profileRepository.deleteProfile(user)
         }
     }
+
     fun toggleHobby(hobby: String) {
         val currentSelected = _uiState.value.selectedHobbies.toMutableSet()
         if (currentSelected.contains(hobby)) {

@@ -78,9 +78,9 @@ private fun handleNavigationEvent(
             mainViewModel.setSuccessMessage(navigationEvent.message)
             navController.navigate(NavRoutes.MAIN) { popUpTo(0) { inclusive = true } }
         }
-        is NavigationEvent.NavigateToProfileCompletion -> {
-            navController.navigate(NavRoutes.PROFILE_COMPLETION) { popUpTo(0) { inclusive = true } }
-        }
+//        is NavigationEvent.NavigateToProfileCompletion -> {
+//            navController.navigate(NavRoutes.PROFILE_COMPLETION) { popUpTo(0) { inclusive = true } }
+//        }
         is NavigationEvent.NavigateToProfile -> navController.navigate(NavRoutes.PROFILE)
         is NavigationEvent.NavigateToManageProfile -> navController.navigate(NavRoutes.MANAGE_PROFILE)
         is NavigationEvent.NavigateToManageHobbies -> navController.navigate(NavRoutes.MANAGE_HOBBIES)
@@ -109,16 +109,16 @@ private fun AppNavHost(
             AuthScreen(authViewModel = authViewModel, profileViewModel = profileViewModel)
         }
 
-        composable(NavRoutes.PROFILE_COMPLETION) {
-            ProfileCompletionScreen(
-                profileViewModel = profileViewModel,
-                onProfileCompleted = { navigationStateManager.handleProfileCompletion() },
-                onProfileCompletedWithMessage = { message ->
-                    Log.d("AppNavigation", "Profile completed with message: $message")
-                    navigationStateManager.handleProfileCompletionWithMessage(message)
-                }
-            )
-        }
+//        composable(NavRoutes.PROFILE_COMPLETION) {
+////            ProfileCompletionScreen(
+////                profileViewModel = profileViewModel,
+////                onProfileCompleted = { navigationStateManager.handleProfileCompletion() },
+////                onProfileCompletedWithMessage = { message ->
+////                    Log.d("AppNavigation", "Profile completed with message: $message")
+////                    navigationStateManager.handleProfileCompletionWithMessage(message)
+////                }
+////            )
+//        }
 
         composable(NavRoutes.MAIN) {
             MainScreen(
