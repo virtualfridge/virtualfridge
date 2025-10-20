@@ -29,20 +29,40 @@ router.post('/', authenticateToken, async (req, res) => {
 
     const product = response.data.product;
 
-    // Simplify the response (you can include more fields as needed)
+    // Extract expiration or shelf-life related info if available
+    const expirationDate =
+      product.expiration_date ||
+      product.expiry_date ||
+      product["expiration_date"] ||
+      null;
+
+    const shelfLife =
+      product.conservation_conditions ||
+      product.storage_instructions ||
+      product.packaging_text ||
+      null;
+
+    // Simplify the response (add expiration/shelf-life fields)
     const productData = {
       name: product.product_name,
       brand: product.brands,
       quantity: product.quantity,
       ingredients: product.ingredients_text,
       image: product.image_url,
+      expiration_date: expirationDate,
+      shelf_life: shelfLife,
       nutriments: {
-        calories: product.nutriments['energy-kcal_100g'],
-        protein: product.nutriments.proteins_100g,
-        fat: product.nutriments.fat_100g,
-        carbs: product.nutriments.carbohydrates_100g,
+        calories: product.nutriments?.['energy-kcal_100g'],
+        protein: product.nutriments?.proteins_100g,
+        fat: product.nutriments?.fat_100g,
+        carbs: product.nutriments?.carbohydrates_100g,
       },
     };
+
+    // Print for debugging
+    console.log('Product data retrieved:', productData);
+
+    // Eventually, save productData to DB here
 
     return res.status(200).json({ success: true, product: productData });
   } catch (err: any) {

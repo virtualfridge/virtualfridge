@@ -11,7 +11,7 @@ data class BarcodeRequest(
 )
 
 interface BarcodeInterface {
-    @POST("barcode") // Replace with your actual endpoint
+    @POST("barcode")
     suspend fun sendBarcode(
         @Body request: BarcodeRequest,
         @Header("Authorization") authHeader: String
