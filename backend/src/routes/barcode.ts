@@ -11,6 +11,9 @@ const router = Router();
  * Body: { barcode: "0123456789" }
  */
 router.post('/', authenticateToken, async (req, res) => {
+  // TODO:
+  // - Add stricter type/error checking
+  // - Split into multiple files: types, service, route
   try {
     const { barcode } = req.body;
 
@@ -20,56 +23,60 @@ router.post('/', authenticateToken, async (req, res) => {
 
     console.log('Received barcode:', barcode);
 
-    // Call OpenFoodFacts API
-    const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
-    const response = await axios.get(url);
-
-    // Check if the product exists
-    if (!response.data || !response.data.product) {
-      return res
-        .status(404)
-        .json({ message: 'Product not found in OpenFoodFacts' });
-    }
-
-    const product = response.data.product;
-
-    // Extract expiration or shelf-life related info if available
-    const expirationDate =
-      product.expiration_date ||
-      product.expiry_date ||
-      product['expiration_date'] ||
-      null;
-
-    const shelfLife =
-      product.conservation_conditions ||
-      product.storage_instructions ||
-      product.packaging_text ||
-      null;
-
-    // Simplify the response (add expiration/shelf-life fields)
-    const productData = {
-      name: product.product_name,
-      brand: product.brands,
-      quantity: product.quantity,
-      ingredients: product.ingredients_text,
-      image: product.image_url,
-      expiration_date: expirationDate,
-      shelf_life: shelfLife,
-      nutriments: {
-        calories: product.nutriments?.['energy-kcal_100g'],
-        protein: product.nutriments?.proteins_100g,
-        fat: product.nutriments?.fat_100g,
-        carbs: product.nutriments?.carbohydrates_100g,
-      },
-    };
-
     var foodType = await foodTypeModel.findByBarcode(barcode);
     if (foodType == null) {
+      // Call OpenFoodFacts API
+      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
+      const response = await axios.get(url);
+
+      // Check if the product exists
+      if (!response.data || !response.data.product) {
+        return res
+          .status(404)
+          .json({ message: 'Product not found in OpenFoodFacts' });
+      }
+
+      const product = response.data.product;
+
+      // Extract expiration or shelf-life related info if available
+      const expirationDate =
+        product.expiration_date ||
+        product.expiry_date ||
+        product['expiration_date'] ||
+        null;
+
+      const shelfLife =
+        product.conservation_conditions ||
+        product.storage_instructions ||
+        product.packaging_text ||
+        null;
+
+      // Simplify the response (add expiration/shelf-life fields)
+      const productData = {
+        name: product.product_name,
+        brand: product.brands,
+        quantity: product.quantity,
+        ingredients: product.ingredients_text,
+        image: product.image_url,
+        expiration_date: expirationDate,
+        shelf_life: shelfLife,
+        nutriments: {
+          calories: product.nutriments?.['energy-kcal_100g'],
+          protein: product.nutriments?.proteins_100g,
+          fat: product.nutriments?.fat_100g,
+          carbs: product.nutriments?.carbohydrates_100g,
+        },
+      };
+
       // Does not already exist so we save it
       foodType = await foodTypeModel.create(productData);
     }
+
+    const expirationDate = new Date();
+    expirationDate.setDate(new Date().getDate() + foodType.shelfLifeDays);
+
     const foodItem = await foodItemModel.create({
-      userId: req.user?._id,
+      userId: req.user!._id,
       typeId: foodType._id,
       expirationDate: expirationDate,
       percentLeft: 100,
