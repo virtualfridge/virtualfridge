@@ -187,7 +187,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(name: String, bio: String, onSuccess: () -> Unit = {}) {
+    fun updateProfile(name: String, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _uiState.value =
                 _uiState.value.copy(
@@ -196,7 +196,10 @@ class ProfileViewModel @Inject constructor(
                     successMessage = null
                 )
 
-            val result = profileRepository.updateProfile(name, bio, null)
+            val result = profileRepository.updateProfile(
+                name, null,
+                orNull = TODO() //not sure why this works
+            )
             if (result.isSuccess) {
                 val updatedUser = result.getOrNull()!!
                 _uiState.value = _uiState.value.copy(
