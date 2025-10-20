@@ -1,10 +1,6 @@
 package com.cpen321.usermanagement.di
 
-import com.cpen321.usermanagement.data.remote.api.AuthInterface
-import com.cpen321.usermanagement.data.remote.api.HobbyInterface
-import com.cpen321.usermanagement.data.remote.api.ImageInterface
-import com.cpen321.usermanagement.data.remote.api.RetrofitClient
-import com.cpen321.usermanagement.data.remote.api.UserInterface
+import com.cpen321.usermanagement.data.remote.api.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,5 +33,12 @@ object NetworkModule {
     @Singleton
     fun provideHobbyService(): HobbyInterface {
         return RetrofitClient.hobbyInterface
+    }
+
+    // --- Add Barcode API interface ---
+    @Provides
+    @Singleton
+    fun provideBarcodeService(): BarcodeInterface {
+        return RetrofitClient.barcodeInterface
     }
 }

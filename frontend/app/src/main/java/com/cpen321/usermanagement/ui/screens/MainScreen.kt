@@ -1,34 +1,21 @@
 package com.cpen321.usermanagement.ui.screens
 
 import Icon
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
-import com.cpen321.usermanagement.ui.viewmodels.MainUiState
-import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import com.cpen321.usermanagement.ui.theme.LocalFontSizes
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
+import com.cpen321.usermanagement.ui.viewmodels.MainUiState
+import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 
 @Composable
 fun MainScreen(
@@ -38,11 +25,22 @@ fun MainScreen(
     val uiState by mainViewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
+    // Scanner state handled inside MainScreen
+    var showScanner by remember { mutableStateOf(false) }
+
     MainContent(
         uiState = uiState,
         snackBarHostState = snackBarHostState,
         onProfileClick = onProfileClick,
-        onSuccessMessageShown = mainViewModel::clearSuccessMessage
+        showScanner = showScanner,
+        onScanRequested = { showScanner = true },
+        onBarcodeDetected = { barcode ->
+            showScanner = false
+            mainViewModel.handleScannedBarcode(barcode)
+        },
+        onSuccessMessageShown = mainViewModel::clearSuccessMessage,
+        onErrorMessageShown = mainViewModel::clearScanError,
+        mainViewModel = mainViewModel // <-- pass here
     )
 }
 
@@ -51,23 +49,35 @@ private fun MainContent(
     uiState: MainUiState,
     snackBarHostState: SnackbarHostState,
     onProfileClick: () -> Unit,
+    showScanner: Boolean,
+    onScanRequested: () -> Unit,
+    onBarcodeDetected: (String) -> Unit,
     onSuccessMessageShown: () -> Unit,
+    onErrorMessageShown: () -> Unit,
+    mainViewModel: MainViewModel, // <-- add this
     modifier: Modifier = Modifier
+
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = {
-            MainTopBar(onProfileClick = onProfileClick)
-        },
+        topBar = { MainTopBar(onProfileClick = onProfileClick) },
         snackbarHost = {
             MainSnackbarHost(
                 hostState = snackBarHostState,
                 successMessage = uiState.successMessage,
-                onSuccessMessageShown = onSuccessMessageShown
+                errorMessage = uiState.scanError,
+                onSuccessMessageShown = onSuccessMessageShown,
+                onErrorMessageShown = onErrorMessageShown
             )
         }
     ) { paddingValues ->
-        MainBody(paddingValues = paddingValues)
+        MainBody(
+            paddingValues = paddingValues,
+            showScanner = showScanner,
+            onScanClick = onScanRequested,
+            onBarcodeDetected = onBarcodeDetected,
+            mainViewModel = mainViewModel
+        )
     }
 }
 
@@ -79,12 +89,8 @@ private fun MainTopBar(
 ) {
     TopAppBar(
         modifier = modifier,
-        title = {
-            AppTitle()
-        },
-        actions = {
-            ProfileActionButton(onClick = onProfileClick)
-        },
+        title = { AppTitle() },
+        actions = { ProfileActionButton(onClick = onProfileClick) },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
             titleContentColor = MaterialTheme.colorScheme.onSurface
@@ -93,9 +99,7 @@ private fun MainTopBar(
 }
 
 @Composable
-private fun AppTitle(
-    modifier: Modifier = Modifier
-) {
+private fun AppTitle(modifier: Modifier = Modifier) {
     Text(
         text = stringResource(R.string.app_name),
         style = MaterialTheme.typography.titleLarge,
@@ -105,24 +109,19 @@ private fun AppTitle(
 }
 
 @Composable
-private fun ProfileActionButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun ProfileActionButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val spacing = LocalSpacing.current
 
     IconButton(
         onClick = onClick,
         modifier = modifier.size(spacing.extraLarge2)
-    ) {
-        ProfileIcon()
-    }
+    ) { ProfileIcon() }
 }
 
 @Composable
 private fun ProfileIcon() {
     Icon(
-        name = R.drawable.ic_account_circle,
+        name = R.drawable.ic_account_circle
     )
 }
 
@@ -130,16 +129,18 @@ private fun ProfileIcon() {
 private fun MainSnackbarHost(
     hostState: SnackbarHostState,
     successMessage: String?,
+    errorMessage: String?,
     onSuccessMessageShown: () -> Unit,
+    onErrorMessageShown: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     MessageSnackbar(
         hostState = hostState,
         messageState = MessageSnackbarState(
             successMessage = successMessage,
-            errorMessage = null,
+            errorMessage = errorMessage,
             onSuccessMessageShown = onSuccessMessageShown,
-            onErrorMessageShown = { }
+            onErrorMessageShown = onErrorMessageShown
         ),
         modifier = modifier
     )
@@ -148,7 +149,11 @@ private fun MainSnackbarHost(
 @Composable
 private fun MainBody(
     paddingValues: PaddingValues,
-    modifier: Modifier = Modifier
+    showScanner: Boolean,
+    onScanClick: () -> Unit,
+    onBarcodeDetected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel
 ) {
     Box(
         modifier = modifier
@@ -156,14 +161,40 @@ private fun MainBody(
             .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
-        WelcomeMessage()
+        if (showScanner) {
+            ScannerScreen(
+                onBarcodeDetected = onBarcodeDetected,
+                onClose = { /* Could toggle showScanner false here if needed */ }
+            )
+        } else {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                WelcomeMessage()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Scan Barcode Button
+                Button(onClick = onScanClick) {
+                    Text("Scan Barcode")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Test Barcode Button
+                Button(
+                    onClick = {
+                        val testBarcode = "3017620425035" // Example barcode
+                        mainViewModel.handleScannedBarcode(testBarcode)
+                    }
+                ) {
+                    Text("Send Test Barcode")
+                }
+            }
+        }
     }
 }
 
+
 @Composable
-private fun WelcomeMessage(
-    modifier: Modifier = Modifier
-) {
+private fun WelcomeMessage(modifier: Modifier = Modifier) {
     val fontSizes = LocalFontSizes.current
 
     Text(
