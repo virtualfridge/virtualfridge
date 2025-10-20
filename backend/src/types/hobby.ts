@@ -1,4 +1,4 @@
-import { HOBBIES } from '../util/constants';
+import { HOBBIES } from '../config/constants';
 
 export type GetAllHobbiesResponse = {
   message: string;

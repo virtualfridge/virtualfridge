@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 import { z } from 'zod';
 
-import { HOBBIES } from '../util/constants';
+import { HOBBIES } from '../config/constants';
 import {
   createUserSchema,
   GoogleUserInfo,
@@ -75,10 +75,10 @@ export class UserModel {
       return await this.user.create(validatedData);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error('Validation error:', error.issues);
+        logger.error('Validation error:', error.issues);
         throw new Error('Invalid update data');
       }
-      console.error('Error updating user:', error);
+      logger.error('Error updating user:', error);
       throw new Error('Failed to update user');
     }
   }
@@ -123,7 +123,7 @@ export class UserModel {
 
       return user;
     } catch (error) {
-      console.error('Error finding user by Google ID:', error);
+      logger.error('Error finding user by Google ID:', error);
       throw new Error('Failed to find user');
     }
   }
@@ -138,7 +138,7 @@ export class UserModel {
 
       return user;
     } catch (error) {
-      console.error('Error finding user by Google ID:', error);
+      logger.error('Error finding user by Google ID:', error);
       throw new Error('Failed to find user');
     }
   }
