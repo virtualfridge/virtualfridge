@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import axios from 'axios';
 import { authenticateToken } from '../middleware/auth';
+import { foodTypeModel } from '../models/foodType';
+import { foodItemModel } from '../models/foodItem';
 
 const router = Router();
 
@@ -24,7 +26,9 @@ router.post('/', authenticateToken, async (req, res) => {
 
     // Check if the product exists
     if (!response.data || !response.data.product) {
-      return res.status(404).json({ message: 'Product not found in OpenFoodFacts' });
+      return res
+        .status(404)
+        .json({ message: 'Product not found in OpenFoodFacts' });
     }
 
     const product = response.data.product;
@@ -33,7 +37,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const expirationDate =
       product.expiration_date ||
       product.expiry_date ||
-      product["expiration_date"] ||
+      product['expiration_date'] ||
       null;
 
     const shelfLife =
@@ -59,12 +63,24 @@ router.post('/', authenticateToken, async (req, res) => {
       },
     };
 
+    var foodType = await foodTypeModel.findByBarcode(barcode);
+    if (foodType == null) {
+      // Does not already exist so we save it
+      foodType = await foodTypeModel.create(productData);
+    }
+    const foodItem = await foodItemModel.create({
+      userId: req.user?._id,
+      typeId: foodType._id,
+      expirationDate: expirationDate,
+      percentLeft: 100,
+    });
+
     // Print for debugging
-    console.log('Product data retrieved:', productData);
+    console.log('FoodItem created', foodItem);
 
     // Eventually, save productData to DB here
 
-    return res.status(200).json({ success: true, product: productData });
+    return res.status(200).json({ success: true, foodItem: foodItem });
   } catch (err: any) {
     console.error('Error handling barcode:', err.message || err);
     return res.status(500).json({ message: 'Internal server error' });

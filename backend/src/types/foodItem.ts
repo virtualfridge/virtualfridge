@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import z from 'zod';
+import { foodTypeSchema } from './foodType';
 
 // Zod schemas
 
@@ -8,16 +9,18 @@ export const foodItemSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
   userId: z.custom<mongoose.Types.ObjectId>(),
   typeId: z.custom<mongoose.Types.ObjectId>(),
-  barcodeId: z.string().optional(),
   expirationDate: z.date(),
   percentLeft: z.number().positive().max(100),
 });
 
 export type FoodItem = z.infer<typeof foodItemSchema>;
 
-export const createFoodItemSchema = foodItemSchema.omit({
-  _id: true,
-});
+export const createFoodItemSchema = foodItemSchema
+  .omit({
+    _id: true,
+    typeId: true,
+  })
+  .extend(foodTypeSchema.omit({ _id: true }).partial());
 
 export const updateFoodItemSchema = foodItemSchema
   .partial()

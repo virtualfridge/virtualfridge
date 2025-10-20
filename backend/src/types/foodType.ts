@@ -4,11 +4,10 @@ import z from 'zod';
 // Zod schemas
 
 // Any changes to these schemas should also be made to the corresponding mongoose schemas in models/foodType.ts
+// Always per 100g of source item
 export const nutrientInfoSchema = z.object({
   value: z.number().positive(),
   unit: z.string(),
-  perSourceValue: z.number().positive(),
-  perSourceUnit: z.string(),
 });
 
 export type NutrientInfo = z.infer<typeof nutrientInfoSchema>;
@@ -42,6 +41,7 @@ export const foodTypeSchema = z.object({
   name: z.string(),
   shelfLifeDays: z.number(),
   nutritionalInfo: nutritionalInfoSchema.optional(),
+  barcodeId: z.string().optional(),
 });
 
 export type FoodType = z.infer<typeof foodTypeSchema>;
