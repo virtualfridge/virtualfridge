@@ -8,6 +8,7 @@ import usersRoutes from './user';
 import foodItemRoutes from './foodItem';
 import foodTypeRoutes from './foodType';
 import barcodeRoutes from './barcode';
+import recipeRoutes from './recipe';
 
 const router = Router();
 
@@ -20,5 +21,7 @@ router.use('/barcode', authenticateToken, barcodeRoutes);
 router.use('/food-item', authenticateToken, foodItemRoutes);
 
 router.use('/food-type', authenticateToken, foodTypeRoutes);
+
+router.use('/recipes', authenticateToken, recipeRoutes);
 
 export default router;

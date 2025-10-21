@@ -15,12 +15,16 @@ export const foodItemSchema = z.object({
 
 export type FoodItem = z.infer<typeof foodItemSchema>;
 
-export const createFoodItemSchema = foodItemSchema
-  .omit({
-    _id: true,
-    typeId: true,
-  })
-  .extend(foodTypeSchema.omit({ _id: true }).partial());
+const baseCreateFoodItemSchema = foodItemSchema.omit({
+  _id: true,
+  typeId: true,
+});
+
+const embeddedFoodTypeSchema = foodTypeSchema.omit({ _id: true }).partial();
+
+export const createFoodItemSchema = baseCreateFoodItemSchema.merge(
+  embeddedFoodTypeSchema
+);
 
 export const updateFoodItemSchema = foodItemSchema
   .partial()
