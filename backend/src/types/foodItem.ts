@@ -9,7 +9,7 @@ export const foodItemSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
   userId: z.custom<mongoose.Types.ObjectId>(),
   typeId: z.custom<mongoose.Types.ObjectId>(),
-  expirationDate: z.date(),
+  expirationDate: z.date().optional(),
   percentLeft: z.number().positive().max(100),
 });
 
