@@ -41,4 +41,10 @@ object NetworkModule {
     fun provideBarcodeService(): BarcodeInterface {
         return RetrofitClient.barcodeInterface
     }
+
+    @Provides
+    @Singleton
+    fun provideRecipeService(): RecipeInterface {
+        return RetrofitClient.recipeInterface
+    }
 }

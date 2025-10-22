@@ -2,11 +2,15 @@ package com.cpen321.usermanagement.ui.screens
 
 import Icon
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
@@ -76,7 +80,8 @@ private fun MainContent(
             showScanner = showScanner,
             onScanClick = onScanRequested,
             onBarcodeDetected = onBarcodeDetected,
-            mainViewModel = mainViewModel
+            mainViewModel = mainViewModel,
+            uiState = uiState
         )
     }
 }
@@ -153,7 +158,8 @@ private fun MainBody(
     onScanClick: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    uiState: MainUiState
 ) {
     Box(
         modifier = modifier
@@ -167,7 +173,15 @@ private fun MainBody(
                 onClose = { /* Could toggle showScanner false here if needed */ }
             )
         } else {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            val spacing = LocalSpacing.current
+            var showRawJson by remember(uiState.recipesJson) { mutableStateOf(false) }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = spacing.large)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 WelcomeMessage()
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -187,6 +201,117 @@ private fun MainBody(
                 ) {
                     Text("Send Test Barcode")
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Fetch Recipes Button
+                Button(
+                    onClick = { mainViewModel.fetchSampleRecipes() },
+                    enabled = !uiState.isFetchingRecipes
+                ) {
+                    Text(
+                        text = if (uiState.isFetchingRecipes) {
+                            "Fetching Recipes..."
+                        } else {
+                            "Fetch Sample Recipes"
+                        }
+                    )
+                }
+
+                if (uiState.isFetchingRecipes) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CircularProgressIndicator()
+                }
+
+                uiState.recipeError?.let { error ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                if (uiState.recipeSummaries.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Suggested Recipes",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Ingredients used: ${uiState.recipeIngredients.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    uiState.recipeSummaries.forEach { meal ->
+                        RecipeCard(mealName = meal.strMeal, mealId = meal.idMeal, thumbnailUrl = meal.strMealThumb)
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+
+                uiState.recipesJson?.let { json ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(onClick = { showRawJson = !showRawJson }) {
+                        Text(
+                            text = if (showRawJson) "Hide Raw JSON" else "Show Raw JSON",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+
+                    if (showRawJson) {
+                        SelectionContainer {
+                            Text(
+                                text = json,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+
+                    uiState.recipeSource?.let { source ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Source: $source",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecipeCard(mealName: String, mealId: String, thumbnailUrl: String?) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = mealName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Meal ID: $mealId",
+                style = MaterialTheme.typography.labelMedium
+            )
+
+            thumbnailUrl?.takeIf { it.isNotBlank() }?.let { url ->
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Image: $url",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
