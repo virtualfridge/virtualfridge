@@ -25,8 +25,8 @@ const nutrientsOpts = new Schema<Nutrients>({
 
 const foodTypeSchema = new Schema<FoodType>({
   name: { type: String, required: true },
-  shelfLifeDays: { type: Number, required: true },
   nutrients: { type: nutrientsOpts, required: false },
+  shelfLifeDays: { type: Number, required: false },
   barcodeId: { type: String, required: false, index: true },
 });
 

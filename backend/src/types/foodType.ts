@@ -31,8 +31,8 @@ export type Nutrients = z.infer<typeof nutrientsSchema>;
 export const foodTypeSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
   name: z.string(),
-  shelfLifeDays: z.number(),
   nutrients: nutrientsSchema.optional(),
+  shelfLifeDays: z.number().optional(),
   barcodeId: z.string().optional(),
   brand: z.string().optional(),
   image: z.url().optional(),
