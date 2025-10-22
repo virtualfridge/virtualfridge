@@ -20,7 +20,7 @@ export const createFoodItemSchema = foodItemSchema
     _id: true,
     typeId: true,
   })
-  .extend(foodTypeSchema.omit({ _id: true }).partial());
+  .extend(foodTypeSchema.omit({ _id: true }).partial().shape);
 
 export const updateFoodItemSchema = foodItemSchema
   .partial()

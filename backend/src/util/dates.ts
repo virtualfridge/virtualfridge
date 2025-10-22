@@ -4,7 +4,11 @@ export const dateDiffInDays = (a: Date, b: Date) => {
   const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
   const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
 
-  return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+  if (utc2 < utc1) {
+    return undefined;
+  } else {
+    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+  }
 };
 
 export const addDaysToDate = (originalDate: Date, daysToAdd: number) => {
