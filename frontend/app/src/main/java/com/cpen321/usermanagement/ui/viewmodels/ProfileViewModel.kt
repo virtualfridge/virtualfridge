@@ -89,9 +89,15 @@ class ProfileViewModel @Inject constructor(
 
     fun deleteProfile() {
         viewModelScope.launch {
-            profileRepository.deleteProfile(_uiState.value.user!! )
+            val user = _uiState.value.user
+            if (user == null) {
+                Log.e("ProfileViewModel", "Cannot delete profile: user is null")
+                return@launch
+            }
+            profileRepository.deleteProfile(user)
         }
     }
+
     fun toggleHobby(hobby: String) {
         val currentSelected = _uiState.value.selectedHobbies.toMutableSet()
         if (currentSelected.contains(hobby)) {
@@ -181,7 +187,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfile(name: String, bio: String, onSuccess: () -> Unit = {}) {
+    fun updateProfile(name: String, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             _uiState.value =
                 _uiState.value.copy(
@@ -190,7 +196,10 @@ class ProfileViewModel @Inject constructor(
                     successMessage = null
                 )
 
-            val result = profileRepository.updateProfile(name, bio, null)
+            val result = profileRepository.updateProfile(
+                name, null,
+                orNull = TODO() //not sure why this works
+            )
             if (result.isSuccess) {
                 val updatedUser = result.getOrNull()!!
                 _uiState.value = _uiState.value.copy(

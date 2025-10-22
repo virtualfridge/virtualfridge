@@ -18,7 +18,7 @@ object NavRoutes {
     const val MAIN = "main"
     const val PROFILE = "profile"
     const val MANAGE_PROFILE = "manage_profile"
-    const val MANAGE_HOBBIES = "manage_hobbies"
+//    const val MANAGE_HOBBIES = "manage_hobbies"
     const val PROFILE_COMPLETION = "profile_completion"
     const val SCANNER = "scanner"
 }
@@ -78,12 +78,12 @@ private fun handleNavigationEvent(
             mainViewModel.setSuccessMessage(navigationEvent.message)
             navController.navigate(NavRoutes.MAIN) { popUpTo(0) { inclusive = true } }
         }
-        is NavigationEvent.NavigateToProfileCompletion -> {
-            navController.navigate(NavRoutes.PROFILE_COMPLETION) { popUpTo(0) { inclusive = true } }
-        }
+//        is NavigationEvent.NavigateToProfileCompletion -> {
+//            navController.navigate(NavRoutes.PROFILE_COMPLETION) { popUpTo(0) { inclusive = true } }
+//        }
         is NavigationEvent.NavigateToProfile -> navController.navigate(NavRoutes.PROFILE)
         is NavigationEvent.NavigateToManageProfile -> navController.navigate(NavRoutes.MANAGE_PROFILE)
-        is NavigationEvent.NavigateToManageHobbies -> navController.navigate(NavRoutes.MANAGE_HOBBIES)
+//        is NavigationEvent.NavigateToManageHobbies -> navController.navigate(NavRoutes.MANAGE_HOBBIES)
         is NavigationEvent.NavigateToScanner -> navController.navigate(NavRoutes.SCANNER)
         is NavigationEvent.NavigateBack -> navController.popBackStack()
         is NavigationEvent.ClearBackStack -> navController.popBackStack(navController.graph.startDestinationId, false)
@@ -109,16 +109,16 @@ private fun AppNavHost(
             AuthScreen(authViewModel = authViewModel, profileViewModel = profileViewModel)
         }
 
-        composable(NavRoutes.PROFILE_COMPLETION) {
-            ProfileCompletionScreen(
-                profileViewModel = profileViewModel,
-                onProfileCompleted = { navigationStateManager.handleProfileCompletion() },
-                onProfileCompletedWithMessage = { message ->
-                    Log.d("AppNavigation", "Profile completed with message: $message")
-                    navigationStateManager.handleProfileCompletionWithMessage(message)
-                }
-            )
-        }
+//        composable(NavRoutes.PROFILE_COMPLETION) {
+////            ProfileCompletionScreen(
+////                profileViewModel = profileViewModel,
+////                onProfileCompleted = { navigationStateManager.handleProfileCompletion() },
+////                onProfileCompletedWithMessage = { message ->
+////                    Log.d("AppNavigation", "Profile completed with message: $message")
+////                    navigationStateManager.handleProfileCompletionWithMessage(message)
+////                }
+////            )
+//        }
 
         composable(NavRoutes.MAIN) {
             MainScreen(
@@ -134,8 +134,8 @@ private fun AppNavHost(
                 actions = ProfileScreenActions(
                     onBackClick = { navigationStateManager.navigateBack() },
                     onManageProfileClick = { navigationStateManager.navigateToManageProfile() },
-                    onManageHobbiesClick = { navigationStateManager.navigateToManageHobbies() },
-                    onAccountDeleted = { navigationStateManager.handleAccountDeletion() }
+//                    onManageHobbiesClick = { navigationStateManager.navigateToManageHobbies() },
+                    onAccountDeleted = { navigationStateManager.handleAccountDeletion() },
                 )
             )
         }
@@ -147,12 +147,12 @@ private fun AppNavHost(
             )
         }
 
-        composable(NavRoutes.MANAGE_HOBBIES) {
-            ManageHobbiesScreen(
-                profileViewModel = profileViewModel,
-                onBackClick = { navigationStateManager.navigateBack() }
-            )
-        }
+//        composable(NavRoutes.MANAGE_HOBBIES) {
+//            ManageHobbiesScreen(
+//                profileViewModel = profileViewModel,
+//                onBackClick = { navigationStateManager.navigateBack() }
+//            )
+//        }
 
         // Placeholder for scanner screen; implement separately
         composable(NavRoutes.SCANNER) {

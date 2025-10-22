@@ -27,8 +27,8 @@ router.post('/', authenticateToken, async (req, res) => {
 
     var foodType = await foodTypeModel.findByBarcode(barcode);
     if (foodType == null) {
-      // Call OpenFoodFacts API
-      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
+      // Call OpenFoodFacts API with English locale
+      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
       const response = await axios.get(url);
 
       // Check if the product exists
@@ -80,7 +80,20 @@ router.post('/', authenticateToken, async (req, res) => {
           iron: product.nutrients?.['iron_100g'] || null,
           potassium: product.nutrients?.['potassium_100g'] || null,
         },
-      };
+        // other: {
+          // alcohol: product.nutriments?.['alcohol_100g'] || null,
+          caffeine: product.nutriments?.['caffeine_100g'] || null,
+        //   water: product.nutriments?.['water_100g'] || null,
+        // }
+      },
+
+      category_properties: {
+        ciqual_food_name: product.category_properties?.['ciqual_food_name:en'] || null,
+      },
+    };
+
+    foodType = await foodTypeModel.create(productData);
+  
 
       // Does not already exist so we save it
       foodType = await foodTypeModel.create(foodTypeData);
@@ -98,13 +111,12 @@ router.post('/', authenticateToken, async (req, res) => {
     // Print for debugging
     console.log('FoodItem created', foodItem);
 
-    // Eventually, save productData to DB here
-
     return res.status(200).json({ success: true, foodItem: foodItem });
   } catch (err: any) {
     console.error('Error handling barcode:', err.message || err);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 export default router;

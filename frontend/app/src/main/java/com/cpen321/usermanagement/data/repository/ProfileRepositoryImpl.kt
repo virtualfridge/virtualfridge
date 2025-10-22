@@ -15,14 +15,11 @@ import com.cpen321.usermanagement.utils.JsonUtils.parseErrorMessage
 import com.cpen321.usermanagement.utils.MediaUtils.uriToFile
 import com.cpen321.usermanagement.utils.MediaUtils.uriToMimeType
 import dagger.hilt.android.qualifiers.ApplicationContext
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import kotlin.io.path.createTempFile
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.io.path.outputStream
 
 @Singleton
 class ProfileRepositoryImpl @Inject constructor(
@@ -66,9 +63,10 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateProfile(name: String?, bio: String?, profilePicture: String? ): Result<User> {
+
+    override suspend fun updateProfile(name: String?, profilePicture: String?, orNull: String): Result<User> {
         return try {
-            val updateRequest = UpdateProfileRequest(name = name, bio = bio, profilePicture = profilePicture)
+            val updateRequest = UpdateProfileRequest(name = name, profilePicture = profilePicture)
             val response = userInterface.updateProfile("", updateRequest) // Auth header is handled by interceptor
             if (response.isSuccessful && response.body()?.data != null) {
                 Result.success(response.body()!!.data!!.user)
