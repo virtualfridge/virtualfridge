@@ -84,19 +84,19 @@ router.post('/', authenticateToken, async (req, res) => {
         minerals: {
           calcium: product.nutriments?.['calcium_100g'] || null,
           iron: product.nutriments?.['iron_100g'] || null,
-          // magnesium: product.nutriments?.['magnesium_100g'] || null,
+          magnesium: product.nutriments?.['magnesium_100g'] || null,
           // phosphorus: product.nutriments?.['phosphorus_100g'] || null,
           potassium: product.nutriments?.['potassium_100g'] || null,
           sodium: product.nutriments?.['sodium_100g'] || null,
-          // zinc: product.nutriments?.['zinc_100g'] || null,
+          zinc: product.nutriments?.['zinc_100g'] || null,
           // copper: product.nutriments?.['copper_100g'] || null,
           // manganese: product.nutriments?.['manganese_100g'] || null,
           // selenium: product.nutriments?.['selenium_100g'] || null,
           // iodine: product.nutriments?.['iodine_100g'] || null,
         },
         // other: {
-        //   alcohol: product.nutriments?.['alcohol_100g'] || null,
-        //   caffeine: product.nutriments?.['caffeine_100g'] || null,
+          // alcohol: product.nutriments?.['alcohol_100g'] || null,
+          caffeine: product.nutriments?.['caffeine_100g'] || null,
         //   water: product.nutriments?.['water_100g'] || null,
         // }
       },
