@@ -116,7 +116,25 @@ router.post('/', authenticateToken, async (req, res) => {
       },
     };
 
-    console.log('Product data retrieved:', productData);
+    foodType = await foodTypeModel.create(productData);
+  
+
+
+    // console.log('Product data retrieved:', productData);
+  }
+
+    const expirationDate = new Date();
+    expirationDate.setDate(new Date().getDate() + foodType.shelfLifeDays);
+
+    const foodItem = await foodItemModel.create({
+      userId: req.user!._id,
+      typeId: foodType._id,
+      expirationDate: expirationDate,
+      percentLeft: 100,
+    });
+
+    // Print for debugging
+    console.log('FoodItem created', foodItem);
 
     return res.status(200).json({ success: true, foodItem: foodItem });
   } catch (err: any) {
@@ -124,5 +142,6 @@ router.post('/', authenticateToken, async (req, res) => {
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 export default router;
