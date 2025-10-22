@@ -3,6 +3,8 @@ import axios from 'axios';
 import { authenticateToken } from '../middleware/auth';
 import { foodTypeModel } from '../models/foodType';
 import { foodItemModel } from '../models/foodItem';
+import { FoodType } from '../types/foodType';
+import { addDaysToDate, dateDiffInDays } from '../util/dates';
 
 const router = Router();
 
@@ -35,45 +37,56 @@ router.post('/', authenticateToken, async (req, res) => {
           .status(404)
           .json({ message: 'Product not found in OpenFoodFacts' });
       }
-
       const product = response.data.product;
 
       // Extract expiration or shelf-life related info if available
+      let shelfLifeDays = undefined;
       const expirationDate =
-        product.expiration_date ||
-        product.expiry_date ||
-        product['expiration_date'] ||
-        null;
+        product.expiration_date || product.expiry_date || null;
+      if (expirationDate) {
+        shelfLifeDays = dateDiffInDays(expirationDate, new Date());
+      }
 
-      const shelfLife =
-        product.conservation_conditions ||
-        product.storage_instructions ||
-        product.packaging_text ||
-        null;
-
-      // Simplify the response (add expiration/shelf-life fields)
-      const productData = {
-        name: product.product_name,
-        brand: product.brands,
-        quantity: product.quantity,
-        ingredients: product.ingredients_text,
-        image: product.image_url,
-        expiration_date: expirationDate,
-        shelf_life: shelfLife,
-        nutriments: {
-          calories: product.nutriments?.['energy-kcal_100g'],
-          protein: product.nutriments?.proteins_100g,
-          fat: product.nutriments?.fat_100g,
-          carbs: product.nutriments?.carbohydrates_100g,
+      // Extract English-only product data
+      const foodTypeData: Partial<FoodType> = {
+        name: product.product_name_en || null,
+        brand: product.brands || null,
+        // quantity: product.quantity || null,
+        // ingredients: product.ingredients_text_en || null,
+        image: product.image_url || null,
+        shelfLifeDays: shelfLifeDays,
+        allergens:
+          product.allergens_hierarchy
+            ?.filter((a: string) => a.startsWith('en:'))
+            .map((a: string) => a.replace(/^en:/, '')) || null,
+        nutrients: {
+          calories: product.nutrients?.['energy-kcal_100g'] || null,
+          energyKj: product.nutrients?.['energy-kj_100g'] || null,
+          protein: product.nutrients?.proteins_100g || null,
+          fat: product.nutrients?.fat_100g || null,
+          saturatedFat: product.nutrients?.['saturated-fat_100g'] || null,
+          monounsaturatedFat:
+            product.nutrients?.['monounsaturated-fat_100g'] || null,
+          polyunsaturatedFat:
+            product.nutrients?.['polyunsaturated-fat_100g'] || null,
+          transFat: product.nutrients?.['trans-fat_100g'] || null,
+          cholesterol: product.nutrients?.cholesterol_100g || null,
+          carbohydrates: product.nutrients?.carbohydrates_100g || null,
+          sugars: product.nutrients?.['sugars_100g'] || null,
+          fiber: product.nutrients?.['fiber_100g'] || null,
+          salt: product.nutrients?.['salt_100g'] || null,
+          sodium: product.nutrients?.['sodium_100g'] || null,
+          calcium: product.nutrients?.['calcium_100g'] || null,
+          iron: product.nutrients?.['iron_100g'] || null,
+          potassium: product.nutrients?.['potassium_100g'] || null,
         },
       };
 
       // Does not already exist so we save it
-      foodType = await foodTypeModel.create(productData);
+      foodType = await foodTypeModel.create(foodTypeData);
     }
 
-    const expirationDate = new Date();
-    expirationDate.setDate(new Date().getDate() + foodType.shelfLifeDays);
+    const expirationDate = addDaysToDate(new Date(), foodType.shelfLifeDays);
 
     const foodItem = await foodItemModel.create({
       userId: req.user!._id,
