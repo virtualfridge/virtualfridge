@@ -16,12 +16,16 @@
 2. **Environment Configuration**: Create a `.env` file in the root directory using the following format:
 
    ```
-    PORT=3000
-    JWT_SECRET=your_generated_secret_value
-    GOOGLE_CLIENT_ID=google_web_client_id
-    MONGODB_URI=mongodb_uri
-    MONGODB_USER=mongodb_username
-    MONGODB_PASS=your_strong_password
+   PORT=3000
+   JWT_SECRET=your_generated_secret_value
+   GOOGLE_CLIENT_ID=google_web_client_id
+   MONGODB_URI=mongodb_uri
+   MONGODB_USER=mongodb_username
+   MONGODB_PASS=your_strong_password
+   GEMINI_API_KEY=your_gemini_api_key
+   # Optional overrides
+   # GEMINI_MODEL=models/gemini-1.5-flash-latest
+   # GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta
    ```
 
 3. **Start development server**: Start development server with ts-node with auto-reload

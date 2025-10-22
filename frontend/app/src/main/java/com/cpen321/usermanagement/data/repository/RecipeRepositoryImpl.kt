@@ -1,7 +1,9 @@
 package com.cpen321.usermanagement.data.repository
 
 import android.util.Log
+import com.cpen321.usermanagement.data.remote.api.AiRecipeRequest
 import com.cpen321.usermanagement.data.remote.api.RecipeInterface
+import com.cpen321.usermanagement.data.remote.dto.AiRecipeDataDto
 import com.cpen321.usermanagement.data.remote.dto.RecipeDataDto
 import com.google.gson.GsonBuilder
 import com.cpen321.usermanagement.utils.JsonUtils.parseErrorMessage
@@ -65,6 +67,54 @@ class RecipeRepositoryImpl @Inject constructor(
             Result.failure(e)
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while fetching recipes: ${e.code()}", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun generateAiRecipe(ingredients: List<String>): Result<AiRecipeFetchResult> {
+        return try {
+            val token = authRepository.getStoredToken()
+            if (token.isNullOrEmpty()) {
+                return Result.failure(Exception("User is not authenticated"))
+            }
+
+            val response = recipeInterface.generateAiRecipe(
+                authHeader = "Bearer $token",
+                request = AiRecipeRequest(ingredients)
+            )
+
+            if (response.isSuccessful) {
+                val data = response.body()?.data
+                if (data != null) {
+                    Result.success(
+                        AiRecipeFetchResult(
+                            recipeData = data,
+                            formattedRecipe = data.recipe
+                        )
+                    )
+                } else {
+                    Result.failure(Exception("Empty AI recipe response received from server."))
+                }
+            } else {
+                val errorBodyString = response.errorBody()?.string()
+                val errorMessage = parseErrorMessage(
+                    errorBodyString,
+                    "Failed to generate AI recipe."
+                )
+                Log.e(TAG, "AI recipe generation failed: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Network timeout while generating AI recipe", e)
+            Result.failure(e)
+        } catch (e: UnknownHostException) {
+            Log.e(TAG, "Network connection failed while generating AI recipe", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Log.e(TAG, "IO error while generating AI recipe", e)
+            Result.failure(e)
+        } catch (e: HttpException) {
+            Log.e(TAG, "HTTP error while generating AI recipe: ${e.code()}", e)
             Result.failure(e)
         }
     }

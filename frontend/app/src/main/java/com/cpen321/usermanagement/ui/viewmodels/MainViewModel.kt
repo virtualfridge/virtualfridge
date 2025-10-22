@@ -23,7 +23,13 @@ data class MainUiState(
     val recipeSource: String? = null,
     val recipeError: String? = null,
     val isFetchingRecipes: Boolean = false,
-    val recipeSummaries: List<MealSummaryDto> = emptyList()
+    val recipeSummaries: List<MealSummaryDto> = emptyList(),
+    val aiRecipe: String? = null,
+    val aiPrompt: String? = null,
+    val aiIngredients: List<String> = emptyList(),
+    val aiModel: String? = null,
+    val isGeneratingAiRecipe: Boolean = false,
+    val aiError: String? = null
 )
 
 @HiltViewModel
@@ -31,6 +37,8 @@ class MainViewModel @Inject constructor(
     private val barcodeRepository: BarcodeRepository,
     private val recipeRepository: RecipeRepository
 ) : ViewModel() {
+
+    private val defaultAiIngredients = listOf("broccoli", "carrot")
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -125,6 +133,38 @@ class MainViewModel @Inject constructor(
 
     fun clearRecipeError() {
         _uiState.value = _uiState.value.copy(recipeError = null)
+    }
+
+    fun generateAiRecipe(ingredients: List<String> = defaultAiIngredients) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isGeneratingAiRecipe = true,
+                aiError = null
+            )
+
+            val result = recipeRepository.generateAiRecipe(ingredients)
+            result.fold(
+                onSuccess = { aiResult ->
+                    _uiState.value = _uiState.value.copy(
+                        aiRecipe = aiResult.formattedRecipe,
+                        aiPrompt = aiResult.recipeData.prompt,
+                        aiIngredients = formatIngredients(aiResult.recipeData.ingredients),
+                        aiModel = aiResult.recipeData.model,
+                        isGeneratingAiRecipe = false
+                    )
+                },
+                onFailure = { error ->
+                    _uiState.value = _uiState.value.copy(
+                        aiError = error.message ?: "Failed to generate AI recipe.",
+                        isGeneratingAiRecipe = false
+                    )
+                }
+            )
+        }
+    }
+
+    fun clearAiError() {
+        _uiState.value = _uiState.value.copy(aiError = null)
     }
 
     private fun formatIngredients(rawIngredients: List<String>): List<String> {

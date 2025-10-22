@@ -43,3 +43,23 @@ export type GetRecipesResponse = {
 };
 
 export const defaultRecipeIngredients = ['chicken_breast'];
+
+export const defaultAiIngredients = ['broccoli', 'carrot'];
+
+export const aiRecipeRequestSchema = z.object({
+  ingredients: z.array(z.string().min(1)).nonempty(),
+});
+
+export type AiRecipeRequestBody = z.infer<typeof aiRecipeRequestSchema>;
+
+export type AiRecipeData = {
+  ingredients: string[];
+  prompt: string;
+  recipe: string;
+  model: string;
+};
+
+export type AiRecipeResponse = {
+  message: string;
+  data: AiRecipeData;
+};

@@ -175,6 +175,7 @@ private fun MainBody(
         } else {
             val spacing = LocalSpacing.current
             var showRawJson by remember(uiState.recipesJson) { mutableStateOf(false) }
+            var showAiPrompt by remember(uiState.aiPrompt) { mutableStateOf(false) }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -223,7 +224,36 @@ private fun MainBody(
                     CircularProgressIndicator()
                 }
 
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Generate AI Recipe Button
+                Button(
+                    onClick = { mainViewModel.generateAiRecipe() },
+                    enabled = !uiState.isGeneratingAiRecipe
+                ) {
+                    Text(
+                        text = if (uiState.isGeneratingAiRecipe) {
+                            "Generating AI Recipe..."
+                        } else {
+                            "Generate AI Recipe"
+                        }
+                    )
+                }
+
+                if (uiState.isGeneratingAiRecipe) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CircularProgressIndicator()
+                }
+
                 uiState.recipeError?.let { error ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                uiState.aiError?.let { error ->
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = error,
@@ -279,6 +309,54 @@ private fun MainBody(
                             text = "Source: $source",
                             style = MaterialTheme.typography.labelSmall
                         )
+                    }
+                }
+
+                uiState.aiRecipe?.let { aiRecipe ->
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Text(
+                        text = "Gemini Suggestion",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (uiState.aiIngredients.isNotEmpty()) {
+                        Text(
+                            text = "Ingredients: ${uiState.aiIngredients.joinToString(", ")}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    
+
+                    SelectionContainer {
+                        Text(
+                            text = aiRecipe,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = FontFamily.Default
+                        )
+                    }
+
+                    uiState.aiPrompt?.let { prompt ->
+                        Spacer(modifier = Modifier.height(12.dp))
+                        TextButton(onClick = { showAiPrompt = !showAiPrompt }) {
+                            Text(
+                                text = if (showAiPrompt) "Hide Prompt" else "Show Prompt",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+
+                        if (showAiPrompt) {
+                            SelectionContainer {
+                                Text(
+                                    text = prompt,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
                     }
                 }
             }

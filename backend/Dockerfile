@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY --chown=node . .
 
 # Install node modules
-RUN npm ci
+RUN npm i
 RUN npm run build
 
 # Run the application as a non-root user.

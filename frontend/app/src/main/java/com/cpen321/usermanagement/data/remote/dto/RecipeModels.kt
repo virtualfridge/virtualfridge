@@ -11,3 +11,10 @@ data class RecipeDataDto(
     val meals: List<MealSummaryDto>,
     val externalSource: String
 )
+
+data class AiRecipeDataDto(
+    val ingredients: List<String>,
+    val prompt: String,
+    val recipe: String,
+    val model: String
+)
