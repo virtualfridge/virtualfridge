@@ -2,11 +2,10 @@ import mongoose, { Schema } from 'mongoose';
 import { FoodType, NutrientInfo, NutritionalInfo } from '../types/foodType';
 import logger from '../util/logger';
 
+// Always per 100g of source item
 const nutrientInfoOpts = new Schema<NutrientInfo>({
   value: { type: Number, required: true },
   unit: { type: String, required: true },
-  perSourceValue: { type: Number, required: true },
-  perSourceUnit: { type: String, required: true },
 });
 const nutritionalInfoOpts = new Schema<NutritionalInfo>({
   energy: { type: nutrientInfoOpts, required: false },
@@ -34,6 +33,7 @@ const foodTypeSchema = new Schema<FoodType>({
   name: { type: String, required: true },
   shelfLifeDays: { type: Number, required: true },
   nutritionalInfo: { type: nutritionalInfoOpts, required: false },
+  barcodeId: { type: String, required: false, index: true },
 });
 
 export class FoodTypeModel {
@@ -87,6 +87,16 @@ export class FoodTypeModel {
     } catch (error) {
       logger.error('Error finding foodType by id:', error);
       throw new Error('Failed to find foodType by id');
+    }
+  }
+
+  async findByBarcode(barcodeId: String): Promise<FoodType | null> {
+    try {
+      const foodType = await this.foodType.findOne({ barcodeId });
+      return foodType;
+    } catch (error) {
+      logger.error('Error finding foodType by barcode:', error);
+      throw new Error('Failed to find foodType by barcodeId');
     }
   }
 }

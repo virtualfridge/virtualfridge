@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import axios from 'axios';
 import { authenticateToken } from '../middleware/auth';
+import { foodTypeModel } from '../models/foodType';
+import { foodItemModel } from '../models/foodItem';
 
 const router = Router();
 
@@ -9,6 +11,9 @@ const router = Router();
  * Body: { barcode: "0123456789" }
  */
 router.post('/', authenticateToken, async (req, res) => {
+  // TODO:
+  // - Add stricter type/error checking
+  // - Split into multiple files: types, service, route
   try {
     const { barcode } = req.body;
 
@@ -18,22 +23,27 @@ router.post('/', authenticateToken, async (req, res) => {
 
     console.log('Received barcode:', barcode);
 
-    // Call OpenFoodFacts API with English locale
-    const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
-    const response = await axios.get(url);
+    var foodType = await foodTypeModel.findByBarcode(barcode);
+    if (foodType == null) {
+      // Call OpenFoodFacts API with English locale
+      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
+      const response = await axios.get(url);
 
-    // Check if the product exists
-    if (!response.data || !response.data.product) {
-      return res.status(404).json({ message: 'Product not found in OpenFoodFacts' });
-    }
+      // Check if the product exists
+      if (!response.data || !response.data.product) {
+        return res
+          .status(404)
+          .json({ message: 'Product not found in OpenFoodFacts' });
+      }
 
-    const product = response.data.product;
+      const product = response.data.product;
 
-    // Extract expiration or shelf-life related info if available
-    const expirationDate =
-      product.expiration_date ||
-      product.expiry_date ||
-      null;
+      // Extract expiration or shelf-life related info if available
+      const expirationDate =
+        product.expiration_date ||
+        product.expiry_date ||
+        product['expiration_date'] ||
+        null;
 
     // const shelfLife =
     //   product.conservation_conditions ||
@@ -108,7 +118,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
     console.log('Product data retrieved:', productData);
 
-    return res.status(200).json({ success: true, product: productData });
+    return res.status(200).json({ success: true, foodItem: foodItem });
   } catch (err: any) {
     console.error('Error handling barcode:', err.message || err);
     return res.status(500).json({ message: 'Internal server error' });

@@ -6,6 +6,8 @@ import com.cpen321.usermanagement.data.repository.BarcodeRepository
 import com.cpen321.usermanagement.data.repository.BarcodeRepositoryImpl
 import com.cpen321.usermanagement.data.repository.ProfileRepository
 import com.cpen321.usermanagement.data.repository.ProfileRepositoryImpl
+import com.cpen321.usermanagement.data.repository.RecipeRepository
+import com.cpen321.usermanagement.data.repository.RecipeRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -30,4 +32,9 @@ abstract class RepositoryModule {
     abstract fun bindBarcodeRepository(
         impl: BarcodeRepositoryImpl
     ): BarcodeRepository
+
+    @Binds
+    abstract fun bindRecipeRepository(
+        impl: RecipeRepositoryImpl
+    ): RecipeRepository
 }

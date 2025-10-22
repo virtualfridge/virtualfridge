@@ -6,7 +6,6 @@ import logger from '../util/logger';
 const foodItemSchema = new Schema<FoodItem>({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   typeId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  barcodeId: { type: String, required: false },
   expirationDate: { type: Date, required: true },
   percentLeft: { type: Number, required: true },
 });
