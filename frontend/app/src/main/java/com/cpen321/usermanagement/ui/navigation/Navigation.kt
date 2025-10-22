@@ -21,6 +21,7 @@ object NavRoutes {
 //    const val MANAGE_HOBBIES = "manage_hobbies"
     const val PROFILE_COMPLETION = "profile_completion"
     const val SCANNER = "scanner"
+    const val RECIPE = "recipe"
 }
 
 @Composable
@@ -85,6 +86,7 @@ private fun handleNavigationEvent(
         is NavigationEvent.NavigateToManageProfile -> navController.navigate(NavRoutes.MANAGE_PROFILE)
 //        is NavigationEvent.NavigateToManageHobbies -> navController.navigate(NavRoutes.MANAGE_HOBBIES)
         is NavigationEvent.NavigateToScanner -> navController.navigate(NavRoutes.SCANNER)
+        is NavigationEvent.NavigateToRecipe -> navController.navigate(NavRoutes.RECIPE)
         is NavigationEvent.NavigateBack -> navController.popBackStack()
         is NavigationEvent.ClearBackStack -> navController.popBackStack(navController.graph.startDestinationId, false)
         is NavigationEvent.NoNavigation -> { /* do nothing */ }
@@ -124,6 +126,7 @@ private fun AppNavHost(
             MainScreen(
                 mainViewModel = mainViewModel,
                 onProfileClick = { navigationStateManager.navigateToProfile() },
+                onRecipeClick = { navigationStateManager.navigateToRecipe() }
             )
         }
 
@@ -156,6 +159,13 @@ private fun AppNavHost(
 
         // Placeholder for scanner screen; implement separately
         composable(NavRoutes.SCANNER) {
+        }
+
+        composable(NavRoutes.RECIPE) {
+            RecipeScreen(
+                mainViewModel = mainViewModel,
+                onBackClick = { navigationStateManager.navigateBack() }
+            )
         }
     }
 }
