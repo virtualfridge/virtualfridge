@@ -124,8 +124,11 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 
     const expirationDate = new Date();
-    expirationDate.setDate(new Date().getDate() + foodType.shelfLifeDays);
-
+    const days = foodType?.shelfLifeDays;
+    if (typeof days === "number" && Number.isFinite(days)) {
+      expirationDate.setDate(expirationDate.getDate() + days);
+    }
+    
     const foodItem = await foodItemModel.create({
       userId: req.user!._id,
       typeId: foodType._id,
