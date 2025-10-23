@@ -20,7 +20,6 @@ router.post('/', authenticateToken, async (req, res) => {
     console.log('Received barcode:', barcode);
 
     let foodType = await foodTypeModel.findByBarcode(barcode);
-
     // Only call OpenFoodFacts if we don’t already have this food type
     if (!foodType) {
       const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
@@ -30,7 +29,7 @@ router.post('/', authenticateToken, async (req, res) => {
         return res.status(404).json({ message: 'Product not found in OpenFoodFacts' });
 
       const product = data.product;
-      console.log('Product data from OpenFoodFacts:', product);
+      // console.log('Product data from OpenFoodFacts:', product);
 
       const nutriments = product.nutriments || {};
 
@@ -54,7 +53,7 @@ product.expiration_date || product.expiry_date || null;
         shelfLifeDays = dateDiffInDays(new Date(expirationDate), new Date());
       }
 
-      const productData = {
+      let productData = {
         name: product.product_name_en || product.product_name || null,
         brand: product.brands || null,
         quantity: product.quantity || null,
@@ -116,7 +115,7 @@ product.expiration_date || product.expiry_date || null;
     });
 
     console.log('FoodItem created:', foodItem);
-    return res.status(200).json({ success: true, foodItem });
+    return res.status(200).json({ success: true, foodType });
   } catch (err: any) {
     console.error('Error handling barcode:', err.message || err);
     return res.status(500).json({ message: 'Internal server error' });

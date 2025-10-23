@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
+import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
 import com.cpen321.usermanagement.data.repository.BarcodeRepository
+import com.cpen321.usermanagement.data.repository.FoodType
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,10 +16,17 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
+data class IngredientOption(
+    val key: String,
+    val displayName: String
+)
+
 data class MainUiState(
     val successMessage: String? = null,
     val lastScannedBarcode: String? = null,
     val scanError: String? = null,
+    val testBarcodeResponse: FoodType? = null,
+    val isSendingTestBarcode: Boolean = false,
     val recipesJson: String? = null,
     val recipeIngredients: List<String> = emptyList(),
     val recipeSource: String? = null,
@@ -29,7 +38,8 @@ data class MainUiState(
     val aiIngredients: List<String> = emptyList(),
     val aiModel: String? = null,
     val isGeneratingAiRecipe: Boolean = false,
-    val aiError: String? = null
+    val aiError: String? = null,
+    val selectedIngredientKeys: Set<String> = emptySet()
 )
 
 @HiltViewModel
@@ -38,7 +48,11 @@ class MainViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository
 ) : ViewModel() {
 
-    private val defaultAiIngredients = listOf("broccoli", "carrot")
+    private val ingredientOptions = listOf(
+        IngredientOption(key = "chicken_breast", displayName = "Chicken Breast"),
+        IngredientOption(key = "broccoli", displayName = "Broccoli"),
+        IngredientOption(key = "carrot", displayName = "Carrot")
+    )
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -60,6 +74,15 @@ class MainViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(scanError = null)
     }
 
+    fun clearTestBarcodeState() {
+        _uiState.value = _uiState.value.copy(
+            testBarcodeResponse = null,
+            isSendingTestBarcode = false,
+            scanError = null,
+            successMessage = null
+        )
+    }
+
     // --- Barcode handling ---
     fun handleScannedBarcode(barcode: String) {
         _uiState.value = _uiState.value.copy(lastScannedBarcode = barcode)
@@ -68,7 +91,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val result = barcodeRepository.sendBarcode(barcode)
             result.fold(
-                onSuccess = {
+                onSuccess = { _ ->
                     setSuccessMessage("Barcode sent successfully!")
                 },
                 onFailure = { error ->
@@ -84,33 +107,58 @@ class MainViewModel @Inject constructor(
             val testBarcode = "3017620425035" // Nutella barcode
             Log.d("BarcodeTest", "Sending test barcode: $testBarcode")
 
+            _uiState.value = _uiState.value.copy(
+                isSendingTestBarcode = true,
+                testBarcodeResponse = null,
+                scanError = null,
+                successMessage = null
+            )
+
             val result = barcodeRepository.sendBarcode(testBarcode)
             result.fold(
-                onSuccess = {
+                onSuccess = { productData ->
                     Log.d("BarcodeTest", "Successfully sent test barcode")
-                    setSuccessMessage("Test barcode sent successfully!")
+                    _uiState.value = _uiState.value.copy(
+                        testBarcodeResponse = productData,
+                        isSendingTestBarcode = false
+                    )
                 },
                 onFailure = { error ->
                     Log.e("BarcodeTest", "Failed to send test barcode: ${error.message}", error)
                     setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
+                    _uiState.value = _uiState.value.copy(isSendingTestBarcode = false)
                 }
             )
         }
     }
 
     // --- Recipe fetching ---
-    fun fetchSampleRecipes() {
-        fetchRecipes(listOf("chicken_breast"))
-    }
-
     fun fetchRecipes(ingredients: List<String>? = null) {
+        val resolvedIngredients = resolveIngredients(ingredients)
+
+        if (resolvedIngredients.isEmpty()) {
+            _uiState.value = _uiState.value.copy(
+                recipeError = "Please select at least one ingredient."
+            )
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isFetchingRecipes = true,
-                recipeError = null
+                recipeError = null,
+                recipesJson = null,
+                recipeSource = null,
+                recipeSummaries = emptyList(),
+                recipeIngredients = emptyList(),
+                aiRecipe = null,
+                aiPrompt = null,
+                aiIngredients = emptyList(),
+                aiModel = null,
+                aiError = null
             )
 
-            val result = recipeRepository.fetchRecipes(ingredients)
+            val result = recipeRepository.fetchRecipes(resolvedIngredients)
             result.fold(
                 onSuccess = { recipeResult ->
                     _uiState.value = _uiState.value.copy(
@@ -135,14 +183,57 @@ class MainViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(recipeError = null)
     }
 
-    fun generateAiRecipe(ingredients: List<String> = defaultAiIngredients) {
+    fun getIngredientOptions(): List<IngredientOption> = ingredientOptions
+
+    fun isIngredientSelected(key: String): Boolean {
+        return _uiState.value.selectedIngredientKeys.contains(key)
+    }
+
+    fun setIngredientSelection(key: String, selected: Boolean) {
+        if (ingredientOptions.none { it.key == key }) {
+            return
+        }
+
+        val updated = _uiState.value.selectedIngredientKeys.toMutableSet()
+        if (selected) {
+            updated.add(key)
+        } else {
+            updated.remove(key)
+        }
+
+        _uiState.value = _uiState.value.copy(
+            selectedIngredientKeys = updated,
+            recipeError = null,
+            aiError = null
+        )
+    }
+
+    fun generateAiRecipe(ingredients: List<String>? = null) {
+        val resolvedIngredients = resolveIngredients(ingredients)
+
+        if (resolvedIngredients.isEmpty()) {
+            _uiState.value = _uiState.value.copy(
+                aiError = "Please select at least one ingredient."
+            )
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isGeneratingAiRecipe = true,
-                aiError = null
+                aiError = null,
+                aiRecipe = null,
+                aiPrompt = null,
+                aiIngredients = emptyList(),
+                aiModel = null,
+                recipesJson = null,
+                recipeIngredients = emptyList(),
+                recipeSource = null,
+                recipeSummaries = emptyList(),
+                recipeError = null
             )
 
-            val result = recipeRepository.generateAiRecipe(ingredients)
+            val result = recipeRepository.generateAiRecipe(resolvedIngredients)
             result.fold(
                 onSuccess = { aiResult ->
                     _uiState.value = _uiState.value.copy(
@@ -181,6 +272,18 @@ class MainViewModel @Inject constructor(
                         else char.toString()
                     }
                 }
+        }
+    }
+
+    private fun resolveIngredients(ingredients: List<String>?): List<String> {
+        val sanitized = ingredients
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+
+        return if (!sanitized.isNullOrEmpty()) {
+            sanitized
+        } else {
+            _uiState.value.selectedIngredientKeys.toList()
         }
     }
 }
