@@ -91,9 +91,10 @@ router.post('/', authenticateToken, async (req, res) => {
           ciqual_food_name: product.category_properties?.['ciqual_food_name:en'] ?? null,
         },
       };
+      console.log('Product data retrieved and stored:', productData);
 
       foodType = await foodTypeModel.create(productData);
-      console.log('Product data retrieved and stored:', productData);
+      // console.log('Product data retrieved and stored:', productData);
     }
 
     // Create a food item instance for the user
