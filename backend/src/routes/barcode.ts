@@ -13,86 +13,95 @@ const router = Router();
  * Body: { barcode: "0123456789" }
  */
 router.post('/', authenticateToken, async (req, res) => {
-  // TODO:
-  // - Add stricter type/error checking
-  // - Split into multiple files: types, service, route
   try {
     const { barcode } = req.body;
-
-    if (!barcode) {
-      return res.status(400).json({ message: 'Missing barcode' });
-    }
+    if (!barcode) return res.status(400).json({ message: 'Missing barcode' });
 
     console.log('Received barcode:', barcode);
 
     let foodType = await foodTypeModel.findByBarcode(barcode);
-    if (foodType == null) {
-      // Call OpenFoodFacts API with English locale
-      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
-      const response = await axios.get(url);
 
-      // Check if the product exists
-      if (!response.data || !response.data.product) {
-        return res
-          .status(404)
-          .json({ message: 'Product not found in OpenFoodFacts' });
-      }
-      const product = response.data.product;
+    // Only call OpenFoodFacts if we don’t already have this food type
+    if (!foodType) {
+      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
+      const { data } = await axios.get(url);
+
+      if (!data || !data.product)
+        return res.status(404).json({ message: 'Product not found in OpenFoodFacts' });
+
+      const product = data.product;
+      console.log('Product data from OpenFoodFacts:', product);
+
+      const nutriments = product.nutriments || {};
 
       // Extract expiration or shelf-life related info if available
       let shelfLifeDays = undefined;
+      // Extract calories (handle both kcal and kJ cases)
+      let calories =
+        nutriments['energy-kcal_100g'] ??
+        nutriments['energy-kcal_serving'] ??
+        nutriments['energy-kcal'] ??
+        null;
+
+      if (!calories && nutriments['energy_100g']) {
+        // Convert from kJ to kcal if needed
+        calories = Math.round(nutriments['energy_100g'] / 4.184);
+      }
+
       const expirationDate =
-        product.expiration_date || product.expiry_date || null;
+product.expiration_date || product.expiry_date || null;
       if (expirationDate) {
         shelfLifeDays = dateDiffInDays(new Date(expirationDate), new Date());
       }
 
-      // Extract English-only product data
-      const foodTypeData: Partial<FoodType> = {
-        name: product.product_name_en || null,
+      const productData = {
+        name: product.product_name_en || product.product_name || null,
         brand: product.brands || null,
-        // quantity: product.quantity || null,
-        // ingredients: product.ingredients_text_en || null,
+        quantity: product.quantity || null,
+        ingredients: product.ingredients_text_en || product.ingredients_text || null,
         image: product.image_url || null,
-        shelfLifeDays: shelfLifeDays,
+        expiration_date: expirationDate,
         allergens:
           product.allergens_hierarchy
             ?.filter((a: string) => a.startsWith('en:'))
             .map((a: string) => a.replace(/^en:/, '')) || null,
+
         nutrients: {
-          calories: product.nutrients?.['energy-kcal_100g'] || null,
-          energyKj: product.nutrients?.['energy-kj_100g'] || null,
-          protein: product.nutrients?.proteins_100g || null,
-          fat: product.nutrients?.fat_100g || null,
-          saturatedFat: product.nutrients?.['saturated-fat_100g'] || null,
-          monounsaturatedFat:
-            product.nutrients?.['monounsaturated-fat_100g'] || null,
-          polyunsaturatedFat:
-            product.nutrients?.['polyunsaturated-fat_100g'] || null,
-          transFat: product.nutrients?.['trans-fat_100g'] || null,
-          cholesterol: product.nutrients?.cholesterol_100g || null,
-          carbohydrates: product.nutrients?.carbohydrates_100g || null,
-          sugars: product.nutrients?.['sugars_100g'] || null,
-          fiber: product.nutrients?.['fiber_100g'] || null,
-          salt: product.nutrients?.['salt_100g'] || null,
-          sodium: product.nutrients?.['sodium_100g'] || null,
-          calcium: product.nutrients?.['calcium_100g'] || null,
-          iron: product.nutrients?.['iron_100g'] || null,
-          potassium: product.nutrients?.['potassium_100g'] || null,
+          calories,
+          energy_kj: nutriments['energy-kj_100g'] ?? nutriments['energy_100g'] ?? null,
+          protein: nutriments.proteins_100g ?? null,
+          fat: nutriments.fat_100g ?? null,
+          saturated_fat: nutriments['saturated-fat_100g'] ?? null,
+          monounsaturated_fat: nutriments['monounsaturated-fat_100g'] ?? null,
+          polyunsaturated_fat: nutriments['polyunsaturated-fat_100g'] ?? null,
+          trans_fat: nutriments['trans-fat_100g'] ?? null,
+          cholesterol: nutriments.cholesterol_100g ?? null,
+          carbs: nutriments.carbohydrates_100g ?? null,
+          sugars: nutriments['sugars_100g'] ?? null,
+          fiber: nutriments['fiber_100g'] ?? null,
+          salt: nutriments['salt_100g'] ?? null,
+          sodium: nutriments['sodium_100g'] ?? null,
+          minerals: {
+            calcium: nutriments['calcium_100g'] ?? null,
+            iron: nutriments['iron_100g'] ?? null,
+            magnesium: nutriments['magnesium_100g'] ?? null,
+            potassium: nutriments['potassium_100g'] ?? null,
+            zinc: nutriments['zinc_100g'] ?? null,
+          },
+          caffeine: nutriments['caffeine_100g'] ?? null,
         },
-        // other: {
-        // alcohol: product.nutriments?.['alcohol_100g'] || null,
-        // caffeine: product.nutriments?.['caffeine_100g'] || null,
-        //   water: product.nutriments?.['water_100g'] || null,
-        // }
+
+        category_properties: {
+          ciqual_food_name: product.category_properties?.['ciqual_food_name:en'] ?? null,
+        },
       };
-      // category_properties: {
-      //   ciqual_food_name: product.category_properties?.['ciqual_food_name:en'] || null,
-      // },
-      // Does not already exist so we save it
-      foodType = await foodTypeModel.create(foodTypeData);
+      console.log('Product data retrieved and stored:', productData);
+
+      foodType = await foodTypeModel.create(productData);
+      // console.log('Product data retrieved and stored:', productData);
     }
 
+    // Create a food item instance for the user
     const expirationDate = new Date();
     const days = foodType?.shelfLifeDays;
     if (typeof days === "number" && Number.isFinite(days)) {
@@ -106,10 +115,8 @@ router.post('/', authenticateToken, async (req, res) => {
       percentLeft: 100,
     });
 
-    // Print for debugging
-    console.log('FoodItem created', foodItem);
-
-    return res.status(200).json({ success: true, foodItem: foodItem });
+    console.log('FoodItem created:', foodItem);
+    return res.status(200).json({ success: true, foodItem });
   } catch (err: any) {
     console.error('Error handling barcode:', err.message || err);
     return res.status(500).json({ message: 'Internal server error' });
