@@ -3,6 +3,8 @@ import axios from 'axios';
 import { authenticateToken } from '../middleware/auth';
 import { foodTypeModel } from '../models/foodType';
 import { foodItemModel } from '../models/foodItem';
+import { FoodType } from '../types/foodType';
+import { addDaysToDate, dateDiffInDays } from '../util/dates';
 
 const router = Router();
 
@@ -32,6 +34,8 @@ router.post('/', authenticateToken, async (req, res) => {
 
       const nutriments = product.nutriments || {};
 
+      // Extract expiration or shelf-life related info if available
+      let shelfLifeDays = undefined;
       // Extract calories (handle both kcal and kJ cases)
       let calories =
         nutriments['energy-kcal_100g'] ??
@@ -45,10 +49,10 @@ router.post('/', authenticateToken, async (req, res) => {
       }
 
       const expirationDate =
-        product.expiration_date ||
-        product.expiry_date ||
-        product['expiration_date'] ||
-        null;
+product.expiration_date || product.expiry_date || null;
+      if (expirationDate) {
+        shelfLifeDays = dateDiffInDays(new Date(expirationDate), new Date());
+      }
 
       const productData = {
         name: product.product_name_en || product.product_name || null,
@@ -99,12 +103,15 @@ router.post('/', authenticateToken, async (req, res) => {
 
     // Create a food item instance for the user
     const expirationDate = new Date();
-    expirationDate.setDate(new Date().getDate() + (foodType.shelfLifeDays ?? 7)); // default 7 days if missing
-
+    const days = foodType?.shelfLifeDays;
+    if (typeof days === "number" && Number.isFinite(days)) {
+      expirationDate.setDate(expirationDate.getDate() + days);
+    }
+    
     const foodItem = await foodItemModel.create({
       userId: req.user!._id,
-      typeId: foodType._id,
-      expirationDate,
+      typeId: foodType!._id,
+      expirationDate: expirationDate,
       percentLeft: 100,
     });
 

@@ -9,22 +9,18 @@ export const foodItemSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
   userId: z.custom<mongoose.Types.ObjectId>(),
   typeId: z.custom<mongoose.Types.ObjectId>(),
-  expirationDate: z.date(),
+  expirationDate: z.date().optional(),
   percentLeft: z.number().positive().max(100),
 });
 
 export type FoodItem = z.infer<typeof foodItemSchema>;
 
-const baseCreateFoodItemSchema = foodItemSchema.omit({
-  _id: true,
-  typeId: true,
-});
-
-const embeddedFoodTypeSchema = foodTypeSchema.omit({ _id: true }).partial();
-
-export const createFoodItemSchema = baseCreateFoodItemSchema.merge(
-  embeddedFoodTypeSchema
-);
+export const createFoodItemSchema = foodItemSchema
+  .omit({
+    _id: true,
+    typeId: true,
+  })
+  .extend(foodTypeSchema.omit({ _id: true }).partial().shape);
 
 export const updateFoodItemSchema = foodItemSchema
   .partial()

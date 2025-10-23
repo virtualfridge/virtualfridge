@@ -1,38 +1,32 @@
 import mongoose, { Schema } from 'mongoose';
-import { FoodType, NutrientInfo, NutritionalInfo } from '../types/foodType';
+import { FoodType, Nutrients } from '../types/foodType';
 import logger from '../util/logger';
 
 // Always per 100g of source item
-const nutrientInfoOpts = new Schema<NutrientInfo>({
-  value: { type: Number, required: true },
-  unit: { type: String, required: true },
-});
-const nutritionalInfoOpts = new Schema<NutritionalInfo>({
-  energy: { type: nutrientInfoOpts, required: false },
-  energyKcal: { type: nutrientInfoOpts, required: false },
-  energyKj: { type: nutrientInfoOpts, required: false },
-  fat: { type: nutrientInfoOpts, required: false },
-  saturatedFat: { type: nutrientInfoOpts, required: false },
-  transFat: { type: nutrientInfoOpts, required: false },
-  cholesterol: { type: nutrientInfoOpts, required: false },
-  salt: { type: nutrientInfoOpts, required: false },
-  sodium: { type: nutrientInfoOpts, required: false },
-  carbohydrates: { type: nutrientInfoOpts, required: false },
-  carbohydratesTotal: { type: nutrientInfoOpts, required: false },
-  fiber: { type: nutrientInfoOpts, required: false },
-  sugars: { type: nutrientInfoOpts, required: false },
-  addedSugars: { type: nutrientInfoOpts, required: false },
-  proteins: { type: nutrientInfoOpts, required: false },
-  vitaminD: { type: nutrientInfoOpts, required: false },
-  calcium: { type: nutrientInfoOpts, required: false },
-  iron: { type: nutrientInfoOpts, required: false },
-  potassium: { type: nutrientInfoOpts, required: false },
+const nutrientsOpts = new Schema<Nutrients>({
+  calories: { type: String, required: false },
+  energyKj: { type: String, required: false },
+  protein: { type: String, required: false },
+  fat: { type: String, required: false },
+  saturatedFat: { type: String, required: false },
+  transFat: { type: String, required: false },
+  monounsaturatedFat: { type: String, required: false },
+  polyunsaturatedFat: { type: String, required: false },
+  cholesterol: { type: String, required: false },
+  salt: { type: String, required: false },
+  sodium: { type: String, required: false },
+  carbohydrates: { type: String, required: false },
+  fiber: { type: String, required: false },
+  sugars: { type: String, required: false },
+  calcium: { type: String, required: false },
+  iron: { type: String, required: false },
+  potassium: { type: String, required: false },
 });
 
 const foodTypeSchema = new Schema<FoodType>({
   name: { type: String, required: true },
-  shelfLifeDays: { type: Number, required: true },
-  nutritionalInfo: { type: nutritionalInfoOpts, required: false },
+  nutrients: { type: nutrientsOpts, required: false },
+  shelfLifeDays: { type: Number, required: false },
   barcodeId: { type: String, required: false, index: true },
 });
 
