@@ -4,6 +4,7 @@ package com.cpen321.usermanagement.data.repository
 import android.util.Log
 import com.cpen321.usermanagement.data.remote.api.BarcodeInterface
 import com.cpen321.usermanagement.data.remote.api.BarcodeRequest
+import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
 import com.cpen321.usermanagement.utils.JsonUtils.parseErrorMessage
 import retrofit2.HttpException
 import java.io.IOException
@@ -22,7 +23,7 @@ class BarcodeRepositoryImpl @Inject constructor(
         private const val TAG = "BarcodeRepositoryImpl"
     }
 
-    override suspend fun sendBarcode(barcode: String): Result<Unit> {
+    override suspend fun sendBarcode(barcode: String): Result<ProductDataDto> {
         return try {
             // Get stored token from AuthRepository
             val token = authRepository.getStoredToken()
@@ -42,7 +43,12 @@ class BarcodeRepositoryImpl @Inject constructor(
             )
 
             if (response.isSuccessful) {
-                Result.success(Unit)
+                val data = response.body()?.data
+                if (data != null) {
+                    Result.success(data)
+                } else {
+                    Result.failure(Exception("Empty product data received from server."))
+                }
             } else {
                 val errorBodyString = response.errorBody()?.string()
                 val errorMessage = parseErrorMessage(errorBodyString, "Failed to send barcode.")

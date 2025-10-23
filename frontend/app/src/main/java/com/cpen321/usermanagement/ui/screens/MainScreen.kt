@@ -21,7 +21,8 @@ import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 fun MainScreen(
     mainViewModel: MainViewModel,
     onProfileClick: () -> Unit,
-    onRecipeClick: () -> Unit
+    onRecipeClick: () -> Unit,
+    onTestBarcodeClick: () -> Unit
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -40,7 +41,7 @@ fun MainScreen(
         onSuccessMessageShown = mainViewModel::clearSuccessMessage,
         onErrorMessageShown = mainViewModel::clearScanError,
         onRecipeClick = onRecipeClick,
-        mainViewModel = mainViewModel
+        onTestBarcodeClick = onTestBarcodeClick
     )
 }
 
@@ -55,7 +56,7 @@ private fun MainContent(
     onSuccessMessageShown: () -> Unit,
     onErrorMessageShown: () -> Unit,
     onRecipeClick: () -> Unit,
-    mainViewModel: MainViewModel,
+    onTestBarcodeClick: () -> Unit,
     modifier: Modifier = Modifier
 
 ) {
@@ -77,8 +78,8 @@ private fun MainContent(
             showScanner = showScanner,
             onRecipeClick = onRecipeClick,
             onScanClick = onScanRequested,
+            onTestBarcodeClick = onTestBarcodeClick,
             onBarcodeDetected = onBarcodeDetected,
-            mainViewModel = mainViewModel,
             uiState = uiState
         )
     }
@@ -155,8 +156,8 @@ private fun MainBody(
     showScanner: Boolean,
     onRecipeClick: () -> Unit,
     onScanClick: () -> Unit,
+    onTestBarcodeClick: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
-    mainViewModel: MainViewModel,
     uiState: MainUiState,
     modifier: Modifier = Modifier
 ) {
@@ -198,10 +199,7 @@ private fun MainBody(
                 }
 
                 Button(
-                    onClick = {
-                        val testBarcode = "3017620425035"
-                        mainViewModel.handleScannedBarcode(testBarcode)
-                    },
+                    onClick = onTestBarcodeClick,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Send Test Barcode")
