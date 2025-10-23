@@ -21,6 +21,8 @@ object NavRoutes {
     const val MANAGE_HOBBIES = "manage_hobbies"
     const val PROFILE_COMPLETION = "profile_completion"
     const val SCANNER = "scanner"
+    const val IMAGE_CAPTURE = "image_capture"
+    const val IMAGE_ANALYSIS = "image_analysis"
 }
 
 @Composable
@@ -156,6 +158,20 @@ private fun AppNavHost(
 
         // Placeholder for scanner screen; implement separately
         composable(NavRoutes.SCANNER) {
+        }
+
+        composable(NavRoutes.IMAGE_CAPTURE) {
+            ImageCaptureScreen(
+                onImageCaptured = { bitmap ->
+                    // Navigate to analysis screen with the captured image
+                    // This will be handled by the MainViewModel
+                },
+                onClose = { navigationStateManager.navigateBack() }
+            )
+        }
+
+        composable(NavRoutes.IMAGE_ANALYSIS) {
+            // This will be handled by MainViewModel with image data
         }
     }
 }

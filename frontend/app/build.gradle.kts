@@ -129,6 +129,12 @@ dependencies {
 // OkHttp for a simple backend POST (or use Retrofit if you prefer)
     implementation("com.squareup.okhttp3:okhttp:4.9.2")
 
+    // image labelling (for vision)
+    implementation("com.google.mlkit:image-labeling:17.0.8")
+
+    // for icons (for vision)
+    implementation("androidx.compose.material:material-icons-extended:1.7.3")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

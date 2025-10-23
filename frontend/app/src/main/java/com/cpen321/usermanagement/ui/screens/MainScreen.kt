@@ -20,6 +20,8 @@ import com.cpen321.usermanagement.ui.theme.LocalFontSizes
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
+import com.cpen321.usermanagement.ui.viewmodels.ComputerVisionViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun MainScreen(
@@ -28,23 +30,49 @@ fun MainScreen(
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
+    val computerVisionViewModel: ComputerVisionViewModel = hiltViewModel()
+    val cvUiState by computerVisionViewModel.uiState.collectAsState()
 
     // Scanner state handled inside MainScreen
     var showScanner by remember { mutableStateOf(false) }
+    var showImageCapture by remember { mutableStateOf(false) }
+    var showImageAnalysis by remember { mutableStateOf(false) }
+
+    // Handle image capture and analysis
+    LaunchedEffect(cvUiState.capturedImage, cvUiState.detectionResult) {
+        if (cvUiState.capturedImage != null && cvUiState.detectionResult != null) {
+            showImageCapture = false
+            showImageAnalysis = true
+        }
+    }
 
     MainContent(
         uiState = uiState,
         snackBarHostState = snackBarHostState,
         onProfileClick = onProfileClick,
         showScanner = showScanner,
+        showImageCapture = showImageCapture,
+        showImageAnalysis = showImageAnalysis,
+        cvUiState = cvUiState,
         onScanRequested = { showScanner = true },
+        onImageCaptureRequested = { showImageCapture = true },
         onBarcodeDetected = { barcode ->
             showScanner = false
             mainViewModel.handleScannedBarcode(barcode)
         },
+        onImageCaptured = { bitmap ->
+            computerVisionViewModel.analyzeImage(bitmap)
+        },
+        onImageAnalysisClose = {
+            showImageAnalysis = false
+            computerVisionViewModel.resetState()
+        },
+        onImageCaptureClose = {
+            showImageCapture = false
+        },
         onSuccessMessageShown = mainViewModel::clearSuccessMessage,
         onErrorMessageShown = mainViewModel::clearScanError,
-        mainViewModel = mainViewModel // <-- pass here
+        mainViewModel = mainViewModel
     )
 }
 
@@ -54,13 +82,19 @@ private fun MainContent(
     snackBarHostState: SnackbarHostState,
     onProfileClick: () -> Unit,
     showScanner: Boolean,
+    showImageCapture: Boolean,
+    showImageAnalysis: Boolean,
+    cvUiState: com.cpen321.usermanagement.ui.viewmodels.ComputerVisionUiState,
     onScanRequested: () -> Unit,
+    onImageCaptureRequested: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
+    onImageCaptured: (android.graphics.Bitmap) -> Unit,
+    onImageAnalysisClose: () -> Unit,
+    onImageCaptureClose: () -> Unit,
     onSuccessMessageShown: () -> Unit,
     onErrorMessageShown: () -> Unit,
-    mainViewModel: MainViewModel, // <-- add this
+    mainViewModel: MainViewModel,
     modifier: Modifier = Modifier
-
 ) {
     Scaffold(
         modifier = modifier,
@@ -78,8 +112,15 @@ private fun MainContent(
         MainBody(
             paddingValues = paddingValues,
             showScanner = showScanner,
+            showImageCapture = showImageCapture,
+            showImageAnalysis = showImageAnalysis,
+            cvUiState = cvUiState,
             onScanClick = onScanRequested,
+            onImageCaptureClick = onImageCaptureRequested,
             onBarcodeDetected = onBarcodeDetected,
+            onImageCaptured = onImageCaptured,
+            onImageAnalysisClose = onImageAnalysisClose,
+            onImageCaptureClose = onImageCaptureClose,
             mainViewModel = mainViewModel,
             uiState = uiState
         )
@@ -155,8 +196,15 @@ private fun MainSnackbarHost(
 private fun MainBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
+    showImageCapture: Boolean,
+    showImageAnalysis: Boolean,
+    cvUiState: com.cpen321.usermanagement.ui.viewmodels.ComputerVisionUiState,
     onScanClick: () -> Unit,
+    onImageCaptureClick: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
+    onImageCaptured: (android.graphics.Bitmap) -> Unit,
+    onImageAnalysisClose: () -> Unit,
+    onImageCaptureClose: () -> Unit,
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
     uiState: MainUiState
@@ -167,194 +215,229 @@ private fun MainBody(
             .padding(paddingValues),
         contentAlignment = Alignment.Center
     ) {
-        if (showScanner) {
-            ScannerScreen(
-                onBarcodeDetected = onBarcodeDetected,
-                onClose = { /* Could toggle showScanner false here if needed */ }
-            )
-        } else {
-            val spacing = LocalSpacing.current
-            var showRawJson by remember(uiState.recipesJson) { mutableStateOf(false) }
-            var showAiPrompt by remember(uiState.aiPrompt) { mutableStateOf(false) }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = spacing.large)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                WelcomeMessage()
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Scan Barcode Button
-                Button(onClick = onScanClick) {
-                    Text("Scan Barcode")
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Test Barcode Button
-                Button(
-                    onClick = {
-                        val testBarcode = "3017620425035" // Example barcode
-                        mainViewModel.handleScannedBarcode(testBarcode)
+        when {
+            showScanner -> {
+                ScannerScreen(
+                    onBarcodeDetected = onBarcodeDetected,
+                    onClose = { /* Could toggle showScanner false here if needed */ }
+                )
+            }
+            showImageCapture -> {
+                ImageCaptureScreen(
+                    onImageCaptured = onImageCaptured,
+                    onClose = onImageCaptureClose
+                )
+            }
+            showImageAnalysis -> {
+                cvUiState.capturedImage?.let { image ->
+                    cvUiState.detectionResult?.let { result ->
+                        ImageAnalysisScreen(
+                            imageBitmap = image,
+                            detectionResult = result,
+                            onRetakePhoto = onImageCaptureClose,
+                            onConfirmFood = { foodItem ->
+                                // Handle food confirmation - could send to backend
+                                mainViewModel.setSuccessMessage("Food item '$foodItem' added to fridge!")
+                                onImageAnalysisClose()
+                            },
+                            onClose = onImageAnalysisClose
+                        )
                     }
-                ) {
-                    Text("Send Test Barcode")
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Fetch Recipes Button
-                Button(
-                    onClick = { mainViewModel.fetchSampleRecipes() },
-                    enabled = !uiState.isFetchingRecipes
+            }
+            else -> {
+                val spacing = LocalSpacing.current
+                var showRawJson by remember(uiState.recipesJson) { mutableStateOf(false) }
+                var showAiPrompt by remember(uiState.aiPrompt) { mutableStateOf(false) }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = spacing.large)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    Text(
-                        text = if (uiState.isFetchingRecipes) {
-                            "Fetching Recipes..."
-                        } else {
-                            "Fetch Sample Recipes"
+                    WelcomeMessage()
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Scan Barcode Button
+                    Button(onClick = onScanClick) {
+                        Text("Scan Barcode")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Capture Food Image Button
+                    Button(
+                        onClick = onImageCaptureClick
+                    ) {
+                        Text("Capture Food Image")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Test Barcode Button
+                    Button(
+                        onClick = {
+                            val testBarcode = "3017620425035" // Example barcode
+                            mainViewModel.handleScannedBarcode(testBarcode)
                         }
-                    )
-                }
+                    ) {
+                        Text("Send Test Barcode")
+                    }
 
-                if (uiState.isFetchingRecipes) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CircularProgressIndicator()
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Generate AI Recipe Button
-                Button(
-                    onClick = { mainViewModel.generateAiRecipe() },
-                    enabled = !uiState.isGeneratingAiRecipe
-                ) {
-                    Text(
-                        text = if (uiState.isGeneratingAiRecipe) {
-                            "Generating AI Recipe..."
-                        } else {
-                            "Generate AI Recipe"
-                        }
-                    )
-                }
-
-                if (uiState.isGeneratingAiRecipe) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CircularProgressIndicator()
-                }
-
-                uiState.recipeError?.let { error ->
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = error,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                uiState.aiError?.let { error ->
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = error,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                if (uiState.recipeSummaries.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    Text(
-                        text = "Suggested Recipes",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    // Fetch Recipes Button
+                    Button(
+                        onClick = { mainViewModel.fetchSampleRecipes() },
+                        enabled = !uiState.isFetchingRecipes
+                    ) {
+                        Text(
+                            text = if (uiState.isFetchingRecipes) {
+                                "Fetching Recipes..."
+                            } else {
+                                "Fetch Sample Recipes"
+                            }
+                        )
+                    }
 
-                    Text(
-                        text = "Ingredients used: ${uiState.recipeIngredients.joinToString(", ")}",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    if (uiState.isFetchingRecipes) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CircularProgressIndicator()
+                    }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                    uiState.recipeSummaries.forEach { meal ->
-                        RecipeCard(mealName = meal.strMeal, mealId = meal.idMeal, thumbnailUrl = meal.strMealThumb)
+                    // Generate AI Recipe Button
+                    Button(
+                        onClick = { mainViewModel.generateAiRecipe() },
+                        enabled = !uiState.isGeneratingAiRecipe
+                    ) {
+                        Text(
+                            text = if (uiState.isGeneratingAiRecipe) {
+                                "Generating AI Recipe..."
+                            } else {
+                                "Generate AI Recipe"
+                            }
+                        )
+                    }
+
+                    if (uiState.isGeneratingAiRecipe) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        CircularProgressIndicator()
+                    }
+
+                    uiState.recipeError?.let { error ->
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    uiState.aiError?.let { error ->
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    if (uiState.recipeSummaries.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "Suggested Recipes",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
                         Spacer(modifier = Modifier.height(12.dp))
-                    }
-                }
 
-                uiState.recipesJson?.let { json ->
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextButton(onClick = { showRawJson = !showRawJson }) {
                         Text(
-                            text = if (showRawJson) "Hide Raw JSON" else "Show Raw JSON",
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-
-                    if (showRawJson) {
-                        SelectionContainer {
-                            Text(
-                                text = json,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        }
-                    }
-
-                    uiState.recipeSource?.let { source ->
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Source: $source",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-
-                uiState.aiRecipe?.let { aiRecipe ->
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Text(
-                        text = "Gemini Suggestion",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    if (uiState.aiIngredients.isNotEmpty()) {
-                        Text(
-                            text = "Ingredients: ${uiState.aiIngredients.joinToString(", ")}",
+                            text = "Ingredients used: ${uiState.recipeIngredients.joinToString(", ")}",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    
 
-                    SelectionContainer {
-                        Text(
-                            text = aiRecipe,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontFamily = FontFamily.Default
-                        )
-                    }
-
-                    uiState.aiPrompt?.let { prompt ->
                         Spacer(modifier = Modifier.height(12.dp))
-                        TextButton(onClick = { showAiPrompt = !showAiPrompt }) {
+
+                        uiState.recipeSummaries.forEach { meal ->
+                            RecipeCard(mealName = meal.strMeal, mealId = meal.idMeal, thumbnailUrl = meal.strMealThumb)
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
+                    }
+
+                    uiState.recipesJson?.let { json ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = { showRawJson = !showRawJson }) {
                             Text(
-                                text = if (showAiPrompt) "Hide Prompt" else "Show Prompt",
+                                text = if (showRawJson) "Hide Raw JSON" else "Show Raw JSON",
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
 
-                        if (showAiPrompt) {
+                        if (showRawJson) {
                             SelectionContainer {
                                 Text(
-                                    text = prompt,
+                                    text = json,
                                     style = MaterialTheme.typography.bodySmall,
                                     fontFamily = FontFamily.Monospace
                                 )
+                            }
+                        }
+
+                        uiState.recipeSource?.let { source ->
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Source: $source",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+
+                    uiState.aiRecipe?.let { aiRecipe ->
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Text(
+                            text = "Gemini Suggestion",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (uiState.aiIngredients.isNotEmpty()) {
+                            Text(
+                                text = "Ingredients: ${uiState.aiIngredients.joinToString(", ")}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+
+                        SelectionContainer {
+                            Text(
+                                text = aiRecipe,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontFamily = FontFamily.Default
+                            )
+                        }
+
+                        uiState.aiPrompt?.let { prompt ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            TextButton(onClick = { showAiPrompt = !showAiPrompt }) {
+                                Text(
+                                    text = if (showAiPrompt) "Hide Prompt" else "Show Prompt",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+
+                            if (showAiPrompt) {
+                                SelectionContainer {
+                                    Text(
+                                        text = prompt,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontFamily = FontFamily.Monospace
+                                    )
+                                }
                             }
                         }
                     }
@@ -364,47 +447,47 @@ private fun MainBody(
     }
 }
 
-@Composable
-private fun RecipeCard(mealName: String, mealId: String, thumbnailUrl: String?) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = mealName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Meal ID: $mealId",
-                style = MaterialTheme.typography.labelMedium
-            )
-
-            thumbnailUrl?.takeIf { it.isNotBlank() }?.let { url ->
-                Spacer(modifier = Modifier.height(4.dp))
+    @Composable
+    private fun RecipeCard(mealName: String, mealId: String, thumbnailUrl: String?) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Image: $url",
-                    style = MaterialTheme.typography.bodySmall
+                    text = mealName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Meal ID: $mealId",
+                    style = MaterialTheme.typography.labelMedium
+                )
+
+                thumbnailUrl?.takeIf { it.isNotBlank() }?.let { url ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Image: $url",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }
-}
 
 
-@Composable
-private fun WelcomeMessage(modifier: Modifier = Modifier) {
-    val fontSizes = LocalFontSizes.current
+    @Composable
+    private fun WelcomeMessage(modifier: Modifier = Modifier) {
+        val fontSizes = LocalFontSizes.current
 
-    Text(
-        text = stringResource(R.string.welcome),
-        style = MaterialTheme.typography.bodyLarge,
-        fontSize = fontSizes.extraLarge3,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier
-    )
-}
+        Text(
+            text = stringResource(R.string.welcome),
+            style = MaterialTheme.typography.bodyLarge,
+            fontSize = fontSizes.extraLarge3,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = modifier
+        )
+    }
