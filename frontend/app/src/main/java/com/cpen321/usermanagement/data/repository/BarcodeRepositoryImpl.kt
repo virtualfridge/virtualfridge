@@ -14,6 +14,27 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
+
+data class FoodType(
+    val _id: String,
+    val name: String,
+    val nutrients: Nutrients
+)
+
+data class Nutrients(
+    val calories: String?,
+    val protein: String?,
+    val fat: String?,
+    val carbohydrates: String?,
+    val fiber: String?,
+    val sugars: String?,
+    val salt: String?,
+    val sodium: String?,
+    val calcium: String?,
+    val iron: String?,
+    val potassium: String?
+)
+
 class BarcodeRepositoryImpl @Inject constructor(
     private val barcodeInterface: BarcodeInterface,
     private val authRepository: AuthRepository // Inject AuthRepository to get token
@@ -23,49 +44,39 @@ class BarcodeRepositoryImpl @Inject constructor(
         private const val TAG = "BarcodeRepositoryImpl"
     }
 
-    override suspend fun sendBarcode(barcode: String): Result<ProductDataDto> {
+    data class BarcodeResponse(
+        val success: Boolean,
+        val foodType: FoodType,
+    )
+
+    override suspend fun sendBarcode(barcode: String): Result<FoodType> {
         return try {
-            // Get stored token from AuthRepository
             val token = authRepository.getStoredToken()
             if (token.isNullOrEmpty()) {
                 return Result.failure(Exception("User is not authenticated"))
             }
 
-            // Create request object
-            val request = BarcodeRequest(
-                barcode = barcode,
-            )
-
-            // Send barcode with authorization header
+            val request = BarcodeRequest(barcode)
             val response = barcodeInterface.sendBarcode(
                 request,
                 authHeader = "Bearer $token"
             )
 
             if (response.isSuccessful) {
-                val data = response.body()?.data
-                if (data != null) {
-                    Result.success(data)
+                val body = response.body()
+                if (body != null) {
+                    Result.success(body.foodType) // <-- get the foodType from backend
+
+
                 } else {
                     Result.failure(Exception("Empty product data received from server."))
                 }
             } else {
                 val errorBodyString = response.errorBody()?.string()
                 val errorMessage = parseErrorMessage(errorBodyString, "Failed to send barcode.")
-                Log.e(TAG, "Failed to send barcode: $errorMessage")
                 Result.failure(Exception(errorMessage))
             }
-        } catch (e: SocketTimeoutException) {
-            Log.e(TAG, "Network timeout while sending barcode", e)
-            Result.failure(e)
-        } catch (e: UnknownHostException) {
-            Log.e(TAG, "Network connection failed while sending barcode", e)
-            Result.failure(e)
-        } catch (e: IOException) {
-            Log.e(TAG, "IO error while sending barcode", e)
-            Result.failure(e)
-        } catch (e: HttpException) {
-            Log.e(TAG, "HTTP error while sending barcode: ${e.code()}", e)
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

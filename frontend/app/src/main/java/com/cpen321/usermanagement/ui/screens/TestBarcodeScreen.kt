@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
+import com.cpen321.usermanagement.data.repository.FoodType
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 
@@ -89,7 +90,7 @@ private fun TestBarcodeTopBar(
 private fun TestBarcodeContent(
     paddingValues: PaddingValues,
     isSending: Boolean,
-    productData: ProductDataDto?,
+    productData: FoodType?,
     onSendTestBarcode: () -> Unit,
     errorMessage: String?,
     modifier: Modifier = Modifier
@@ -140,11 +141,6 @@ private fun TestBarcodeContent(
             )
 
             ProductDetailRow(label = "Name", value = data.name)
-            ProductDetailRow(label = "Brand", value = data.brand)
-            ProductDetailRow(label = "Quantity", value = data.quantity)
-            ProductDetailRow(label = "Ingredients", value = data.ingredients)
-            ProductDetailRow(label = "Expiration Date", value = data.expiration_date)
-            ProductDetailRow(label = "Image URL", value = data.image)
 
             data.nutrients?.let { nutrients ->
                 Text(
@@ -153,50 +149,27 @@ private fun TestBarcodeContent(
                     fontWeight = FontWeight.Medium
                 )
 
-                ProductDetailRow(label = "Calories (kcal/100g)", value = nutrients.calories?.toString())
-                ProductDetailRow(label = "Protein (g/100g)", value = nutrients.protein?.toString())
-                ProductDetailRow(label = "Fat (g/100g)", value = nutrients.fat?.toString())
-                ProductDetailRow(label = "Saturated Fat (g/100g)", value = nutrients.saturated_fat?.toString())
-                ProductDetailRow(label = "Carbs (g/100g)", value = nutrients.carbs?.toString())
-                ProductDetailRow(label = "Sugars (g/100g)", value = nutrients.sugars?.toString())
-                ProductDetailRow(label = "Fiber (g/100g)", value = nutrients.fiber?.toString())
-                ProductDetailRow(label = "Salt (g/100g)", value = nutrients.salt?.toString())
-                ProductDetailRow(label = "Sodium (mg/100g)", value = nutrients.sodium?.toString())
-                ProductDetailRow(label = "Caffeine (mg/100g)", value = nutrients.caffeine?.toString())
+                ProductDetailRow(label = "Calories (kcal/100g)", value = nutrients.calories)
+                ProductDetailRow(label = "Protein (g/100g)", value = nutrients.protein)
+                ProductDetailRow(label = "Fat (g/100g)", value = nutrients.fat)
+                ProductDetailRow(label = "Carbs (g/100g)", value = nutrients.carbohydrates)
+                ProductDetailRow(label = "Sugars (g/100g)", value = nutrients.sugars)
+                ProductDetailRow(label = "Fiber (g/100g)", value = nutrients.fiber)
+                ProductDetailRow(label = "Salt (g/100g)", value = nutrients.salt)
+                ProductDetailRow(label = "Sodium (mg/100g)", value = nutrients.sodium)
+                // Optional: Add other fields like transFat, mono/polyunsaturatedFat, cholesterol
             }
 
-            data.minerals?.let { minerals ->
-                Text(
-                    text = "Minerals",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
 
-                ProductDetailRow(label = "Calcium (mg/100g)", value = minerals.calcium?.toString())
-                ProductDetailRow(label = "Iron (mg/100g)", value = minerals.iron?.toString())
-                ProductDetailRow(label = "Magnesium (mg/100g)", value = minerals.magnesium?.toString())
-                ProductDetailRow(label = "Potassium (mg/100g)", value = minerals.potassium?.toString())
-                ProductDetailRow(label = "Sodium (mg/100g)", value = minerals.sodium?.toString())
-                ProductDetailRow(label = "Zinc (mg/100g)", value = minerals.zinc?.toString())
-            }
-
-            data.allergens?.takeIf { it.isNotEmpty() }?.let { allergens ->
-                Text(
-                    text = "Allergens",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-
-                SelectionContainer {
-                    Text(
-                        text = allergens.joinToString(", "),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+//                SelectionContainer {
+//                    Text(
+//                        text = allergens.joinToString(", "),
+//                        style = MaterialTheme.typography.bodyMedium
+//                    )
+//                }
             }
         }
     }
-}
 
 @Composable
 private fun ProductDetailRow(label: String, value: String?, modifier: Modifier = Modifier) {

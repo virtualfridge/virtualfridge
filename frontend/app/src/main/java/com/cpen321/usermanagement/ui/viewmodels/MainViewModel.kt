@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
 import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
 import com.cpen321.usermanagement.data.repository.BarcodeRepository
+import com.cpen321.usermanagement.data.repository.FoodType
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,7 @@ data class MainUiState(
     val successMessage: String? = null,
     val lastScannedBarcode: String? = null,
     val scanError: String? = null,
-    val testBarcodeResponse: ProductDataDto? = null,
+    val testBarcodeResponse: FoodType? = null,
     val isSendingTestBarcode: Boolean = false,
     val recipesJson: String? = null,
     val recipeIngredients: List<String> = emptyList(),
