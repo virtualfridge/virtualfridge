@@ -42,6 +42,7 @@ rectangle barcodeApi as "Barcode API"
 rectangle recipeApi as "Recipe API"
 rectangle nutritionApi as "Nutrition API"
 rectangle ComputerVisionAPI as "Computer Vision API"
+rectangle GeminiAPI as "Gemini API"
 
 
 ' ==== User connections ====
@@ -60,6 +61,7 @@ signUp -- googleAuth
 signIn -- googleAuth
 logBarcode -- barcodeApi
 genRecipes -- recipeApi
+genRecipes -- GeminiAPI
 viewRecipe -- recipeApi
 viewNutrition -- nutritionApi
 logImage -- ComputerVisionAPI
