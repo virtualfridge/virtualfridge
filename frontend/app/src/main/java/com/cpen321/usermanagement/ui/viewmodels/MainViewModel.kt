@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
 import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
+import com.cpen321.usermanagement.data.remote.api.BarcodeResultData
 import com.cpen321.usermanagement.data.repository.BarcodeRepository
-import com.cpen321.usermanagement.data.repository.FoodType
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,8 @@ data class MainUiState(
     val successMessage: String? = null,
     val lastScannedBarcode: String? = null,
     val scanError: String? = null,
-    val testBarcodeResponse: FoodType? = null,
+    val barcodeResult: BarcodeResultData? = null,
+    val testBarcodeResponse: BarcodeResultData? = null,
     val isSendingTestBarcode: Boolean = false,
     val recipesJson: String? = null,
     val recipeIngredients: List<String> = emptyList(),
@@ -74,6 +75,10 @@ class MainViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(scanError = null)
     }
 
+    fun clearBarcodeResult() {
+        _uiState.value = _uiState.value.copy(barcodeResult = null)
+    }
+
     fun clearTestBarcodeState() {
         _uiState.value = _uiState.value.copy(
             testBarcodeResponse = null,
@@ -91,11 +96,15 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val result = barcodeRepository.sendBarcode(barcode)
             result.fold(
-                onSuccess = { _ ->
-                    setSuccessMessage("Barcode sent successfully!")
+                onSuccess = { barcodeResult ->
+                    _uiState.value = _uiState.value.copy(
+                        barcodeResult = barcodeResult,
+                        scanError = null
+                    )
+                    setSuccessMessage("Product added successfully!")
                 },
                 onFailure = { error ->
-                    setScanError("Failed to send barcode: ${error.message ?: "Unknown error"}")
+                    setScanError("Failed to scan barcode: ${error.message ?: "Unknown error"}")
                 }
             )
         }
@@ -116,10 +125,10 @@ class MainViewModel @Inject constructor(
 
             val result = barcodeRepository.sendBarcode(testBarcode)
             result.fold(
-                onSuccess = { productData ->
+                onSuccess = { barcodeResult ->
                     Log.d("BarcodeTest", "Successfully sent test barcode")
                     _uiState.value = _uiState.value.copy(
-                        testBarcodeResponse = productData,
+                        testBarcodeResponse = barcodeResult,
                         isSendingTestBarcode = false
                     )
                 },
