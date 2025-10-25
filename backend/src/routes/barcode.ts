@@ -113,9 +113,13 @@ router.post('/', authenticateToken, async (req, res) => {
       expirationDate: expirationDate,
       percentLeft: 100,
     });
+    const response = {
+      ...foodItem,
+      ...foodType,
+    };
 
-    console.log('FoodItem created:', foodItem);
-    return res.status(200).json({ success: true, foodType });
+    console.log('FoodItem created:', response);
+    return res.status(200).json({ success: true, response });
   } catch (err: any) {
     console.error('Error handling barcode:', err.message || err);
     return res.status(500).json({ message: 'Internal server error' });
