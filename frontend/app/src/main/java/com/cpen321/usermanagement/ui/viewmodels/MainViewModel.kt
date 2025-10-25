@@ -4,10 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
-import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
 import com.cpen321.usermanagement.data.remote.api.BarcodeResultData
 import com.cpen321.usermanagement.data.repository.BarcodeRepository
-import com.cpen321.usermanagement.data.repository.FoodType
 import com.cpen321.usermanagement.data.repository.NotificationRepository
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
