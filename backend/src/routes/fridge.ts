@@ -7,6 +7,10 @@ const router = Router();
 
 router.get('/', fridgeService.findAllFridgeItemsByUserId);
 
-router.post('/barcode', validateBody(barcodeRequestSchema));
+router.post(
+  '/barcode',
+  validateBody(barcodeRequestSchema),
+  fridgeService.createFromBarcode
+);
 
 export default router;
