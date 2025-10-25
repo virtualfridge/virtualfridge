@@ -24,6 +24,7 @@ object NavRoutes {
     const val RECIPE = "recipe"
     const val TEST_BARCODE = "test_barcode"
     const val BARCODE_RESULT = "barcode_result"
+    const val FRIDGE = "fridge"
 }
 
 @Composable
@@ -91,6 +92,7 @@ private fun handleNavigationEvent(
         is NavigationEvent.NavigateToTestBarcode -> navController.navigate(NavRoutes.TEST_BARCODE)
         is NavigationEvent.NavigateToRecipe -> navController.navigate(NavRoutes.RECIPE)
         is NavigationEvent.NavigateToBarcodeResult -> navController.navigate(NavRoutes.BARCODE_RESULT)
+        is NavigationEvent.NavigateToFridge -> navController.navigate(NavRoutes.FRIDGE)
         is NavigationEvent.NavigateBack -> navController.popBackStack()
         is NavigationEvent.ClearBackStack -> navController.popBackStack(navController.graph.startDestinationId, false)
         is NavigationEvent.NoNavigation -> { /* do nothing */ }
@@ -132,7 +134,8 @@ private fun AppNavHost(
                 onProfileClick = { navigationStateManager.navigateToProfile() },
                 onRecipeClick = { navigationStateManager.navigateToRecipe() },
                 onTestBarcodeClick = { navigationStateManager.navigateToTestBarcode() },
-                onBarcodeResultClick = { navigationStateManager.navigateToBarcodeResult() }
+                onBarcodeResultClick = { navigationStateManager.navigateToBarcodeResult() },
+                onFridgeClick = { navigationStateManager.navigateToFridge() }
             )
         }
 
@@ -188,6 +191,13 @@ private fun AppNavHost(
                     mainViewModel.clearBarcodeResult()
                     navigationStateManager.navigateBack() 
                 }
+            )
+        }
+
+        composable(NavRoutes.FRIDGE) {
+            FridgeScreen(
+                fridgeViewModel = hiltViewModel(),
+                onBackClick = { navigationStateManager.navigateBack() }
             )
         }
     }

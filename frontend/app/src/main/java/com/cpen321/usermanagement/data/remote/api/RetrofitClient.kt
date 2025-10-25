@@ -40,6 +40,7 @@ object RetrofitClient {
     val hobbyInterface: HobbyInterface = retrofit.create(HobbyInterface::class.java)
     val barcodeInterface: BarcodeInterface = retrofit.create(BarcodeInterface::class.java)
     val recipeInterface: RecipeInterface = retrofit.create(RecipeInterface::class.java)
+    val fridgeInterface: FridgeInterface = retrofit.create(FridgeInterface::class.java)
     val notificationInterface: NotificationInterface = retrofit.create(NotificationInterface::class.java)
 
 

@@ -19,6 +19,7 @@ sealed class NavigationEvent {
     object NavigateToTestBarcode : NavigationEvent()
     object NavigateToRecipe : NavigationEvent()
     object NavigateToBarcodeResult : NavigationEvent()
+    object NavigateToFridge : NavigationEvent()
     object NavigateBack : NavigationEvent()
     object ClearBackStack : NavigationEvent()
     object NoNavigation : NavigationEvent()
@@ -133,6 +134,11 @@ class NavigationStateManager @Inject constructor() {
     fun navigateToBarcodeResult() {
         _navigationEvent.value = NavigationEvent.NavigateToBarcodeResult
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.BARCODE_RESULT)
+    }
+
+    fun navigateToFridge() {
+        _navigationEvent.value = NavigationEvent.NavigateToFridge
+        _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.FRIDGE)
     }
 
     fun navigateBack() {
