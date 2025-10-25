@@ -10,6 +10,7 @@ import foodTypeRoutes from './foodType';
 import barcodeRoutes from './barcode';
 import recipeRoutes from './recipe';
 import notificationRoutes from './notification';
+import fridgeRoutes from './fridge';
 
 const router = Router();
 
@@ -18,6 +19,8 @@ router.use('/hobbies', authenticateToken, hobbiesRoutes);
 router.use('/user', authenticateToken, usersRoutes);
 router.use('/media', authenticateToken, mediaRoutes);
 router.use('/barcode', authenticateToken, barcodeRoutes);
+
+router.use('/fridge', authenticateToken, fridgeRoutes);
 
 router.use('/food-item', authenticateToken, foodItemRoutes);
 

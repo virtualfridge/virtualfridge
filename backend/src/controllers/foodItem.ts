@@ -3,7 +3,7 @@ import {
   CreateFoodItemBody,
   DeleteFoodItemParams,
   FoodItemResponse,
-  FindFoodItemParams,
+  FindFoodItemByIdParams,
   UpdateFoodItemBody,
 } from '../types/foodItem';
 import { foodItemModel } from '../models/foodItem';
@@ -71,7 +71,7 @@ export class FoodItemController {
   }
 
   async findFoodItemById(
-    req: Request<FindFoodItemParams>,
+    req: Request<FindFoodItemByIdParams>,
     res: Response<FoodItemResponse>,
     next: NextFunction
   ) {

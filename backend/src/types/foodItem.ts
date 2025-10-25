@@ -31,14 +31,14 @@ export const updateFoodItemSchema = foodItemSchema
   })
   .required({ _id: true });
 
-export const findFoodItemSchema = foodItemSchema.pick({ _id: true });
+export const findFoodItemByIdSchema = foodItemSchema.pick({ _id: true });
 
 export const deleteFoodItemSchema = foodItemSchema.pick({ _id: true });
 
 // Request types
 export type CreateFoodItemBody = z.infer<typeof createFoodItemSchema>;
 export type UpdateFoodItemBody = z.infer<typeof updateFoodItemSchema>;
-export type FindFoodItemParams = z.infer<typeof findFoodItemSchema>;
+export type FindFoodItemByIdParams = z.infer<typeof findFoodItemByIdSchema>;
 export type DeleteFoodItemParams = z.infer<typeof deleteFoodItemSchema>;
 
 export type FoodItemResponse = {

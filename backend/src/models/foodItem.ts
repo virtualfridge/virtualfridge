@@ -1,6 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 import { FoodItem } from '../types/foodItem';
 import logger from '../util/logger';
+import { foodTypeModel } from './foodType';
+import { FoodType } from '../types/foodType';
 
 // TODO: move nutritional info to the food type definition only and as SSOT
 const foodItemSchema = new Schema<FoodItem>({
@@ -76,15 +78,32 @@ export class FoodItemModel {
     }
   }
 
-  async findAllByUserId(
-    userId: mongoose.Types.ObjectId
-  ): Promise<FoodItem[]> {
+  async findAllByUserId(userId: mongoose.Types.ObjectId): Promise<FoodItem[]> {
     try {
       const foodItems = await this.foodItem.find({ userId });
       return foodItems;
     } catch (error) {
       logger.error('Error finding foodItems by userId:', error);
       throw new Error('Failed to find foodItems by userId');
+    }
+  }
+
+  async getAssociatedFoodType(foodItem: FoodItem): Promise<FoodType> {
+    try {
+      const foodType = await foodTypeModel.findById(foodItem.typeId);
+      if (foodType) {
+        return foodType;
+      } else {
+        throw new Error(
+          `FoodType with _id ${foodItem.typeId} not found in database`
+        );
+      }
+    } catch (error) {
+      logger.error(
+        `Error finding associated foodType for foodItem ${foodItem._id}:`,
+        error
+      );
+      throw new Error('Failed to find associated foodType');
     }
   }
 }
