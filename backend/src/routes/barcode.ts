@@ -4,7 +4,7 @@ import { authenticateToken } from '../middleware/auth';
 import { foodTypeModel } from '../models/foodType';
 import { foodItemModel } from '../models/foodItem';
 import { FoodType } from '../types/foodType';
-import { addDaysToDate, dateDiffInDays } from '../util/dates';
+import { addDaysToDate, dateDiffInDays, parseDate } from '../util/dates';
 
 const router = Router();
 
@@ -26,7 +26,9 @@ router.post('/', authenticateToken, async (req, res) => {
       const { data } = await axios.get(url);
 
       if (!data || !data.product)
-        return res.status(404).json({ message: 'Product not found in OpenFoodFacts' });
+        return res
+          .status(404)
+          .json({ message: 'Product not found in OpenFoodFacts' });
 
       const product = data.product;
       // console.log('Product data from OpenFoodFacts:', product);
@@ -35,6 +37,14 @@ router.post('/', authenticateToken, async (req, res) => {
 
       // Extract expiration or shelf-life related info if available
       let shelfLifeDays = undefined;
+      const expirationDate =
+        product.expiration_date || product.expiry_date || null;
+      if (expirationDate) {
+        shelfLifeDays = dateDiffInDays(
+          new Date(),
+          parseDate(expirationDate, 'mm-yyyy')
+        );
+      }
       // Extract calories (handle both kcal and kJ cases)
       let calories =
         nutriments['energy-kcal_100g'] ??
@@ -47,17 +57,12 @@ router.post('/', authenticateToken, async (req, res) => {
         calories = Math.round(nutriments['energy_100g'] / 4.184);
       }
 
-      const expirationDate =
-product.expiration_date || product.expiry_date || null;
-      if (expirationDate) {
-        shelfLifeDays = dateDiffInDays(new Date(expirationDate), new Date());
-      }
-
       let productData = {
         name: product.product_name_en || product.product_name || null,
         brand: product.brands || null,
         quantity: product.quantity || null,
-        ingredients: product.ingredients_text_en || product.ingredients_text || null,
+        ingredients:
+          product.ingredients_text_en || product.ingredients_text || null,
         image: product.image_url || null,
         expiration_date: expirationDate,
         allergens:
@@ -67,7 +72,8 @@ product.expiration_date || product.expiry_date || null;
 
         nutrients: {
           calories,
-          energy_kj: nutriments['energy-kj_100g'] ?? nutriments['energy_100g'] ?? null,
+          energy_kj:
+            nutriments['energy-kj_100g'] ?? nutriments['energy_100g'] ?? null,
           protein: nutriments.proteins_100g ?? null,
           fat: nutriments.fat_100g ?? null,
           saturated_fat: nutriments['saturated-fat_100g'] ?? null,
@@ -80,18 +86,12 @@ product.expiration_date || product.expiry_date || null;
           fiber: nutriments['fiber_100g'] ?? null,
           salt: nutriments['salt_100g'] ?? null,
           sodium: nutriments['sodium_100g'] ?? null,
-          minerals: {
-            calcium: nutriments['calcium_100g'] ?? null,
-            iron: nutriments['iron_100g'] ?? null,
-            magnesium: nutriments['magnesium_100g'] ?? null,
-            potassium: nutriments['potassium_100g'] ?? null,
-            zinc: nutriments['zinc_100g'] ?? null,
-          },
+          calcium: nutriments['calcium_100g'] ?? null,
+          iron: nutriments['iron_100g'] ?? null,
+          magnesium: nutriments['magnesium_100g'] ?? null,
+          potassium: nutriments['potassium_100g'] ?? null,
+          zinc: nutriments['zinc_100g'] ?? null,
           caffeine: nutriments['caffeine_100g'] ?? null,
-        },
-
-        category_properties: {
-          ciqual_food_name: product.category_properties?.['ciqual_food_name:en'] ?? null,
         },
       };
       console.log('Product data retrieved and stored:', productData);
@@ -103,10 +103,10 @@ product.expiration_date || product.expiry_date || null;
     // Create a food item instance for the user
     const expirationDate = new Date();
     const days = foodType?.shelfLifeDays;
-    if (typeof days === "number" && Number.isFinite(days)) {
+    if (typeof days === 'number' && Number.isFinite(days)) {
       expirationDate.setDate(expirationDate.getDate() + days);
     }
-    
+
     const foodItem = await foodItemModel.create({
       userId: req.user!._id,
       typeId: foodType!._id,
