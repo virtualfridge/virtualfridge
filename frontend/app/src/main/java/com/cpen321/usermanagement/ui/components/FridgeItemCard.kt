@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.cpen321.usermanagement.data.remote.api.FridgeItem
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

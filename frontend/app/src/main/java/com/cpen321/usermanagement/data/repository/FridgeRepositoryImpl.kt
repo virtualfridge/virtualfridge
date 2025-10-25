@@ -2,9 +2,10 @@ package com.cpen321.usermanagement.data.repository
 
 import android.util.Log
 import com.cpen321.usermanagement.data.remote.api.FridgeInterface
-import com.cpen321.usermanagement.data.remote.api.FridgeItem
-import com.cpen321.usermanagement.data.remote.api.UpdateFoodItemRequest
-import com.cpen321.usermanagement.utils.JsonUtils
+import com.cpen321.usermanagement.data.remote.dto.BarcodeRequest
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
+import com.cpen321.usermanagement.data.remote.dto.UpdateFoodItemRequest
+import com.cpen321.usermanagement.utils.JsonUtils.parseErrorMessage
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -15,7 +16,6 @@ import javax.inject.Singleton
 @Singleton
 class FridgeRepositoryImpl @Inject constructor(
     private val fridgeInterface: FridgeInterface,
-    private val authRepository: AuthRepository
 ) : FridgeRepository {
 
     companion object {
@@ -24,13 +24,8 @@ class FridgeRepositoryImpl @Inject constructor(
 
     override suspend fun getFridgeItems(): Result<List<FridgeItem>> {
         return try {
-            val token = authRepository.getStoredToken()
-            if (token.isNullOrEmpty()) {
-                return Result.failure(Exception("User is not authenticated"))
-            }
-
             val response = fridgeInterface.getFridgeItems(
-                authHeader = "Bearer $token"
+                "" // authHeader handled by interceptor
             )
 
             if (response.isSuccessful) {
@@ -43,7 +38,7 @@ class FridgeRepositoryImpl @Inject constructor(
             } else {
                 val errorBodyString = response.errorBody()?.string()
                 val errorMessage =
-                    JsonUtils.parseErrorMessage(errorBodyString, "Failed to fetch fridge items.")
+                    parseErrorMessage(errorBodyString, "Failed to fetch fridge items.")
                 Log.e(TAG, "Fridge fetch failed: $errorMessage")
                 Result.failure(Exception(errorMessage))
             }
@@ -67,28 +62,20 @@ class FridgeRepositoryImpl @Inject constructor(
 
     override suspend fun updateFoodItem(foodItemId: String, percentLeft: Int): Result<Unit> {
         return try {
-            val token = authRepository.getStoredToken()
-            if (token.isNullOrEmpty()) {
-                return Result.failure(Exception("User is not authenticated"))
-            }
-
             val request = UpdateFoodItemRequest(
-                _id = foodItemId,
-                expirationDate = null,
-                percentLeft = percentLeft
+                foodItemId, null, percentLeft
             )
 
             val response = fridgeInterface.updateFoodItem(
-                authHeader = "Bearer $token",
-                request = request
+                "", // authHeader Handled by interceptor
+                request
             )
 
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
                 val errorBodyString = response.errorBody()?.string()
-                val errorMessage =
-                    JsonUtils.parseErrorMessage(errorBodyString, "Failed to update food item.")
+                val errorMessage = parseErrorMessage(errorBodyString, "Failed to update food item.")
                 Log.e(TAG, "Food item update failed: $errorMessage")
                 Result.failure(Exception(errorMessage))
             }
@@ -106,6 +93,31 @@ class FridgeRepositoryImpl @Inject constructor(
             Result.failure(e)
         } catch (e: Exception) {
             Log.e(TAG, "Unexpected error while updating food item", e)
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun sendBarcode(barcode: String): Result<FridgeItem> {
+        return try {
+            val request = BarcodeRequest(barcode)
+            val response = fridgeInterface.sendBarcode(
+                "", // Auth header is handled by interceptor
+                request,
+            )
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null && body.data != null) {
+                    Result.success(body.data.fridgeItem)
+                } else {
+                    Result.failure(Exception("Empty product data received from server."))
+                }
+            } else {
+                val errorBodyString = response.errorBody()?.string()
+                val errorMessage = parseErrorMessage(errorBodyString, "Failed to send barcode.")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }

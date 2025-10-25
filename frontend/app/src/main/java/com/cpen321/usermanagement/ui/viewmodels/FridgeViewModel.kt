@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.repository.FridgeRepository
-import com.cpen321.usermanagement.data.remote.api.FridgeItem
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -158,5 +158,5 @@ class FridgeViewModel @Inject constructor(
         }
     }
 
-    fun getSortOptions(): List<SortOption> = SortOption.values().toList()
+    fun getSortOptions(): List<SortOption> = SortOption.entries
 }

@@ -2,8 +2,6 @@ package com.cpen321.usermanagement.di
 
 import com.cpen321.usermanagement.data.repository.AuthRepository
 import com.cpen321.usermanagement.data.repository.AuthRepositoryImpl
-import com.cpen321.usermanagement.data.repository.BarcodeRepository
-import com.cpen321.usermanagement.data.repository.BarcodeRepositoryImpl
 import com.cpen321.usermanagement.data.repository.FridgeRepository
 import com.cpen321.usermanagement.data.repository.FridgeRepositoryImpl
 import com.cpen321.usermanagement.data.repository.NotificationRepository
@@ -31,11 +29,6 @@ abstract class RepositoryModule {
     abstract fun bindProfileRepository(
         impl: ProfileRepositoryImpl
     ): ProfileRepository
-
-    @Binds
-    abstract fun bindBarcodeRepository(
-        impl: BarcodeRepositoryImpl
-    ): BarcodeRepository
 
     @Binds
     abstract fun bindRecipeRepository(

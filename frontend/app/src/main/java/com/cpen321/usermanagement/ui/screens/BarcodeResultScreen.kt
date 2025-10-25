@@ -33,8 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
-import com.cpen321.usermanagement.data.remote.api.BarcodeResultData
-import com.cpen321.usermanagement.data.remote.api.Nutrients
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
+import com.cpen321.usermanagement.data.remote.dto.Nutrients
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import java.text.SimpleDateFormat
@@ -93,7 +93,7 @@ private fun BarcodeResultTopBar(
 @Composable
 private fun BarcodeResultContent(
     paddingValues: PaddingValues,
-    barcodeResult: BarcodeResultData?,
+    barcodeResult: FridgeItem?,
     errorMessage: String?,
     onRetryScan: () -> Unit,
     modifier: Modifier = Modifier
@@ -117,7 +117,7 @@ private fun BarcodeResultContent(
                 )
             }
             barcodeResult != null -> {
-                SuccessContent(barcodeResult = barcodeResult)
+                SuccessContent(fridgeItem = barcodeResult)
             }
             else -> {
                 Text(
@@ -173,11 +173,11 @@ private fun ErrorContent(
 
 @Composable
 private fun SuccessContent(
-    barcodeResult: BarcodeResultData,
+    fridgeItem: FridgeItem,
     modifier: Modifier = Modifier
 ) {
-    val foodItem = barcodeResult.foodItem
-    val foodType = barcodeResult.foodType
+    val foodItem = fridgeItem.foodItem
+    val foodType = fridgeItem.foodType
     
     Column(
         modifier = modifier.fillMaxWidth(),

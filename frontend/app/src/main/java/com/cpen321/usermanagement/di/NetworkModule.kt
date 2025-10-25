@@ -35,13 +35,6 @@ object NetworkModule {
         return RetrofitClient.hobbyInterface
     }
 
-    // --- Add Barcode API interface ---
-    @Provides
-    @Singleton
-    fun provideBarcodeService(): BarcodeInterface {
-        return RetrofitClient.barcodeInterface
-    }
-
     @Provides
     @Singleton
     fun provideFridgeService(): FridgeInterface {

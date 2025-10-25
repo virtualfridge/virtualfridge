@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.ui.components.FridgeItemCard
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
@@ -251,7 +252,7 @@ private fun EmptyFridgeContent(
 
 @Composable
 private fun FridgeItemsList(
-    items: List<com.cpen321.usermanagement.data.remote.api.FridgeItem>,
+    items: List<FridgeItem>,
     isUpdating: Boolean,
     onItemPercentChanged: (String, Int) -> Unit,
     modifier: Modifier = Modifier

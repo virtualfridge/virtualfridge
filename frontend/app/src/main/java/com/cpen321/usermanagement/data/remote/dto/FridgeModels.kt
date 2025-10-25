@@ -1,8 +1,7 @@
 package com.cpen321.usermanagement.data.remote.dto
 
-data class FridgeItemsResponse(
-    val message: String,
-    val data: FridgeItemsData?
+data class FridgeItemData(
+    val fridgeItem: FridgeItem
 )
 
 data class FridgeItemsData(
@@ -58,15 +57,14 @@ data class Nutrients(
     val caffeine: String?
 )
 
+data class BarcodeRequest(
+    val barcode: String
+)
+
 data class UpdateFoodItemRequest(
     val _id: String,
     val expirationDate: String?,
     val percentLeft: Int?
-)
-
-data class UpdateFoodItemResponse(
-    val message: String,
-    val data: UpdateFoodItemData?
 )
 
 data class UpdateFoodItemData(
