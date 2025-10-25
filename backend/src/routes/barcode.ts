@@ -114,8 +114,8 @@ router.post('/', authenticateToken, async (req, res) => {
       percentLeft: 100,
     });
     const response = {
-      ...foodItem,
-      ...foodType,
+      foodItem: foodItem,
+      foodType: foodType,
     };
 
     console.log('FoodItem created:', response);
