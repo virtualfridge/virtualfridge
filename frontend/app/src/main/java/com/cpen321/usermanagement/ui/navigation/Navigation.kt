@@ -23,6 +23,7 @@ object NavRoutes {
     const val SCANNER = "scanner"
     const val RECIPE = "recipe"
     const val TEST_BARCODE = "test_barcode"
+    const val BARCODE_RESULT = "barcode_result"
 }
 
 @Composable
@@ -89,6 +90,7 @@ private fun handleNavigationEvent(
         is NavigationEvent.NavigateToScanner -> navController.navigate(NavRoutes.SCANNER)
         is NavigationEvent.NavigateToTestBarcode -> navController.navigate(NavRoutes.TEST_BARCODE)
         is NavigationEvent.NavigateToRecipe -> navController.navigate(NavRoutes.RECIPE)
+        is NavigationEvent.NavigateToBarcodeResult -> navController.navigate(NavRoutes.BARCODE_RESULT)
         is NavigationEvent.NavigateBack -> navController.popBackStack()
         is NavigationEvent.ClearBackStack -> navController.popBackStack(navController.graph.startDestinationId, false)
         is NavigationEvent.NoNavigation -> { /* do nothing */ }
@@ -129,7 +131,8 @@ private fun AppNavHost(
                 mainViewModel = mainViewModel,
                 onProfileClick = { navigationStateManager.navigateToProfile() },
                 onRecipeClick = { navigationStateManager.navigateToRecipe() },
-                onTestBarcodeClick = { navigationStateManager.navigateToTestBarcode() }
+                onTestBarcodeClick = { navigationStateManager.navigateToTestBarcode() },
+                onBarcodeResultClick = { navigationStateManager.navigateToBarcodeResult() }
             )
         }
 
@@ -175,6 +178,16 @@ private fun AppNavHost(
             TestBarcodeScreen(
                 mainViewModel = mainViewModel,
                 onBackClick = { navigationStateManager.navigateBack() }
+            )
+        }
+
+        composable(NavRoutes.BARCODE_RESULT) {
+            BarcodeResultScreen(
+                mainViewModel = mainViewModel,
+                onBackClick = { 
+                    mainViewModel.clearBarcodeResult()
+                    navigationStateManager.navigateBack() 
+                }
             )
         }
     }
