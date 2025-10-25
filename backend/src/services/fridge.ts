@@ -69,7 +69,6 @@ export class FridgeService {
             .json({ message: 'Product not found in OpenFoodFacts' });
 
         const product = data.product;
-        // console.log('Product data from OpenFoodFacts:', product);
 
         const nutriments = product.nutriments || {};
 
@@ -132,10 +131,9 @@ export class FridgeService {
             caffeine: nutriments['caffeine_100g'] ?? null,
           },
         };
-        console.log('Product data retrieved and stored:', productData);
+        logger.debug('Product data retrieved and stored:', productData);
 
         foodType = await foodTypeModel.create(productData);
-        // console.log('Product data retrieved and stored:', productData);
       }
 
       // Create a food item instance for the user
