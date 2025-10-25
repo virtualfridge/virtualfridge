@@ -44,6 +44,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideFridgeService(): FridgeInterface {
+        return RetrofitClient.fridgeInterface
+    }
+
+    @Provides
+    @Singleton
     fun provideRecipeService(): RecipeInterface {
         return RetrofitClient.recipeInterface
     }
