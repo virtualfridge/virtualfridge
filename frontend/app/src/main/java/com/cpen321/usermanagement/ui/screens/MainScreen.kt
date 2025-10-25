@@ -22,11 +22,19 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     onProfileClick: () -> Unit,
     onRecipeClick: () -> Unit,
-    onTestBarcodeClick: () -> Unit
+    onTestBarcodeClick: () -> Unit,
+    onBarcodeResultClick: () -> Unit
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     var showScanner by remember { mutableStateOf(false) }
+
+    // Navigate to barcode result screen when a barcode is successfully scanned
+    LaunchedEffect(uiState.barcodeResult) {
+        if (uiState.barcodeResult != null) {
+            onBarcodeResultClick()
+        }
+    }
 
     MainContent(
         uiState = uiState,
