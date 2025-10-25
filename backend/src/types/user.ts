@@ -16,6 +16,7 @@ export interface IUser extends Document {
   updatedAt: Date;
   dietaryPreferences?: DietaryPreferences;
   notificationPreferences?: NotificationPreferences;
+  fcmToken?: string;
 }
 
 // TODO: expand/reduce as necessary
@@ -84,6 +85,7 @@ export const updateProfileSchema = z.object({
       notificationTime: z.uint32().optional(),
     })
     .optional(),
+  fcmToken: z.string().optional(),
 });
 
 // Request types

@@ -4,7 +4,8 @@ data class UpdateProfileRequest(
     val name: String? = null,
     val bio: String? = null,
     val hobbies: List<String>? = null,
-    val profilePicture: String? = null
+    val profilePicture: String? = null,
+    val fcmToken: String? = null
 )
 
 data class ProfileData(

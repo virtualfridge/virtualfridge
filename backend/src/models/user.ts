@@ -55,6 +55,18 @@ const userSchema = new Schema<IUser>(
           'Hobbies must be non-empty strings and must be in the available hobbies list',
       },
     },
+    dietaryPreferences: {
+      type: Object,
+      required: false,
+    },
+    notificationPreferences: {
+      type: Object,
+      required: false,
+    },
+    fcmToken: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,

@@ -47,4 +47,10 @@ object NetworkModule {
     fun provideRecipeService(): RecipeInterface {
         return RetrofitClient.recipeInterface
     }
+
+    @Provides
+    @Singleton
+    fun provideNotificationService(): NotificationInterface {
+        return RetrofitClient.notificationInterface
+    }
 }

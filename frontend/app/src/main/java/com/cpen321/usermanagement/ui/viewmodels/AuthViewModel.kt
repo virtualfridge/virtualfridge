@@ -39,6 +39,7 @@ data class AuthUiState(
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val profileRepository: ProfileRepository,
     private val navigationStateManager: NavigationStateManager
 ) : ViewModel() {
 
@@ -191,5 +192,22 @@ class AuthViewModel @Inject constructor(
 
     fun clearSuccessMessage() {
         _uiState.value = _uiState.value.copy(successMessage = null)
+    }
+
+    fun registerFcmToken(fcmToken: String) {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Registering FCM token: $fcmToken")
+                profileRepository.updateFcmToken(fcmToken)
+                    .onSuccess {
+                        Log.d(TAG, "FCM token registered successfully")
+                    }
+                    .onFailure { error ->
+                        Log.e(TAG, "Failed to register FCM token", error)
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error registering FCM token", e)
+            }
+        }
     }
 }

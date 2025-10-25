@@ -75,6 +75,18 @@ export class FoodItemModel {
       throw new Error('Failed to find foodItem by userId');
     }
   }
+
+  async findAllByUserId(
+    userId: mongoose.Types.ObjectId
+  ): Promise<FoodItem[]> {
+    try {
+      const foodItems = await this.foodItem.find({ userId });
+      return foodItems;
+    } catch (error) {
+      logger.error('Error finding foodItems by userId:', error);
+      throw new Error('Failed to find foodItems by userId');
+    }
+  }
 }
 
 export const foodItemModel = new FoodItemModel();

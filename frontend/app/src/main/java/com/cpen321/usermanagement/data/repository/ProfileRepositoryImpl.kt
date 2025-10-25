@@ -172,6 +172,34 @@ class ProfileRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateFcmToken(fcmToken: String): Result<User> {
+        return try {
+            val updateRequest = UpdateProfileRequest(fcmToken = fcmToken)
+            val response = userInterface.updateProfile("", updateRequest) // Auth header is handled by interceptor
+            if (response.isSuccessful && response.body()?.data != null) {
+                Log.d(TAG, "Successfully updated FCM token")
+                Result.success(response.body()!!.data!!.user)
+            } else {
+                val errorBodyString = response.errorBody()?.string()
+                val errorMessage = parseErrorMessage(errorBodyString, "Failed to update FCM token.")
+                Log.e(TAG, "Failed to update FCM token: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: java.net.SocketTimeoutException) {
+            Log.e(TAG, "Network timeout while updating FCM token", e)
+            Result.failure(e)
+        } catch (e: java.net.UnknownHostException) {
+            Log.e(TAG, "Network connection failed while updating FCM token", e)
+            Result.failure(e)
+        } catch (e: java.io.IOException) {
+            Log.e(TAG, "IO error while updating FCM token", e)
+            Result.failure(e)
+        } catch (e: retrofit2.HttpException) {
+            Log.e(TAG, "HTTP error while updating FCM token: ${e.code()}", e)
+            Result.failure(e)
+        }
+    }
+
     override suspend fun uploadImage(image: Uri): Result<String> {
         return try {
             Log.e("DEBUG", uriToMimeType(context, image)?.toMediaTypeOrNull()?.toString() ?: "")

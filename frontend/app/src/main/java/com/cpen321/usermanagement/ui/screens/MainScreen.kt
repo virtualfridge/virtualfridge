@@ -49,7 +49,8 @@ fun MainScreen(
         onSuccessMessageShown = mainViewModel::clearSuccessMessage,
         onErrorMessageShown = mainViewModel::clearScanError,
         onRecipeClick = onRecipeClick,
-        onTestBarcodeClick = onTestBarcodeClick
+        onTestBarcodeClick = onTestBarcodeClick,
+        onTestNotificationClick = mainViewModel::sendTestNotification
     )
 }
 
@@ -65,6 +66,7 @@ private fun MainContent(
     onErrorMessageShown: () -> Unit,
     onRecipeClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
+    onTestNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 
 ) {
@@ -87,6 +89,7 @@ private fun MainContent(
             onRecipeClick = onRecipeClick,
             onScanClick = onScanRequested,
             onTestBarcodeClick = onTestBarcodeClick,
+            onTestNotificationClick = onTestNotificationClick,
             onBarcodeDetected = onBarcodeDetected,
             uiState = uiState
         )
@@ -165,6 +168,7 @@ private fun MainBody(
     onRecipeClick: () -> Unit,
     onScanClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
+    onTestNotificationClick: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
     uiState: MainUiState,
     modifier: Modifier = Modifier
@@ -211,6 +215,30 @@ private fun MainBody(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Send Test Barcode")
+                }
+
+                Button(
+                    onClick = onTestNotificationClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !uiState.isSendingTestNotification
+                ) {
+                    Text(if (uiState.isSendingTestNotification) "Sending..." else "Test Expiry Notification")
+                }
+
+                uiState.notificationSuccessMessage?.let { message ->
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                uiState.notificationError?.let { error ->
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
 
                 uiState.lastScannedBarcode?.let { barcode ->
