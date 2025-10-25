@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.google.services)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
@@ -115,6 +116,10 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     // ML Kit (bundled model - immediate availability)
     implementation("com.google.mlkit:barcode-scanning:17.3.0")

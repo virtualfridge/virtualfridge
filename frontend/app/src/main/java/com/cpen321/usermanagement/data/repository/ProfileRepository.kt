@@ -9,6 +9,7 @@ interface ProfileRepository {
     suspend fun deleteProfile(user: User): Result<Unit>
     suspend fun updateUserHobbies(hobbies: List<String>): Result<User>
     suspend fun getAvailableHobbies(): Result<List<String>>
+    suspend fun updateFcmToken(fcmToken: String): Result<User>
 
     suspend fun uploadImage(image: Uri): Result<String>
 }

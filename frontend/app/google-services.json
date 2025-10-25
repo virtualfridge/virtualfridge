@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "637354226583",
+    "project_id": "virtual-fridge-2322a",
+    "storage_bucket": "virtual-fridge-2322a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637354226583:android:99eebc48bc91aaa668cad2",
+        "android_client_info": {
+          "package_name": "com.cpen321.usermanagement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsyOOr01Hy9KWSJzDOpQhn_AAx6WQL4EA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
