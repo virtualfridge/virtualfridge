@@ -27,8 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.cpen321.usermanagement.R
-import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
-import com.cpen321.usermanagement.data.remote.api.BarcodeResultData
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import java.text.SimpleDateFormat
@@ -55,7 +54,7 @@ fun TestBarcodeScreen(
         TestBarcodeContent(
             paddingValues = paddingValues,
             isSending = uiState.isSendingTestBarcode,
-            productData = uiState.testBarcodeResponse,
+            fridgeItem = uiState.testBarcodeResponse,
             onSendTestBarcode = { mainViewModel.testSendBarcode() },
             errorMessage = uiState.scanError
         )
@@ -93,7 +92,7 @@ private fun TestBarcodeTopBar(
 private fun TestBarcodeContent(
     paddingValues: PaddingValues,
     isSending: Boolean,
-    productData: BarcodeResultData?,
+    fridgeItem: FridgeItem?,
     onSendTestBarcode: () -> Unit,
     errorMessage: String?,
     modifier: Modifier = Modifier
@@ -136,7 +135,7 @@ private fun TestBarcodeContent(
             )
         }
 
-        productData?.let { data ->
+        fridgeItem?.let { data ->
             val foodItem = data.foodItem
             val foodType = data.foodType
             

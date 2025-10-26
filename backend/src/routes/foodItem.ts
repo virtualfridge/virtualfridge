@@ -6,8 +6,8 @@ import {
   createFoodItemSchema,
   DeleteFoodItemParams,
   deleteFoodItemSchema,
-  FindFoodItemParams,
-  findFoodItemSchema,
+  FindFoodItemByIdParams,
+  findFoodItemByIdSchema,
   UpdateFoodItemBody,
   updateFoodItemSchema,
 } from '../types/foodItem';
@@ -29,7 +29,7 @@ router.put(
 
 router.get(
   '/:_id',
-  validateParams<FindFoodItemParams>(findFoodItemSchema),
+  validateParams<FindFoodItemByIdParams>(findFoodItemByIdSchema),
   foodItemController.findFoodItemById
 );
 

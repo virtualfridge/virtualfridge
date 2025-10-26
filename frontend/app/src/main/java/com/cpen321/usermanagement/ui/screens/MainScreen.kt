@@ -23,7 +23,8 @@ fun MainScreen(
     onProfileClick: () -> Unit,
     onRecipeClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
-    onBarcodeResultClick: () -> Unit
+    onBarcodeResultClick: () -> Unit,
+    onFridgeClick: () -> Unit
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -50,6 +51,7 @@ fun MainScreen(
         onErrorMessageShown = mainViewModel::clearScanError,
         onRecipeClick = onRecipeClick,
         onTestBarcodeClick = onTestBarcodeClick,
+        onFridgeClick = onFridgeClick,
         onTestNotificationClick = mainViewModel::sendTestNotification
     )
 }
@@ -66,6 +68,7 @@ private fun MainContent(
     onErrorMessageShown: () -> Unit,
     onRecipeClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
+    onFridgeClick: () -> Unit,
     onTestNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 
@@ -89,6 +92,7 @@ private fun MainContent(
             onRecipeClick = onRecipeClick,
             onScanClick = onScanRequested,
             onTestBarcodeClick = onTestBarcodeClick,
+            onFridgeClick = onFridgeClick,
             onTestNotificationClick = onTestNotificationClick,
             onBarcodeDetected = onBarcodeDetected,
             uiState = uiState
@@ -168,6 +172,7 @@ private fun MainBody(
     onRecipeClick: () -> Unit,
     onScanClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
+    onFridgeClick: () -> Unit,
     onTestNotificationClick: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
     uiState: MainUiState,
@@ -201,6 +206,13 @@ private fun MainBody(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Recipe")
+                }
+
+                Button(
+                    onClick = onFridgeClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("View Fridge")
                 }
 
                 Button(

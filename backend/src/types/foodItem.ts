@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import z from 'zod';
-import { foodTypeSchema } from './foodType';
 
 // Zod schemas
 
@@ -10,7 +9,7 @@ export const foodItemSchema = z.object({
   userId: z.custom<mongoose.Types.ObjectId>(),
   typeId: z.custom<mongoose.Types.ObjectId>(),
   expirationDate: z.date().optional(),
-  percentLeft: z.number().positive().max(100),
+  percentLeft: z.number().min(0).max(100),
 });
 
 export type FoodItem = z.infer<typeof foodItemSchema>;
@@ -25,18 +24,17 @@ export const updateFoodItemSchema = foodItemSchema
   .omit({
     userId: true,
     typeId: true,
-    barcodeId: true,
   })
   .required({ _id: true });
 
-export const findFoodItemSchema = foodItemSchema.pick({ _id: true });
+export const findFoodItemByIdSchema = foodItemSchema.pick({ _id: true });
 
 export const deleteFoodItemSchema = foodItemSchema.pick({ _id: true });
 
 // Request types
 export type CreateFoodItemBody = z.infer<typeof createFoodItemSchema>;
 export type UpdateFoodItemBody = z.infer<typeof updateFoodItemSchema>;
-export type FindFoodItemParams = z.infer<typeof findFoodItemSchema>;
+export type FindFoodItemByIdParams = z.infer<typeof findFoodItemByIdSchema>;
 export type DeleteFoodItemParams = z.infer<typeof deleteFoodItemSchema>;
 
 export type FoodItemResponse = {

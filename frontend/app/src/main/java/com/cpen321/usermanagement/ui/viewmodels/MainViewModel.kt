@@ -3,9 +3,9 @@ package com.cpen321.usermanagement.ui.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
-import com.cpen321.usermanagement.data.remote.api.BarcodeResultData
-import com.cpen321.usermanagement.data.repository.BarcodeRepository
+import com.cpen321.usermanagement.data.repository.FridgeRepository
 import com.cpen321.usermanagement.data.repository.NotificationRepository
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,17 +23,23 @@ data class IngredientOption(
 
 data class MainUiState(
     val successMessage: String? = null,
+
+    // Barcode data
     val lastScannedBarcode: String? = null,
     val scanError: String? = null,
-    val barcodeResult: BarcodeResultData? = null,
-    val testBarcodeResponse: BarcodeResultData? = null,
+    val barcodeResult: FridgeItem? = null,
+    val testBarcodeResponse: FridgeItem? = null,
     val isSendingTestBarcode: Boolean = false,
+
+    // Recipe data
     val recipesJson: String? = null,
     val recipeIngredients: List<String> = emptyList(),
     val recipeSource: String? = null,
     val recipeError: String? = null,
     val isFetchingRecipes: Boolean = false,
     val recipeSummaries: List<MealSummaryDto> = emptyList(),
+
+    // AI recipe data
     val aiRecipe: String? = null,
     val aiPrompt: String? = null,
     val aiIngredients: List<String> = emptyList(),
@@ -41,6 +47,8 @@ data class MainUiState(
     val isGeneratingAiRecipe: Boolean = false,
     val aiError: String? = null,
     val selectedIngredientKeys: Set<String> = emptySet(),
+
+    // Notification data
     val isSendingTestNotification: Boolean = false,
     val notificationSuccessMessage: String? = null,
     val notificationError: String? = null
@@ -48,7 +56,7 @@ data class MainUiState(
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val barcodeRepository: BarcodeRepository,
+    private val barcodeRepository: FridgeRepository,
     private val recipeRepository: RecipeRepository,
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {

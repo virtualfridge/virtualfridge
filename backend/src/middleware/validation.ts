@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { z, ZodError } from 'zod';
+import logger from '../util/logger';
 
 export const validateBody = <T>(schema: z.ZodSchema<T>): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +20,7 @@ export const validateBody = <T>(schema: z.ZodSchema<T>): RequestHandler => {
           })),
         });
       }
-
+      logger.error('Error validating data:', error);
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Validation processing failed',
@@ -47,6 +48,7 @@ export const validateParams = <T>(
         });
       }
 
+      logger.error('Error validating data:', error);
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Validation processing failed',
@@ -74,6 +76,7 @@ export const validateQuery = <T>(
         });
       }
 
+      logger.error('Error validating data:', error);
       return res.status(500).json({
         error: 'Internal server error',
         message: 'Validation processing failed',
