@@ -28,9 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.data.remote.dto.ProductDataDto
-import com.cpen321.usermanagement.data.repository.FoodType
+import com.cpen321.usermanagement.data.remote.api.BarcodeResultData
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun TestBarcodeScreen(
@@ -90,7 +93,7 @@ private fun TestBarcodeTopBar(
 private fun TestBarcodeContent(
     paddingValues: PaddingValues,
     isSending: Boolean,
-    productData: FoodType?,
+    productData: BarcodeResultData?,
     onSendTestBarcode: () -> Unit,
     errorMessage: String?,
     modifier: Modifier = Modifier
@@ -134,42 +137,96 @@ private fun TestBarcodeContent(
         }
 
         productData?.let { data ->
+            val foodItem = data.foodItem
+            val foodType = data.foodType
+            
             Text(
                 text = "Product Details",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
 
-            ProductDetailRow(label = "Name", value = data.name)
+            ProductDetailRow(label = "Name", value = foodType.name)
+            ProductDetailRow(label = "Brand", value = foodType.brand)
+            ProductDetailRow(label = "Quantity", value = foodType.quantity)
+            ProductDetailRow(label = "Quantity Left", value = "${foodItem.percentLeft}%")
+            
+            foodType.shelfLifeDays?.let { days ->
+                ProductDetailRow(label = "Shelf Life", value = "$days days")
+            }
+            
+            foodItem.expirationDate?.let { date ->
+                ProductDetailRow(
+                    label = "Your Item Expiration Date", 
+                    value = formatDate(date)
+                )
+            }
+            
+            foodType.expiration_date?.let { date ->
+                ProductDetailRow(
+                    label = "Product Expiration Date", 
+                    value = date
+                )
+            }
 
-            data.nutrients?.let { nutrients ->
+            foodType.nutrients?.let { nutrients ->
                 Text(
-                    text = "Nutrients",
+                    text = "Nutrients (per 100g)",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium
                 )
 
-                ProductDetailRow(label = "Calories (kcal/100g)", value = nutrients.calories)
-                ProductDetailRow(label = "Protein (g/100g)", value = nutrients.protein)
-                ProductDetailRow(label = "Fat (g/100g)", value = nutrients.fat)
-                ProductDetailRow(label = "Carbs (g/100g)", value = nutrients.carbohydrates)
-                ProductDetailRow(label = "Sugars (g/100g)", value = nutrients.sugars)
-                ProductDetailRow(label = "Fiber (g/100g)", value = nutrients.fiber)
-                ProductDetailRow(label = "Salt (g/100g)", value = nutrients.salt)
-                ProductDetailRow(label = "Sodium (mg/100g)", value = nutrients.sodium)
-                // Optional: Add other fields like transFat, mono/polyunsaturatedFat, cholesterol
+                ProductDetailRow(label = "Calories (kcal)", value = nutrients.calories)
+                ProductDetailRow(label = "Energy (kJ)", value = nutrients.energy_kj)
+                ProductDetailRow(label = "Protein (g)", value = nutrients.protein)
+                ProductDetailRow(label = "Fat (g)", value = nutrients.fat)
+                ProductDetailRow(label = "Saturated Fat (g)", value = nutrients.saturated_fat)
+                ProductDetailRow(label = "Trans Fat (g)", value = nutrients.trans_fat)
+                ProductDetailRow(label = "Carbohydrates (g)", value = nutrients.carbs)
+                ProductDetailRow(label = "Sugars (g)", value = nutrients.sugars)
+                ProductDetailRow(label = "Fiber (g)", value = nutrients.fiber)
+                ProductDetailRow(label = "Salt (g)", value = nutrients.salt)
+                ProductDetailRow(label = "Sodium (mg)", value = nutrients.sodium)
+                ProductDetailRow(label = "Calcium (mg)", value = nutrients.calcium)
+                ProductDetailRow(label = "Iron (mg)", value = nutrients.iron)
+                ProductDetailRow(label = "Magnesium (mg)", value = nutrients.magnesium)
+                ProductDetailRow(label = "Potassium (mg)", value = nutrients.potassium)
+                ProductDetailRow(label = "Zinc (mg)", value = nutrients.zinc)
+                ProductDetailRow(label = "Caffeine (mg)", value = nutrients.caffeine)
             }
 
+            foodType.ingredients?.let { ingredients ->
+                Text(
+                    text = "Ingredients",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                SelectionContainer {
+                    Text(
+                        text = ingredients,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
 
-//                SelectionContainer {
-//                    Text(
-//                        text = allergens.joinToString(", "),
-//                        style = MaterialTheme.typography.bodyMedium
-//                    )
-//                }
+            foodType.allergens?.let { allergens ->
+                if (allergens.isNotEmpty()) {
+                    Text(
+                        text = "Allergens",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    SelectionContainer {
+                        Text(
+                            text = allergens.joinToString(", "),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             }
         }
     }
+}
 
 @Composable
 private fun ProductDetailRow(label: String, value: String?, modifier: Modifier = Modifier) {
@@ -187,5 +244,16 @@ private fun ProductDetailRow(label: String, value: String?, modifier: Modifier =
                 )
             }
         }
+    }
+}
+
+private fun formatDate(dateString: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val date = inputFormat.parse(dateString)
+        outputFormat.format(date ?: Date())
+    } catch (e: Exception) {
+        dateString // Return original string if parsing fails
     }
 }
