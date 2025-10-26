@@ -36,6 +36,9 @@ class FridgeViewModel @Inject constructor(
     private val fridgeRepository: FridgeRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "FridgeViewModel"
+    }
     private val _uiState = MutableStateFlow(FridgeUiState())
     val uiState: StateFlow<FridgeUiState> = _uiState.asStateFlow()
 
@@ -46,7 +49,7 @@ class FridgeViewModel @Inject constructor(
     fun loadFridgeItems() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            
+
             val result = fridgeRepository.getFridgeItems()
             result.fold(
                 onSuccess = { items ->
@@ -57,7 +60,7 @@ class FridgeViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    Log.e("FridgeViewModel", "Failed to load fridge items", error)
+                    Log.e(TAG, "Failed to load fridge items", error)
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = error.message ?: "Failed to load fridge items"
@@ -68,9 +71,12 @@ class FridgeViewModel @Inject constructor(
     }
 
     fun updateFoodItemPercent(foodItemId: String, newPercent: Int) {
+        if (newPercent == 0) {
+            return removeFoodItem(foodItemId)
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isUpdating = true, error = null)
-            
+
             val result = fridgeRepository.updateFoodItem(foodItemId, newPercent)
             result.fold(
                 onSuccess = {
@@ -84,7 +90,7 @@ class FridgeViewModel @Inject constructor(
                             item
                         }
                     }
-                    
+
                     val sortedItems = sortItems(updatedItems, _uiState.value.sortOption)
                     _uiState.value = _uiState.value.copy(
                         fridgeItems = sortedItems,
@@ -93,7 +99,7 @@ class FridgeViewModel @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    Log.e("FridgeViewModel", "Failed to update food item", error)
+                    Log.e(TAG, "Failed to update food item", error)
                     _uiState.value = _uiState.value.copy(
                         isUpdating = false,
                         error = error.message ?: "Failed to update item"
@@ -104,7 +110,35 @@ class FridgeViewModel @Inject constructor(
     }
 
     fun removeFoodItem(foodItemId: String) {
-        updateFoodItemPercent(foodItemId, 0)
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isUpdating = true, error = null)
+
+            val result = fridgeRepository.deleteFoodItem(foodItemId)
+            result.fold(
+                onSuccess = {
+                    // Update the local state
+
+                    val updatedItems = _uiState.value.fridgeItems.toMutableList()
+                    updatedItems.removeIf { item ->
+                        item.foodItem._id == foodItemId
+                    }
+
+                    val sortedItems = sortItems(updatedItems, _uiState.value.sortOption)
+                    _uiState.value = _uiState.value.copy(
+                        fridgeItems = sortedItems,
+                        isUpdating = false,
+                        successMessage = "Item removed from fridge"
+                    )
+                },
+                onFailure = { error ->
+                    Log.e(TAG, "Failed to remove food item", error)
+                    _uiState.value = _uiState.value.copy(
+                        isUpdating = false,
+                        error = error.message ?: "Failed to remove item"
+                    )
+                }
+            )
+        }
     }
 
     fun setSortOption(sortOption: SortOption) {
@@ -130,16 +164,19 @@ class FridgeViewModel @Inject constructor(
                     item.foodItem.expirationDate?.let { parseDate(it) } ?: Date(Long.MAX_VALUE)
                 }
             }
+
             SortOption.ADDED_DATE -> {
                 // Since we don't have added date in the current data structure,
                 // we'll sort by food item ID as a proxy
                 items.sortedBy { it.foodItem._id }
             }
+
             SortOption.NUTRITIONAL_VALUE -> {
                 items.sortedByDescending { item ->
                     item.foodType.nutrients?.calories?.toDoubleOrNull() ?: 0.0
                 }
             }
+
             SortOption.NAME -> {
                 items.sortedBy { item ->
                     item.foodType.name ?: ""
@@ -153,7 +190,7 @@ class FridgeViewModel @Inject constructor(
             val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
             inputFormat.parse(dateString)
         } catch (e: Exception) {
-            Log.e("FridgeViewModel", "Failed to parse date: $dateString", e)
+            Log.e(TAG, "Failed to parse date: $dateString", e)
             null
         }
     }

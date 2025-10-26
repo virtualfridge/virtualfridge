@@ -37,6 +37,7 @@ fun FridgeItemCard(
     fridgeItem: FridgeItem,
     isUpdating: Boolean,
     onPercentChanged: (Int) -> Unit,
+    onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val foodItem = fridgeItem.foodItem
@@ -172,7 +173,7 @@ fun FridgeItemCard(
                 
                 if (foodItem.percentLeft > 0) {
                     IconButton(
-                        onClick = { onPercentChanged(0) },
+                        onClick = { onRemove() },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(

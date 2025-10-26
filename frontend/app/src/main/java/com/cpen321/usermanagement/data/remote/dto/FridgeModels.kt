@@ -67,6 +67,6 @@ data class UpdateFoodItemRequest(
     val percentLeft: Int?
 )
 
-data class UpdateFoodItemData(
+data class FoodItemData(
     val foodItem: FoodItem
 )

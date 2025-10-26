@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,37 +45,31 @@ import com.cpen321.usermanagement.ui.viewmodels.SortOption
 
 @Composable
 fun FridgeScreen(
-    fridgeViewModel: FridgeViewModel,
-    onBackClick: () -> Unit
+    fridgeViewModel: FridgeViewModel, onBackClick: () -> Unit
 ) {
     val uiState by fridgeViewModel.uiState.collectAsState()
     val snackBarHostState = remember { androidx.compose.material3.SnackbarHostState() }
 
-    Scaffold(
-        topBar = {
-            FridgeTopBar(
-                onBackClick = onBackClick,
-                onRefreshClick = { fridgeViewModel.loadFridgeItems() }
+    Scaffold(topBar = {
+        FridgeTopBar(
+            onBackClick = onBackClick, onRefreshClick = { fridgeViewModel.loadFridgeItems() })
+    }, snackbarHost = {
+        MessageSnackbar(
+            hostState = snackBarHostState, messageState = MessageSnackbarState(
+                successMessage = uiState.successMessage,
+                errorMessage = uiState.error,
+                onSuccessMessageShown = fridgeViewModel::clearSuccessMessage,
+                onErrorMessageShown = fridgeViewModel::clearError
             )
-        },
-        snackbarHost = {
-            MessageSnackbar(
-                hostState = snackBarHostState,
-                messageState = MessageSnackbarState(
-                    successMessage = uiState.successMessage,
-                    errorMessage = uiState.error,
-                    onSuccessMessageShown = fridgeViewModel::clearSuccessMessage,
-                    onErrorMessageShown = fridgeViewModel::clearError
-                )
-            )
-        }
-    ) { paddingValues ->
+        )
+    }) { paddingValues ->
         FridgeContent(
             paddingValues = paddingValues,
             uiState = uiState,
             onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
             onRefreshClick = fridgeViewModel::loadFridgeItems,
-            onSortOptionChanged = fridgeViewModel::setSortOption
+            onSortOptionChanged = fridgeViewModel::setSortOption,
+            onRemove = fridgeViewModel::removeFoodItem,
         )
     }
 }
@@ -85,33 +77,27 @@ fun FridgeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FridgeTopBar(
-    onBackClick: () -> Unit,
-    onRefreshClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onBackClick: () -> Unit, onRefreshClick: () -> Unit, modifier: Modifier = Modifier
 ) {
     TopAppBar(
-        modifier = modifier,
-        title = {
-            Text(
-                text = "My Fridge",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(name = R.drawable.ic_arrow_back)
-            }
-        },
-        actions = {
-            IconButton(onClick = onRefreshClick) {
-                Text("↻")
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.onSurface
+        modifier = modifier, title = {
+        Text(
+            text = "My Fridge",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Medium
         )
+    }, navigationIcon = {
+        IconButton(onClick = onBackClick) {
+            Icon(name = R.drawable.ic_arrow_back)
+        }
+    }, actions = {
+        IconButton(onClick = onRefreshClick) {
+            Text("↻")
+        }
+    }, colors = TopAppBarDefaults.topAppBarColors(
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface
+    )
     )
 }
 
@@ -122,6 +108,7 @@ private fun FridgeContent(
     onItemPercentChanged: (String, Int) -> Unit,
     onRefreshClick: () -> Unit,
     onSortOptionChanged: (SortOption) -> Unit,
+    onRemove: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
@@ -145,10 +132,9 @@ private fun FridgeContent(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
-            
+
             Button(
-                onClick = { showSortMenu = !showSortMenu }
-            ) {
+                onClick = { showSortMenu = !showSortMenu }) {
                 Text(
                     text = when (uiState.sortOption) {
                         SortOption.EXPIRATION_DATE -> "Expiration Date"
@@ -161,26 +147,21 @@ private fun FridgeContent(
         }
 
         DropdownMenu(
-            expanded = showSortMenu,
-            onDismissRequest = { showSortMenu = false }
-        ) {
-            SortOption.values().forEach { option ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = when (option) {
-                                SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                SortOption.ADDED_DATE -> "Added Date"
-                                SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                SortOption.NAME -> "Name"
-                            }
-                        )
-                    },
-                    onClick = {
-                        onSortOptionChanged(option)
-                        showSortMenu = false
-                    }
-                )
+            expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+            SortOption.entries.forEach { option ->
+                DropdownMenuItem(text = {
+                    Text(
+                        text = when (option) {
+                            SortOption.EXPIRATION_DATE -> "Expiration Date"
+                            SortOption.ADDED_DATE -> "Added Date"
+                            SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                            SortOption.NAME -> "Name"
+                        }
+                    )
+                }, onClick = {
+                    onSortOptionChanged(option)
+                    showSortMenu = false
+                })
             }
         }
 
@@ -189,14 +170,17 @@ private fun FridgeContent(
             uiState.isLoading -> {
                 LoadingContent()
             }
+
             uiState.fridgeItems.isEmpty() -> {
                 EmptyFridgeContent()
             }
+
             else -> {
                 FridgeItemsList(
                     items = uiState.fridgeItems,
                     isUpdating = uiState.isUpdating,
-                    onItemPercentChanged = onItemPercentChanged
+                    onItemPercentChanged = onItemPercentChanged,
+                    onRemove = onRemove
                 )
             }
         }
@@ -215,8 +199,7 @@ private fun LoadingContent(
         CircularProgressIndicator()
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Loading your fridge...",
-            style = MaterialTheme.typography.bodyLarge
+            text = "Loading your fridge...", style = MaterialTheme.typography.bodyLarge
         )
     }
 }
@@ -231,8 +214,7 @@ private fun EmptyFridgeContent(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "🍽️",
-            style = MaterialTheme.typography.displayLarge
+            text = "🍽️", style = MaterialTheme.typography.displayLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -255,11 +237,11 @@ private fun FridgeItemsList(
     items: List<FridgeItem>,
     isUpdating: Boolean,
     onItemPercentChanged: (String, Int) -> Unit,
+    onRemove: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(items) { item ->
             FridgeItemCard(
@@ -267,8 +249,8 @@ private fun FridgeItemsList(
                 isUpdating = isUpdating,
                 onPercentChanged = { newPercent ->
                     onItemPercentChanged(item.foodItem._id, newPercent)
-                }
-            )
+                },
+                onRemove = { onRemove(item.foodItem._id) })
         }
     }
 }

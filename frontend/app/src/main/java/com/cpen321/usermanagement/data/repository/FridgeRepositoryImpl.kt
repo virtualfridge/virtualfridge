@@ -97,6 +97,38 @@ class FridgeRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteFoodItem(foodItemId: String): Result<Unit> {
+        return try {
+            val response = fridgeInterface.deleteFoodItem(
+                "", // authHeader Handled by interceptor
+                foodItemId
+            )
+
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val errorBodyString = response.errorBody()?.string()
+                val errorMessage = parseErrorMessage(errorBodyString, "Failed to delete food item.")
+                Log.e(TAG, "Food item delete failed: $errorMessage")
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Network timeout while deleting food item", e)
+            Result.failure(e)
+        } catch (e: UnknownHostException) {
+            Log.e(TAG, "Network connection failed while deleting food item", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Log.e(TAG, "IO error while deleting food item", e)
+            Result.failure(e)
+        } catch (e: HttpException) {
+            Log.e(TAG, "HTTP error while deleting food item", e)
+            Result.failure(e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error while deleting food item", e)
+            Result.failure(e)
+        }
+    }
     override suspend fun sendBarcode(barcode: String): Result<FridgeItem> {
         return try {
             val request = BarcodeRequest(barcode)

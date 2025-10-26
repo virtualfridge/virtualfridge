@@ -14,8 +14,11 @@ import fridgeRoutes from './fridge';
 const router = Router();
 
 router.use('/auth', authRoutes);
+
 router.use('/hobbies', authenticateToken, hobbiesRoutes);
+
 router.use('/user', authenticateToken, usersRoutes);
+
 router.use('/media', authenticateToken, mediaRoutes);
 
 router.use('/fridge', authenticateToken, fridgeRoutes);
