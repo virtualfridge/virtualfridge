@@ -44,11 +44,13 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 5. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
 
+6. **Gemini API**: An API offered by google to make requests to the Gemini LLM.
+
 ### **3.4. Use Case Description**
 - Use cases for feature 1: Authentication
 1. **Sign Up with Google**: Users create an account for the virtual fridge application by linking their Google account. Each Google account can only be registered once.
 2. **Sign In with Google**: Users access the application by authenticating with their Google account credentials.
-3. **Sign Out**: Users can securely log out of the application at any time.  
+3. **Sign Out**: Users can securely log out of the application at any time.
 4. **Delete Account**: Users can permanently remove their account from the system, after which their associated data will be deleted. 
 - Use cases for feature 2: Log Food
 5. **Log Food via Barcode**: Users can scan the barcode of a food item using the in-app barcode scanner to automatically retrieve and log details such as name, brand, and nutritional information.  
