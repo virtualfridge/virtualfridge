@@ -14,16 +14,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -40,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
+import com.cpen321.usermanagement.data.remote.dto.Nutrients
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -57,6 +64,7 @@ fun FridgeItemCard(
 
     var sliderValue by remember { mutableFloatStateOf(foodItem.percentLeft.toFloat()) }
     var showSlider by remember { mutableStateOf(false) }
+    var showNutrition by remember { mutableStateOf(false) }
 
     val foodEmoji = getFoodEmoji(foodType.name ?: "")
 
@@ -287,53 +295,26 @@ fun FridgeItemCard(
             }
 
             // Action buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Edit/Cancel Button
-                Button(
-                    onClick = { showSlider = !showSlider },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (showSlider)
-                            MaterialTheme.colorScheme.surfaceVariant
-                        else
-                            MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = if (showSlider)
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        else
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 2.dp,
-                        pressedElevation = 4.dp
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = if (showSlider) "✕" else "✎",
-                            fontSize = 16.sp
-                        )
-                        Text(
-                            text = if (showSlider) "Cancel" else "Edit",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                if (foodItem.percentLeft > 0) {
-                    // Remove Button
+                    // Edit/Cancel Button
                     Button(
-                        onClick = { onRemove() },
+                        onClick = { showSlider = !showSlider },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            containerColor = if (showSlider)
+                                MaterialTheme.colorScheme.surfaceVariant
+                            else
+                                MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = if (showSlider)
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            else
+                                MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         elevation = ButtonDefaults.buttonElevation(
                             defaultElevation = 2.dp,
@@ -345,16 +326,123 @@ fun FridgeItemCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "🗑",
+                                text = if (showSlider) "✕" else "✎",
                                 fontSize = 16.sp
                             )
                             Text(
-                                text = "Remove",
+                                text = if (showSlider) "Cancel" else "Edit",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
+
+                    if (foodItem.percentLeft > 0) {
+                        // Remove Button
+                        Button(
+                            onClick = { onRemove() },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 2.dp,
+                                pressedElevation = 4.dp
+                            )
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "🗑",
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = "Remove",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Nutritional Facts Button (always show)
+                Button(
+                    onClick = { showNutrition = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = 2.dp,
+                        pressedElevation = 4.dp
+                    )
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "📊",
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "Nutritional Facts",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+
+            // Nutritional Facts Dialog
+            if (showNutrition) {
+                if (foodType.nutrients != null) {
+                    NutritionalFactsDialog(
+                        foodName = foodType.name ?: "Unknown Item",
+                        nutrients = foodType.nutrients!!,
+                        onDismiss = { showNutrition = false }
+                    )
+                } else {
+                    // Show message when no nutritional data available
+                    AlertDialog(
+                        onDismissRequest = { showNutrition = false },
+                        title = {
+                            Text(
+                                text = "📊 Nutritional Facts",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        },
+                        text = {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Text(
+                                    text = "❌",
+                                    fontSize = 48.sp
+                                )
+                                Text(
+                                    text = "No nutritional information available for this item",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Center,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = { showNutrition = false }) {
+                                Text("Close")
+                            }
+                        },
+                        shape = RoundedCornerShape(16.dp)
+                    )
                 }
             }
         }
@@ -483,5 +571,147 @@ private fun getFoodEmoji(foodName: String): String {
 
         // Default emoji for unknown items
         else -> "🍽️"
+    }
+}
+
+@Composable
+private fun NutritionalFactsDialog(
+    foodName: String,
+    nutrients: Nutrients,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Column {
+                Text(
+                    text = "📊 Nutritional Facts",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = foodName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Energy
+                NutritionSection(
+                    title = "Energy",
+                    items = listOf(
+                        "Calories" to nutrients.calories,
+                        "Energy (kJ)" to nutrients.energy_kj
+                    )
+                )
+
+                Divider()
+
+                // Macronutrients
+                NutritionSection(
+                    title = "Macronutrients",
+                    items = listOf(
+                        "Protein" to nutrients.protein,
+                        "Carbohydrates" to nutrients.carbs,
+                        "Sugars" to nutrients.sugars,
+                        "Fiber" to nutrients.fiber,
+                        "Fat" to nutrients.fat,
+                        "Saturated Fat" to nutrients.saturated_fat,
+                        "Monounsaturated Fat" to nutrients.monounsaturated_fat,
+                        "Polyunsaturated Fat" to nutrients.polyunsaturated_fat,
+                        "Trans Fat" to nutrients.trans_fat,
+                        "Cholesterol" to nutrients.cholesterol
+                    )
+                )
+
+                Divider()
+
+                // Minerals
+                NutritionSection(
+                    title = "Minerals & Vitamins",
+                    items = listOf(
+                        "Sodium" to nutrients.sodium,
+                        "Salt" to nutrients.salt,
+                        "Calcium" to nutrients.calcium,
+                        "Iron" to nutrients.iron,
+                        "Magnesium" to nutrients.magnesium,
+                        "Potassium" to nutrients.potassium,
+                        "Zinc" to nutrients.zinc
+                    )
+                )
+
+                Divider()
+
+                // Other
+                nutrients.caffeine?.let { caffeine ->
+                    NutritionSection(
+                        title = "Other",
+                        items = listOf("Caffeine" to caffeine)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+        shape = RoundedCornerShape(16.dp)
+    )
+}
+
+@Composable
+private fun NutritionSection(
+    title: String,
+    items: List<Pair<String, String?>>
+) {
+    val validItems = items.filter { it.second != null && it.second!!.isNotBlank() }
+
+    if (validItems.isNotEmpty()) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            validItems.forEach { (name, value) ->
+                NutritionItem(name = name, value = value ?: "")
+            }
+        }
+    }
+}
+
+@Composable
+private fun NutritionItem(
+    name: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
