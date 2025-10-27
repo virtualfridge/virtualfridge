@@ -94,6 +94,9 @@ fun MainScreen(
             if (fridgeUiState.selectedItems.isNotEmpty()) {
                 showRecipeSheet = true
             }
+        },
+        onNotificationClick = {
+            mainViewModel.sendTestNotification()
         }
     )
 
@@ -170,6 +173,7 @@ private fun MainContent(
     onItemRemove: (String) -> Unit,
     onTestBarcodeClick: () -> Unit,
     onRecipeButtonClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -189,7 +193,8 @@ private fun MainContent(
                 hasSelectedItems = fridgeUiState.selectedItems.isNotEmpty(),
                 onScanClick = onScanRequested,
                 onTestBarcodeClick = onTestBarcodeClick,
-                onRecipeClick = onRecipeButtonClick
+                onRecipeClick = onRecipeButtonClick,
+                onNotificationClick = onNotificationClick
             )
         }
     ) { paddingValues ->
@@ -469,6 +474,7 @@ private fun MainBottomBar(
     onScanClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
     onRecipeClick: () -> Unit,
+    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar(
@@ -548,6 +554,27 @@ private fun MainBottomBar(
                     )
                     Text(
                         text = "Recipe",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Notification Test Button
+            OutlinedButton(
+                onClick = onNotificationClick,
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "🔔",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Notify",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
