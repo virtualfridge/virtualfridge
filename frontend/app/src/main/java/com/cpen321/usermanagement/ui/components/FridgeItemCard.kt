@@ -580,6 +580,30 @@ private fun NutritionalFactsDialog(
     nutrients: Nutrients,
     onDismiss: () -> Unit
 ) {
+    // Collect all nutrient data
+    val allNutrients = listOf(
+        "Calories" to nutrients.calories,
+        "Energy (kJ)" to nutrients.energy_kj,
+        "Protein" to nutrients.protein,
+        "Carbohydrates" to nutrients.carbs,
+        "Sugars" to nutrients.sugars,
+        "Fiber" to nutrients.fiber,
+        "Fat" to nutrients.fat,
+        "Saturated Fat" to nutrients.saturated_fat,
+        "Monounsaturated Fat" to nutrients.monounsaturated_fat,
+        "Polyunsaturated Fat" to nutrients.polyunsaturated_fat,
+        "Trans Fat" to nutrients.trans_fat,
+        "Cholesterol" to nutrients.cholesterol,
+        "Sodium" to nutrients.sodium,
+        "Salt" to nutrients.salt,
+        "Calcium" to nutrients.calcium,
+        "Iron" to nutrients.iron,
+        "Magnesium" to nutrients.magnesium,
+        "Potassium" to nutrients.potassium,
+        "Zinc" to nutrients.zinc,
+        "Caffeine" to nutrients.caffeine
+    ).filter { it.second != null && it.second!!.isNotBlank() }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -597,64 +621,35 @@ private fun NutritionalFactsDialog(
             }
         },
         text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Energy
-                NutritionSection(
-                    title = "Energy",
-                    items = listOf(
-                        "Calories" to nutrients.calories,
-                        "Energy (kJ)" to nutrients.energy_kj
+            if (allNutrients.isEmpty()) {
+                // Show message when no data
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "❌",
+                        fontSize = 48.sp
                     )
-                )
-
-                Divider()
-
-                // Macronutrients
-                NutritionSection(
-                    title = "Macronutrients",
-                    items = listOf(
-                        "Protein" to nutrients.protein,
-                        "Carbohydrates" to nutrients.carbs,
-                        "Sugars" to nutrients.sugars,
-                        "Fiber" to nutrients.fiber,
-                        "Fat" to nutrients.fat,
-                        "Saturated Fat" to nutrients.saturated_fat,
-                        "Monounsaturated Fat" to nutrients.monounsaturated_fat,
-                        "Polyunsaturated Fat" to nutrients.polyunsaturated_fat,
-                        "Trans Fat" to nutrients.trans_fat,
-                        "Cholesterol" to nutrients.cholesterol
+                    Text(
+                        text = "No nutritional information available",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                )
-
-                Divider()
-
-                // Minerals
-                NutritionSection(
-                    title = "Minerals & Vitamins",
-                    items = listOf(
-                        "Sodium" to nutrients.sodium,
-                        "Salt" to nutrients.salt,
-                        "Calcium" to nutrients.calcium,
-                        "Iron" to nutrients.iron,
-                        "Magnesium" to nutrients.magnesium,
-                        "Potassium" to nutrients.potassium,
-                        "Zinc" to nutrients.zinc
-                    )
-                )
-
-                Divider()
-
-                // Other
-                nutrients.caffeine?.let { caffeine ->
-                    NutritionSection(
-                        title = "Other",
-                        items = listOf("Caffeine" to caffeine)
-                    )
+                }
+            } else {
+                // Show all available nutrients
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    allNutrients.forEach { (name, value) ->
+                        NutritionItem(name = name, value = value ?: "")
+                    }
                 }
             }
         },
