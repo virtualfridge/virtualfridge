@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -59,7 +63,8 @@ private data class ProfileScreenCallbacks(
     val onDeleteDialogDismiss: () -> Unit,
     val onDeleteDialogConfirm: () -> Unit,
     val onSuccessMessageShown: () -> Unit,
-    val onErrorMessageShown: () -> Unit
+    val onErrorMessageShown: () -> Unit,
+    val onDarkModeToggle: () -> Unit = {}
 )
 
 @Composable
@@ -69,6 +74,7 @@ fun ProfileScreen(
     actions: ProfileScreenActions
 ) {
     val uiState by profileViewModel.uiState.collectAsState()
+    val isDarkMode by profileViewModel.isDarkMode.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
     // Dialog state
@@ -85,6 +91,7 @@ fun ProfileScreen(
     ProfileContent(
         uiState = uiState,
         dialogState = dialogState,
+        isDarkMode = isDarkMode,
         snackBarHostState = snackBarHostState,
         callbacks = ProfileScreenCallbacks(
             onBackClick = actions.onBackClick,
@@ -102,7 +109,8 @@ fun ProfileScreen(
                 actions.onAccountDeleted()
             },
             onSuccessMessageShown = profileViewModel::clearSuccessMessage,
-            onErrorMessageShown = profileViewModel::clearError
+            onErrorMessageShown = profileViewModel::clearError,
+            onDarkModeToggle = profileViewModel::toggleDarkMode
         )
     )
 }
@@ -112,6 +120,7 @@ fun ProfileScreen(
 private fun ProfileContent(
     uiState: ProfileUiState,
     dialogState: ProfileDialogState,
+    isDarkMode: Boolean,
     snackBarHostState: SnackbarHostState,
     callbacks: ProfileScreenCallbacks,
     modifier: Modifier = Modifier
@@ -136,9 +145,11 @@ private fun ProfileContent(
         ProfileBody(
             paddingValues = paddingValues,
             isLoading = uiState.isLoadingProfile,
+            isDarkMode = isDarkMode,
             onManageProfileClick = callbacks.onManageProfileClick,
 //            onManageHobbiesClick = callbacks.onManageHobbiesClick,
-            onDeleteAccountClick = callbacks.onDeleteAccountClick
+            onDeleteAccountClick = callbacks.onDeleteAccountClick,
+            onDarkModeToggle = callbacks.onDarkModeToggle
         )
     }
 
@@ -181,9 +192,11 @@ private fun ProfileTopBar(
 private fun ProfileBody(
     paddingValues: PaddingValues,
     isLoading: Boolean,
+    isDarkMode: Boolean,
     onManageProfileClick: () -> Unit,
 //    onManageHobbiesClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
+    onDarkModeToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -200,9 +213,11 @@ private fun ProfileBody(
 
             else -> {
                 ProfileMenuItems(
+                    isDarkMode = isDarkMode,
                     onManageProfileClick = onManageProfileClick,
 //                    onManageHobbiesClick = onManageHobbiesClick,
-                    onDeleteAccountClick = onDeleteAccountClick
+                    onDeleteAccountClick = onDeleteAccountClick,
+                    onDarkModeToggle = onDarkModeToggle
                 )
             }
         }
@@ -211,9 +226,11 @@ private fun ProfileBody(
 
 @Composable
 private fun ProfileMenuItems(
+    isDarkMode: Boolean,
     onManageProfileClick: () -> Unit,
 //    onManageHobbiesClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
+    onDarkModeToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
@@ -229,6 +246,11 @@ private fun ProfileMenuItems(
         ProfileSection(
             onManageProfileClick = onManageProfileClick,
 //            onManageHobbiesClick = onManageHobbiesClick
+        )
+
+        SettingsSection(
+            isDarkMode = isDarkMode,
+            onDarkModeToggle = onDarkModeToggle
         )
 
         AccountSection(
@@ -249,6 +271,44 @@ private fun ProfileSection(
     ) {
         ManageProfileButton(onClick = onManageProfileClick)
 //        ManageHobbiesButton(onClick = onManageHobbiesClick)
+    }
+}
+
+@Composable
+private fun SettingsSection(
+    isDarkMode: Boolean,
+    onDarkModeToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val spacing = LocalSpacing.current
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(spacing.medium)
+    ) {
+        Text(
+            text = "Appearance",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Dark Mode",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Switch(
+                checked = isDarkMode,
+                onCheckedChange = { onDarkModeToggle() }
+            )
+        }
     }
 }
 

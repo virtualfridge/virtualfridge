@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cpen321.usermanagement.data.local.preferences.ThemePreferencesManager
 import com.cpen321.usermanagement.data.remote.dto.User
 import com.cpen321.usermanagement.data.repository.ProfileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,8 @@ data class ProfileUiState(
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val themePreferencesManager: ThemePreferencesManager
 ) : ViewModel() {
 
     companion object {
@@ -40,6 +42,23 @@ class ProfileViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+
+    private val _isDarkMode = MutableStateFlow(false)
+    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            themePreferencesManager.isDarkMode.collect { darkMode ->
+                _isDarkMode.value = darkMode
+            }
+        }
+    }
+
+    fun toggleDarkMode() {
+        viewModelScope.launch {
+            themePreferencesManager.setDarkMode(!_isDarkMode.value)
+        }
+    }
 
     fun loadProfile() {
         viewModelScope.launch {

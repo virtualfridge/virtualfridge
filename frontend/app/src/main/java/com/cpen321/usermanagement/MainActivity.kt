@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import com.cpen321.usermanagement.data.local.preferences.ThemePreferencesManager
 import com.cpen321.usermanagement.ui.navigation.AppNavigation
 import com.cpen321.usermanagement.ui.theme.ProvideFontSizes
 import com.cpen321.usermanagement.ui.theme.ProvideSpacing
@@ -25,10 +28,14 @@ import com.cpen321.usermanagement.ui.theme.UserManagementTheme
 import com.cpen321.usermanagement.ui.viewmodels.AuthViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
+
+    @Inject
+    lateinit var themePreferencesManager: ThemePreferencesManager
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -57,7 +64,9 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            UserManagementTheme {
+            val isDarkMode by themePreferencesManager.isDarkMode.collectAsState(initial = false)
+
+            UserManagementTheme(darkTheme = isDarkMode) {
                 UserManagementApp()
             }
         }

@@ -16,7 +16,7 @@ export class FridgeService {
     next: NextFunction
   ) {
     try {
-      const userId = req.user!._id;
+      const userId = (req as any).user!._id;
       const foodItems = await foodItemModel.findAllByUserId(userId);
 
       // Get the associated foodTypes
@@ -34,7 +34,7 @@ export class FridgeService {
       });
     } catch (error) {
       logger.error(
-        `Failed to get fridge items for user with UserId ${req.user?._id || 'N/A'}:`,
+        `Failed to get fridge items for user with UserId ${(req as any).user?._id || 'N/A'}:`,
         error
       );
 
@@ -144,7 +144,7 @@ export class FridgeService {
       }
 
       const foodItem = await foodItemModel.create({
-        userId: req.user!._id,
+        userId: (req as any).user!._id,
         typeId: foodType!._id,
         expirationDate: expirationDate,
         percentLeft: 100,

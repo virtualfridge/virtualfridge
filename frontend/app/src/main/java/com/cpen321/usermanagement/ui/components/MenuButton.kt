@@ -64,6 +64,7 @@ fun MenuButtonItem(
         ) {
             Icon(
                 name = iconRes,
+                fixedColor = Color.Black  // Keep icon black on white button
             )
             Text(
                 text = text,

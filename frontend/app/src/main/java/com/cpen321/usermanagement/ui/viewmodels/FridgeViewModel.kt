@@ -3,16 +3,13 @@ package com.cpen321.usermanagement.ui.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cpen321.usermanagement.data.repository.FridgeRepository
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
+import com.cpen321.usermanagement.data.repository.FridgeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 
 enum class SortOption {
@@ -23,12 +20,22 @@ enum class SortOption {
 }
 
 data class FridgeUiState(
-    val fridgeItems: List<FridgeItem> = emptyList(),
+    // Loading states
     val isLoading: Boolean = false,
-    val error: String? = null,
-    val successMessage: String? = null,
+    val isUpdating: Boolean = false,
+
+    // Data states
+    val fridgeItems: List<FridgeItem> = emptyList(),
+    val selectedItems: Set<String> = emptySet(), // Set of item IDs
     val sortOption: SortOption = SortOption.EXPIRATION_DATE,
-    val isUpdating: Boolean = false
+
+    // UI states
+    val showRecipeOptions: Boolean = false,
+
+    // Message states
+    val error: String? = null,
+    val errorMessage: String? = null,
+    val successMessage: String? = null
 )
 
 @HiltViewModel
@@ -39,6 +46,7 @@ class FridgeViewModel @Inject constructor(
     companion object {
         private const val TAG = "FridgeViewModel"
     }
+
     private val _uiState = MutableStateFlow(FridgeUiState())
     val uiState: StateFlow<FridgeUiState> = _uiState.asStateFlow()
 
@@ -48,152 +56,161 @@ class FridgeViewModel @Inject constructor(
 
     fun loadFridgeItems() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.value = _uiState.value.copy(
+                isLoading = true,
+                error = null,
+                errorMessage = null
+            )
 
             val result = fridgeRepository.getFridgeItems()
-            result.fold(
-                onSuccess = { items ->
-                    val sortedItems = sortItems(items, _uiState.value.sortOption)
-                    _uiState.value = _uiState.value.copy(
-                        fridgeItems = sortedItems,
-                        isLoading = false
-                    )
-                },
-                onFailure = { error ->
-                    Log.e(TAG, "Failed to load fridge items", error)
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = error.message ?: "Failed to load fridge items"
-                    )
-                }
-            )
+
+            if (result.isSuccess) {
+                val items = result.getOrNull() ?: emptyList()
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    fridgeItems = sortItems(items, _uiState.value.sortOption)
+                )
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e(TAG, "Failed to load fridge items", error)
+                val errorMessage = error?.message ?: "Failed to load fridge items"
+
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = errorMessage,
+                    errorMessage = errorMessage
+                )
+            }
         }
     }
 
-    fun updateFoodItemPercent(foodItemId: String, newPercent: Int) {
-        if (newPercent == 0) {
-            return removeFoodItem(foodItemId)
-        }
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isUpdating = true, error = null)
-
-            val result = fridgeRepository.updateFoodItem(foodItemId, newPercent)
-            result.fold(
-                onSuccess = {
-                    // Update the local state
-                    val updatedItems = _uiState.value.fridgeItems.map { item ->
-                        if (item.foodItem._id == foodItemId) {
-                            item.copy(
-                                foodItem = item.foodItem.copy(percentLeft = newPercent)
-                            )
-                        } else {
-                            item
-                        }
-                    }
-
-                    val sortedItems = sortItems(updatedItems, _uiState.value.sortOption)
-                    _uiState.value = _uiState.value.copy(
-                        fridgeItems = sortedItems,
-                        isUpdating = false,
-                        successMessage = if (newPercent == 0) "Item removed from fridge" else "Item updated successfully"
-                    )
-                },
-                onFailure = { error ->
-                    Log.e(TAG, "Failed to update food item", error)
-                    _uiState.value = _uiState.value.copy(
-                        isUpdating = false,
-                        error = error.message ?: "Failed to update item"
-                    )
-                }
-            )
+    private fun sortItems(items: List<FridgeItem>, sortOption: SortOption): List<FridgeItem> {
+        return when (sortOption) {
+            SortOption.EXPIRATION_DATE -> items.sortedBy { it.foodItem.expirationDate }
+            SortOption.ADDED_DATE -> items.sortedBy { it.foodItem._id } // MongoDB IDs are chronological
+            SortOption.NUTRITIONAL_VALUE -> items.sortedByDescending {
+                // Sort by calories (higher calories = higher nutritional value as a proxy)
+                it.foodType.nutrients?.calories?.toDoubleOrNull() ?: 0.0
+            }
+            SortOption.NAME -> items.sortedBy { it.foodType.name }
         }
     }
 
-    fun removeFoodItem(foodItemId: String) {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isUpdating = true, error = null)
-
-            val result = fridgeRepository.deleteFoodItem(foodItemId)
-            result.fold(
-                onSuccess = {
-                    // Update the local state
-
-                    val updatedItems = _uiState.value.fridgeItems.toMutableList()
-                    updatedItems.removeIf { item ->
-                        item.foodItem._id == foodItemId
-                    }
-
-                    val sortedItems = sortItems(updatedItems, _uiState.value.sortOption)
-                    _uiState.value = _uiState.value.copy(
-                        fridgeItems = sortedItems,
-                        isUpdating = false,
-                        successMessage = "Item removed from fridge"
-                    )
-                },
-                onFailure = { error ->
-                    Log.e(TAG, "Failed to remove food item", error)
-                    _uiState.value = _uiState.value.copy(
-                        isUpdating = false,
-                        error = error.message ?: "Failed to remove item"
-                    )
-                }
-            )
-        }
-    }
-
-    fun setSortOption(sortOption: SortOption) {
-        val sortedItems = sortItems(_uiState.value.fridgeItems, sortOption)
+    fun setSortOption(option: SortOption) {
         _uiState.value = _uiState.value.copy(
-            sortOption = sortOption,
-            fridgeItems = sortedItems
+            sortOption = option,
+            fridgeItems = sortItems(_uiState.value.fridgeItems, option)
         )
     }
 
+    fun toggleItemSelection(itemId: String) {
+        val currentSelected = _uiState.value.selectedItems.toMutableSet()
+        if (currentSelected.contains(itemId)) {
+            currentSelected.remove(itemId)
+        } else {
+            currentSelected.add(itemId)
+        }
+        _uiState.value = _uiState.value.copy(selectedItems = currentSelected)
+    }
+
+    fun clearSelection() {
+        _uiState.value = _uiState.value.copy(selectedItems = emptySet())
+    }
+
+    fun showRecipeOptions() {
+        if (_uiState.value.selectedItems.isNotEmpty()) {
+            _uiState.value = _uiState.value.copy(showRecipeOptions = true)
+        }
+    }
+
+    fun hideRecipeOptions() {
+        _uiState.value = _uiState.value.copy(showRecipeOptions = false)
+    }
+
+    fun updateFoodItemPercent(itemId: String, percent: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isUpdating = true,
+                error = null,
+                errorMessage = null
+            )
+
+            val result = fridgeRepository.updateFoodItem(itemId, percent)
+
+            if (result.isSuccess) {
+                _uiState.value = _uiState.value.copy(
+                    isUpdating = false,
+                    successMessage = "Item updated successfully"
+                )
+                // Reload the fridge items
+                loadFridgeItems()
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e(TAG, "Failed to update item", error)
+                val errorMessage = error?.message ?: "Failed to update item"
+
+                _uiState.value = _uiState.value.copy(
+                    isUpdating = false,
+                    error = errorMessage,
+                    errorMessage = errorMessage
+                )
+            }
+        }
+    }
+
+    fun removeFoodItem(itemId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                error = null,
+                errorMessage = null
+            )
+
+            val result = fridgeRepository.deleteFoodItem(itemId)
+
+            if (result.isSuccess) {
+                // Remove from selected items if it was selected
+                val currentSelected = _uiState.value.selectedItems.toMutableSet()
+                currentSelected.remove(itemId)
+
+                _uiState.value = _uiState.value.copy(
+                    selectedItems = currentSelected,
+                    successMessage = "Item removed successfully"
+                )
+
+                // Reload the fridge items
+                loadFridgeItems()
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e(TAG, "Failed to remove item", error)
+                val errorMessage = error?.message ?: "Failed to remove item"
+
+                _uiState.value = _uiState.value.copy(
+                    error = errorMessage,
+                    errorMessage = errorMessage
+                )
+            }
+        }
+    }
+
+    fun deleteFoodItem(itemId: String) {
+        removeFoodItem(itemId)
+    }
+
     fun clearError() {
-        _uiState.value = _uiState.value.copy(error = null)
+        _uiState.value = _uiState.value.copy(
+            error = null,
+            errorMessage = null
+        )
     }
 
     fun clearSuccessMessage() {
         _uiState.value = _uiState.value.copy(successMessage = null)
     }
 
-    private fun sortItems(items: List<FridgeItem>, sortOption: SortOption): List<FridgeItem> {
-        return when (sortOption) {
-            SortOption.EXPIRATION_DATE -> {
-                items.sortedBy { item ->
-                    item.foodItem.expirationDate?.let { parseDate(it) } ?: Date(Long.MAX_VALUE)
-                }
-            }
-
-            SortOption.ADDED_DATE -> {
-                // Since we don't have added date in the current data structure,
-                // we'll sort by food item ID as a proxy
-                items.sortedBy { it.foodItem._id }
-            }
-
-            SortOption.NUTRITIONAL_VALUE -> {
-                items.sortedByDescending { item ->
-                    item.foodType.nutrients?.calories?.toDoubleOrNull() ?: 0.0
-                }
-            }
-
-            SortOption.NAME -> {
-                items.sortedBy { item ->
-                    item.foodType.name ?: ""
-                }
-            }
+    fun getSelectedItemsData(): List<FridgeItem> {
+        val selectedIds = _uiState.value.selectedItems
+        return _uiState.value.fridgeItems.filter { item ->
+            selectedIds.contains(item.foodItem._id)
         }
     }
-
-    private fun parseDate(dateString: String): Date? {
-        return try {
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            inputFormat.parse(dateString)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse date: $dateString", e)
-            null
-        }
-    }
-
-    fun getSortOptions(): List<SortOption> = SortOption.entries
 }
