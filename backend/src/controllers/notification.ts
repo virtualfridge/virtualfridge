@@ -11,7 +11,7 @@ export class NotificationController {
     next: NextFunction
   ) {
     try {
-      const user = req.user!;
+      const user = (req as any).user!;
 
       // Check if user has FCM token
       if (!user.fcmToken) {

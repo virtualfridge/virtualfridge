@@ -131,6 +131,7 @@ private fun AppNavHost(
         composable(NavRoutes.MAIN) {
             MainScreen(
                 mainViewModel = mainViewModel,
+                fridgeViewModel = hiltViewModel(),
                 onProfileClick = { navigationStateManager.navigateToProfile() },
                 onRecipeClick = { navigationStateManager.navigateToRecipe() },
                 onTestBarcodeClick = { navigationStateManager.navigateToTestBarcode() },

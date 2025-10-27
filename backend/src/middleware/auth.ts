@@ -42,7 +42,7 @@ export const authenticateToken: RequestHandler = async (
       return;
     }
 
-    req.user = user;
+    (req as any).user = user;
 
     next();
   } catch (error) {
