@@ -26,6 +26,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +64,7 @@ fun ScannerScreen(
     var scanMode by remember { mutableStateOf(ScanMode.BARCODE) }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -175,9 +179,28 @@ fun ScannerScreen(
                                 // Send to backend in IO thread
                                 scope.launch(Dispatchers.IO) {
                                     try {
-                                        uploadImageToBackend(photoFile)
+                                        val ok = uploadImageToBackend(photoFile)
+                                        if (ok) {
+                                            // Navigate back on success
+                                            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                                                onClose()
+                                            }
+                                        } else {
+                                            kotlinx.coroutines.withContext(Dispatchers.Main) {
+                                                snackbarHostState.showSnackbar(
+                                                    message = "Item detected must be a fruit or vegetable",
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
+                                        }
                                     } catch (e: Exception) {
                                         Log.e("ScannerScreen", "Upload failed", e)
+                                        kotlinx.coroutines.withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Item detected must be a fruit or vegetable",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     } finally {
                                         try { photoFile.delete() } catch (_: Exception) {}
                                     }
@@ -198,6 +221,14 @@ fun ScannerScreen(
                 )
             }
         }
+
+        // Snackbar host for error messages
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 160.dp)
+        )
     }
 }
 
@@ -230,18 +261,21 @@ private fun createTempImageFile(cacheDir: File): File {
     return File.createTempFile("scan_${'$'}timeStamp", ".jpg", cacheDir)
 }
 
-private suspend fun uploadImageToBackend(file: File) {
-    try {
+private suspend fun uploadImageToBackend(file: File): Boolean {
+    return try {
         val requestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
         val part = MultipartBody.Part.createFormData("media", file.name, requestBody)
-        val response = RetrofitClient.imageInterface.uploadPicture("", part)
+        val response = RetrofitClient.imageInterface.scanProduce("", part)
         if (response.isSuccessful) {
-            Log.d("ScannerScreen", "Image uploaded successfully")
+            Log.d("ScannerScreen", "Produce scan succeeded")
+            true
         } else {
-            Log.e("ScannerScreen", "Image upload failed: ${'$'}{response.errorBody()?.string()}")
+            Log.e("ScannerScreen", "Produce scan failed: ${'$'}{response.errorBody()?.string()}")
+            false
         }
     } catch (e: Exception) {
         Log.e("ScannerScreen", "Upload exception", e)
+        false
     }
 }
 

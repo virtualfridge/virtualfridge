@@ -2,6 +2,7 @@ package com.cpen321.usermanagement.data.remote.api
 
 import com.cpen321.usermanagement.data.remote.dto.ApiResponse
 import com.cpen321.usermanagement.data.remote.dto.ProfileData
+import com.cpen321.usermanagement.data.remote.dto.FridgeItemData
 import com.cpen321.usermanagement.data.remote.dto.UpdateProfileRequest
 import com.cpen321.usermanagement.data.remote.dto.UploadImageData
 import com.cpen321.usermanagement.data.remote.dto.User
@@ -40,4 +41,11 @@ interface ImageInterface {
         @Header("Authorization") authHeader: String,
         @Part media: MultipartBody.Part
     ): Response<ApiResponse<UploadImageData>>
+
+    @Multipart
+    @POST("media/vision")
+    suspend fun scanProduce(
+        @Header("Authorization") authHeader: String,
+        @Part media: MultipartBody.Part
+    ): Response<ApiResponse<FridgeItemData>>
 }

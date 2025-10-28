@@ -93,6 +93,16 @@ export class FoodTypeModel {
       throw new Error('Failed to find foodType by barcodeId');
     }
   }
+
+  async findByName(name: string): Promise<FoodType | null> {
+    try {
+      const foodType = await this.foodType.findOne({ name });
+      return foodType;
+    } catch (error) {
+      logger.error('Error finding foodType by name:', error);
+      throw new Error('Failed to find foodType by name');
+    }
+  }
 }
 
 export const foodTypeModel = new FoodTypeModel();

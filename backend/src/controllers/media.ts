@@ -4,6 +4,11 @@ import logger from '../util/logger';
 import { MediaService } from '../services/media';
 import { UploadImageRequest, UploadImageResponse } from '../types/media';
 import { sanitizeInput } from '../util/sanitizeInput';
+import path from 'path';
+import { aiVisionService } from '../services/aiVision';
+import { foodTypeModel } from '../models/foodType';
+import { foodItemModel } from '../models/foodItem';
+import { FridgeItemResponse } from '../types/fridge';
 
 export class MediaController {
   async uploadImage(
@@ -42,5 +47,83 @@ export class MediaController {
 
       next(error);
     }
+  }
+
+  async visionScan(
+    req: Request<unknown, unknown, UploadImageRequest>,
+    res: Response<FridgeItemResponse>,
+    next: NextFunction
+  ) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const user = (req as any).user!;
+      const sanitizedFilePath = sanitizeInput(req.file.path);
+      const storedPath = await MediaService.saveImage(
+        sanitizedFilePath,
+        user._id.toString()
+      );
+
+      const absolutePath = path.isAbsolute(storedPath)
+        ? storedPath
+        : path.join(process.cwd(), storedPath);
+
+      const analysis = await aiVisionService.analyzeProduce(absolutePath);
+
+      if (!analysis.isProduce || !analysis.name) {
+        return res.status(400).json({
+          message: 'Item detected must be a fruit or vegetable',
+        });
+      }
+
+      const displayName = this.toTitleCase(analysis.name);
+
+      let foodType = await foodTypeModel.findByName(displayName);
+      if (!foodType) {
+        foodType = await foodTypeModel.create({
+          name: displayName,
+          shelfLifeDays: 14,
+        } as any);
+      }
+
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 14);
+
+      const foodItem = await foodItemModel.create({
+        userId: user._id,
+        typeId: foodType._id,
+        expirationDate,
+        percentLeft: 100,
+      });
+
+      return res.status(200).json({
+        message: 'Produce item added to fridge',
+        data: {
+          fridgeItem: {
+            foodItem,
+            foodType,
+          },
+        },
+      });
+    } catch (error) {
+      logger.error('Error processing vision scan:', error);
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: error.message || 'Failed to process vision scan',
+        });
+      }
+      next(error);
+    }
+  }
+
+  private toTitleCase(input: string): string {
+    return input
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
   }
 }
