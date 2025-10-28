@@ -56,7 +56,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 @Composable
 fun ScannerScreen(
     onBarcodeDetected: (String) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onVisionItemAdded: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
@@ -179,10 +180,15 @@ fun ScannerScreen(
                                 // Send to backend in IO thread
                                 scope.launch(Dispatchers.IO) {
                                     try {
-                                        val ok = uploadImageToBackend(photoFile)
-                                        if (ok) {
-                                            // Navigate back on success
+                                        val addedName = uploadImageToBackend(photoFile)
+                                        if (addedName != null) {
+                                            // Show success snackbar, refresh fridge, then close
                                             kotlinx.coroutines.withContext(Dispatchers.Main) {
+                                                snackbarHostState.showSnackbar(
+                                                    message = "Added ${'$'}addedName to your fridge",
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                                onVisionItemAdded(addedName)
                                                 onClose()
                                             }
                                         } else {
@@ -261,21 +267,22 @@ private fun createTempImageFile(cacheDir: File): File {
     return File.createTempFile("scan_${'$'}timeStamp", ".jpg", cacheDir)
 }
 
-private suspend fun uploadImageToBackend(file: File): Boolean {
+private suspend fun uploadImageToBackend(file: File): String? {
     return try {
         val requestBody = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
         val part = MultipartBody.Part.createFormData("media", file.name, requestBody)
         val response = RetrofitClient.imageInterface.scanProduce("", part)
         if (response.isSuccessful) {
-            Log.d("ScannerScreen", "Produce scan succeeded")
-            true
+            val name = response.body()?.data?.fridgeItem?.foodType?.name
+            Log.d("ScannerScreen", "Produce scan succeeded: ${'$'}name")
+            name
         } else {
             Log.e("ScannerScreen", "Produce scan failed: ${response.errorBody()?.string()}")
-            false
+            null
         }
     } catch (e: Exception) {
         Log.e("ScannerScreen", "Upload exception", e)
-        false
+        null
     }
 }
 
