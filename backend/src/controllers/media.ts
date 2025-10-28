@@ -71,6 +71,7 @@ export class MediaController {
         : path.join(process.cwd(), storedPath);
 
       const analysis = await aiVisionService.analyzeProduce(absolutePath);
+      logger.info('Vision analysis result', analysis as any);
 
       if (!analysis.isProduce || !analysis.name) {
         return res.status(400).json({
@@ -81,11 +82,15 @@ export class MediaController {
       const displayName = toTitleCase(analysis.name);
 
       let foodType = await foodTypeModel.findByName(displayName);
+      logger.info('Using produce name', { displayName });
       if (!foodType) {
+        logger.info('Creating new FoodType', { name: displayName, shelfLifeDays: 14 });
         foodType = await foodTypeModel.create({
           name: displayName,
           shelfLifeDays: 14,
         } as any);
+      } else {
+        logger.info('Found existing FoodType', { id: (foodType as any)._id, name: foodType.name });
       }
 
       const expirationDate = new Date();
@@ -97,6 +102,7 @@ export class MediaController {
         expirationDate,
         percentLeft: 100,
       });
+      logger.info('Created FoodItem', { id: (foodItem as any)._id, userId: user._id, typeId: foodType._id, expirationDate });
 
       return res.status(200).json({
         message: 'Produce item added to fridge',
