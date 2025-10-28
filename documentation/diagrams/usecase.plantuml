@@ -5,6 +5,7 @@ left to right direction
 actor User
 
 rectangle "Virtual Fridge App" << System >> {
+
   ' ==== Authentication ====
   usecase signUp as "Sign Up with Google"
   usecase signIn as "Sign In with Google"
@@ -15,29 +16,32 @@ rectangle "Virtual Fridge App" << System >> {
   usecase logFood as "Log Food"
   usecase logImage as "Log Food via Image"
   usecase logBarcode as "Log Food via Barcode"
-'   usecase logList as "Log Food via Pre-Made List"
+'  usecase logList as "Log Food via Pre-Made List"
+
+  ' Extensions (placed right after their base)
+  logImage -left-> logFood : <<extend>>
+  logBarcode -left-> logFood : <<extend>>
 
   ' ==== Viewing Food ====
   usecase viewInventory as "View Fridge"
   usecase sortExp as "Sort by Expiration Date"
   usecase sortAdded as "Sort by Added Date"
 
+  ' Extensions (placed right after base)
+  sortExp -left-> viewInventory : <<extend>>
+  sortAdded -right-> viewInventory : <<extend>>
+
   ' ==== Recipes & Nutrition ====
+  usecase getRecipes as "Get Recipes"
   usecase genRecipes as "Generate Recipe Suggestions with AI"
   usecase findRecipes as "Find Recipe Suggestions"
-  usecase getRecipes as "Get Recipes"
   usecase viewRecipe as "View Recipe Details"
   usecase viewNutrition as "View Nutritional Facts"
 
-  ' ==== Relationships (moved to right side) ====
-  logBarcode -left-> logFood : <<extend>>
-  logImage -left-> logFood : <<extend>>
-
-  sortExp -left-> viewInventory : <<extend>>
-  sortAdded -right-> viewInventory : <<extend>>
-  viewRecipe -right-> getRecipes : <<extend>>
+  ' Extensions (placed immediately below related base)
   genRecipes -left-> getRecipes : <<extend>>
   findRecipes -right-> getRecipes : <<extend>>
+  viewRecipe -right-> getRecipes : <<extend>>
 }
 
 ' ==== External APIs (RHS) ====
@@ -46,7 +50,6 @@ rectangle barcodeApi as "Barcode API"
 rectangle recipeApi as "TheMealDB API"
 rectangle nutritionApi as "OpenFoodFacts API"
 rectangle GeminiApi as "Gemini API"
-
 
 ' ==== User connections ====
 User -- signUp
@@ -62,14 +65,17 @@ User -- viewNutrition
 ' ==== API connections ====
 signUp -- googleAuth
 signIn -- googleAuth
+
 logBarcode -- barcodeApi
 logBarcode -- nutritionApi
 logFood -- nutritionApi
 logImage -- nutritionApi
+logImage -- GeminiApi
+
 genRecipes -- recipeApi
 genRecipes -- GeminiApi
 viewRecipe -- recipeApi
 viewNutrition -- nutritionApi
-logImage -- GeminiApi
 
 @enduml
+
