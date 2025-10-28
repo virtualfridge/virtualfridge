@@ -1,0 +1,150 @@
+import axios from "axios";
+import dotenv from "dotenv";
+import path from "path";
+import logger from "../util/logger";
+import { foodTypeModel } from "../models/foodType"; // adjust path if needed
+import { FoodType } from "../types/foodType";
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+
+type GeminiContentPart = {
+  text?: string;
+  inlineData?: {
+    mimeType: string;
+    data: string; // base64 image data
+  };
+};
+
+type GeminiCandidate = {
+  content?: {
+    parts?: GeminiContentPart[];
+  };
+};
+
+type GeminiResponse = {
+  candidates?: GeminiCandidate[];
+  modelVersion?: string;
+};
+
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "models/gemini-2.0-pro-vision";
+const GEMINI_API_HOST =
+  process.env.GEMINI_API_URL ||
+  "https://generativelanguage.googleapis.com/v1beta";
+
+export class AiFoodAnalyzerService {
+  constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}
+
+  async analyzeFood(prompt: string, imageBase64: string): Promise<FoodType | null> {
+    if (!this.apiKey) {
+      throw new Error("GEMINI_API_KEY is not set in your .env file");
+    }
+
+    const url = `${GEMINI_API_HOST}/${GEMINI_MODEL}:generateContent?key=${this.apiKey}`;
+    const finalPrompt = this.buildPrompt(prompt);
+
+    logger.info("Requesting Gemini food analysis", { model: GEMINI_MODEL });
+
+    const { data } = await axios.post<GeminiResponse>(
+      url,
+      {
+        contents: [
+          {
+            parts: [
+              { text: finalPrompt },
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: imageBase64,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    const responseText = this.extractResponseText(data);
+    if (!responseText) throw new Error("Empty response from Gemini.");
+
+    const parsed = this.parseFoodResponse(responseText);
+
+    if (!parsed?.isFood) {
+      logger.info("Image is not food. Skipping creation.");
+      return null;
+    }
+
+    const foodTypeData = this.mapToFoodType(parsed);
+    const created = await foodTypeModel.create(foodTypeData);
+    
+
+    logger.info(`Created FoodType: ${created.name}`);
+    return created;
+  }
+
+  private buildPrompt(userPrompt: string): string {
+    return [
+      userPrompt || "Identify the food in this image.",
+      "",
+      "If it is food, describe what it is and provide an approximate nutritional profile per 100g.",
+      "Respond ONLY in JSON with this structure:",
+      `{
+        "isFood": true or false,
+        "name": "string or null",
+        "shelfLifeDays": "number or estimated integer days",
+        "nutrition": {
+          "energyKcal": {"value": number, "unit": "kcal"},
+          "fat": {"value": number, "unit": "g"},
+          "saturatedFat": {"value": number, "unit": "g"},
+          "carbohydrates": {"value": number, "unit": "g"},
+          "sugars": {"value": number, "unit": "g"},
+          "proteins": {"value": number, "unit": "g"},
+          "salt": {"value": number, "unit": "g"}
+        }
+      }`,
+      "",
+      "If not food, return { \"isFood\": false } only.",
+      "Do not include explanations or Markdown, only valid JSON.",
+    ].join("\n");
+  }
+
+  private extractResponseText(response: GeminiResponse): string | null {
+    const firstCandidate = response.candidates?.[0];
+    if (!firstCandidate?.content?.parts) return null;
+    const text = firstCandidate.content.parts
+      .map((p) => p.text?.trim())
+      .filter(Boolean)
+      .join("\n")
+      .trim();
+    return text || null;
+  }
+
+  private parseFoodResponse(text: string): any {
+    try {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error("No JSON found in Gemini response.");
+      return JSON.parse(match[0]);
+    } catch (err) {
+      logger.error("Error parsing Gemini food JSON:", { text, err });
+      throw new Error("Could not parse food data from Gemini output.");
+    }
+  }
+
+  private mapToFoodType(parsed: any): Partial<FoodType> {
+    return {
+      name: parsed.name || "Unknown Food",
+      shelfLifeDays: parsed.shelfLifeDays || 3, // default estimate
+      nutritionalInfo: parsed.nutrition
+        ? {
+            energyKcal: parsed.nutrition.energyKcal,
+            fat: parsed.nutrition.fat,
+            saturatedFat: parsed.nutrition.saturatedFat,
+            carbohydrates: parsed.nutrition.carbohydrates,
+            sugars: parsed.nutrition.sugars,
+            proteins: parsed.nutrition.proteins,
+            salt: parsed.nutrition.salt,
+          }
+        : undefined,
+    };
+  }
+}

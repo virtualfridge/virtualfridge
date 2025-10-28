@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for file in imageDiagram.plantuml barcodeDiagram.plantuml viewFridgeDiagram.plantuml viewNutritionDiagram.plantuml generateRecipeSequence.plantuml)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(cat:*)",
+      "Bash(done)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

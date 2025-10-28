@@ -1,0 +1,37 @@
+import { Request, Response } from "express";
+import { AiFoodAnalyzerService } from "../services/aiFoodAnalyzerService";
+import logger from "../util/logger";
+
+export class FoodIdController {
+  private aiService: AiFoodAnalyzerService;
+
+  constructor() {
+    this.aiService = new AiFoodAnalyzerService();
+  }
+
+  analyzeFood = async (req: Request, res: Response) => {
+    try {
+      const { prompt, imageBase64 } = req.body;
+
+      const result = await this.aiService.analyzeFood(prompt, imageBase64);
+
+      if (!result) {
+        return res.status(200).json({
+          isFood: false,
+          message: "The image does not appear to contain food.",
+        });
+      }
+
+      return res.status(201).json({
+        message: "FoodType created successfully.",
+        data: result,
+      });
+    } catch (error: any) {
+      logger.error("Error analyzing food:", error);
+      return res.status(500).json({
+        message: "Failed to analyze food.",
+        error: error.message,
+      });
+    }
+  };
+}

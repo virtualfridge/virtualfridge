@@ -1,0 +1,49 @@
+@startuml
+title Use Case 2: Log Food via Barcode
+
+actor User
+participant "Frontend\n(Android)" as Frontend
+participant "ML Kit\nBarcode Scanner" as MLKit
+participant "Backend\n(Express)" as Backend
+participant "Open Food Facts\nAPI" as OpenFood
+database "MongoDB" as DB
+
+User -> Frontend: Clicks "Add Food"\nand chooses barcode option
+Frontend -> Frontend: Opens camera scanner\nwith back button
+User -> Frontend: Positions barcode in view
+
+Frontend -> MLKit: Scan barcode from camera frame
+MLKit --> Frontend: Barcode detected (once)\n(barcode ID)
+
+Frontend -> Backend: POST /api/fridge/barcode\n{barcode: "123456789"}
+
+Backend -> DB: FoodType.findByBarcode(barcode)
+
+alt FoodType exists in database
+    DB --> Backend: Existing FoodType
+else FoodType not in database
+    Backend -> OpenFood: GET /api/v0/product/{barcode}.json
+    OpenFood --> Backend: Product data\n(name, brand, nutrients, image)
+
+    Backend -> DB: FoodType.create()\n(name, barcodeId, nutrients, shelfLifeDays)
+    DB --> Backend: New FoodType document
+end
+
+Backend -> DB: FoodItem.create()\n(userId, typeId, expirationDate, percentLeft=100)
+DB --> Backend: Created FoodItem
+
+Backend -> DB: FoodItem.getAssociatedFoodType()
+DB --> Backend: Complete FridgeItem data
+
+Backend --> Frontend: 200 OK\nFridgeItem with full details
+Frontend --> User: Display confirmation screen\nwith product info
+User -> Frontend: Reviews and clicks "Confirm"
+Frontend -> Frontend: Refresh fridge list
+Frontend --> User: Show item in fridge inventory
+
+note right of Frontend
+  Back button allows user
+  to cancel at any time
+end note
+
+@enduml
