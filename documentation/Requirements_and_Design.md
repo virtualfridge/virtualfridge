@@ -38,15 +38,13 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 2. **Barcode Scanner**: A module that scans a barcode and retrieves the ID of the associated product.
 
-3. **Gemini API**: Google's AI service that processes images of food items to identify and classify them. When given an image, Gemini analyzes the visual content and determines what food item is present, if any.
+3. **Gemini API**: Google's AI service. It that processes images of food items to identify and classify them. When given an image, Gemini analyzes the visual content and determines what food item is present, if any. It can also be used to generate creative and personalized recipe suggestions based on available ingredients.
 
 4. **The MealDB API**: An API that returns structured recipe data based on passed in parameters like ingredients.
 
 5. **Open Food Facts API**: An API that returns nutritional data, images, product name, ingredients, and product ID based on passed in parameters.
 
-6. **Gemini API (AI)**: Google's AI service that generates creative and personalized recipe suggestions based on available ingredients using advanced language models.
-
-7. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
+6. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
 
 ### **3.4. Use Case Description**
 - Use cases for feature 1: Authentication
