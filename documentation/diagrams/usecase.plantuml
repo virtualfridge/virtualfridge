@@ -28,8 +28,8 @@ rectangle "Virtual Fridge App" << System >> {
   usecase viewNutrition as "View Nutritional Facts"
 
   ' ==== Relationships (moved to right side) ====
-  logFood -left-> logBarcode : <<extend>>
-  logFood -right-> logImage : <<extend>>
+  logFood -right-> logBarcode : <<extend>>
+  logFood -left-> logImage : <<extend>>
 
   viewInventory -left-> sortExp : <<extend>>
   viewInventory -right-> sortAdded : <<extend>>
@@ -39,10 +39,9 @@ rectangle "Virtual Fridge App" << System >> {
 ' ==== External APIs (RHS) ====
 rectangle googleAuth as "Google Authentication"
 rectangle barcodeApi as "Barcode API"
-rectangle recipeApi as "Recipe API"
-rectangle nutritionApi as "Nutrition API"
-rectangle ComputerVisionAPI as "Computer Vision API"
-rectangle GeminiAPI as "Gemini API"
+rectangle recipeApi as "TheMealDB API"
+rectangle nutritionApi as "OpenFoodFacts API"
+rectangle GeminiApi as "Gemini API"
 
 
 ' ==== User connections ====
@@ -60,10 +59,13 @@ User -- viewNutrition
 signUp -- googleAuth
 signIn -- googleAuth
 logBarcode -- barcodeApi
+logBarcode -- nutritionApi
+logFood -- nutritionApi
+logImage -- nutritionApi
 genRecipes -- recipeApi
-genRecipes -- GeminiAPI
+genRecipes -- GeminiApi
 viewRecipe -- recipeApi
 viewNutrition -- nutritionApi
-logImage -- ComputerVisionAPI
+logImage -- GeminiApi
 
 @enduml
