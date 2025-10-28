@@ -57,7 +57,7 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 6. **Log Food via Image**: Users can take a photo of a food item without a barcode, and the app will use Gemini API to identify and log the item.
 7. **Log Food via Pre-Made List**: Users can manually select a food item from a curated list within the app to quickly add common items. 
 - Use cases for feature 3: View Fridge
-8. **View Food Inventory**: Users can access the home page to see a list of all logged food items currently in their virtual fridge.  
+8. **View Fridge**: Users can access the home page to see a list of all logged food items currently in their virtual fridge.  
 9. **Sort by Expiration Date**: Users can sort items to view which foods are closest to expiring, helping to reduce waste.  
 10. **Sort by Added Date**: Users can sort items based on when they were logged into the system.  
 - Use cases for feature 4: Get Recipes
@@ -135,7 +135,7 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 <a name="uc3"></a>
 
-#### Use Case 3: View Food Inventory
+#### Use Case 3: View Fridge
 
 **Description**: Users view a list of all the items in the fridge.
 
