@@ -44,7 +44,7 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 5. **Open Food Facts API**: An API that returns nutritional data, images, product name, ingredients, and product ID based on passed in parameters.
 
-6. **DeepSeek (AI)**: An AI service that generates creative and personalized recipe suggestions based on available ingredients using advanced language models.
+6. **Gemini API (AI)**: Google's AI service that generates creative and personalized recipe suggestions based on available ingredients using advanced language models.
 
 7. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
 
@@ -169,7 +169,7 @@ Failure scenario(s):
 
 **Description**: Users request recipe suggestions using one or more ingredients from their virtual fridge.
 
-**Primary actor(s)**: User, The MealDB API, DeepSeek (AI)  
+**Primary actor(s)**: User, The MealDB API, Gemini API  
 
 Main success scenarios:
 For Recipe Via API
@@ -400,14 +400,14 @@ Failure scenario(s):
         - **Signature**: `AiRecipeData generateAIRecipe(List<String> ingredients)`
         - **Parameters**: `ingredients` - List of ingredient names
         - **Returns**: `AiRecipeData` - AI-generated recipe in markdown format
-        - **Purpose**: Uses DeepSeek AI to create custom recipes based on selected ingredients with creative suggestions.
+        - **Purpose**: Uses Gemini AI to create custom recipes based on selected ingredients with creative suggestions.
 
-     4. **promptDeepSeekAI** (Backend → DeepSeek/Gemini API)
+     4. **promptGeminiAI** (Backend → Gemini API)
         - **External API**: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
-        - **Signature**: `String promptDeepSeekAI(String prompt, List<String> ingredients)`
+        - **Signature**: `String promptGeminiAI(String prompt, List<String> ingredients)`
         - **Parameters**: `prompt` - Recipe generation instructions, `ingredients` - Available ingredients
         - **Returns**: `String` - Formatted recipe in markdown
-        - **Purpose**: Generates creative recipe suggestions by sending structured prompts to AI language models.
+        - **Purpose**: Generates creative recipe suggestions by sending structured prompts to Google's Gemini AI language model.
 
 5. **Nutrition Information Component**
    - **Purpose**: Provides detailed nutritional information for food items in the fridge.
@@ -676,10 +676,10 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
    - **Purpose**: Scans and decodes product barcodes, enabling fast and accurate food item logging by retrieving product identifiers.  
 
 3. **Open Food Facts API**
-   - **Purpose**: Supplies detailed food product information, including nutritional values, ingredients, and barcodes, to enrich the food logging process.  
+   - **Purpose**: Supplies detailed food product information, including nutritional values, ingredients, and barcodes, to enrich the food logging process.
 
-4. **DeepSeek**
-   - **Purpose**: Uses AI to generate recipe ideas based on available ingredients, providing creative and personalized cooking suggestions.  
+4. **Gemini API**
+   - **Purpose**: Google's AI service used for two key features: (1) identifying food items from images, and (2) generating creative recipe suggestions based on available ingredients.
 
 5. **Google Cloud Notifications**
    - **Purpose**: Sends push notifications and reminders (e.g., when items are close to expiration) to help users reduce food waste.  
