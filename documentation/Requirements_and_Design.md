@@ -687,9 +687,6 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 6. **The Meal DB API**
    - **Purpose**: Provides structured recipe data (overview, ingredients, instructions) that the app can display to users for meal preparation.
 
-7. **Gemini API**
-   - **Purpose**: Google's AI service that processes images of food items to identify and classify them. Analyzes visual content to determine what food item is present, if any, enabling image-based food logging.  
-
 ### **4.4. Frameworks**
 1. **Express.js**
   - **Purpose**: Provides a lightweight and flexible web application framework for building the backend server. It handles routing, middleware, and communication between the client, server, and database.  
