@@ -465,30 +465,208 @@ Failure scenario(s):
         - **Purpose**: Allows users to customize when they receive expiration alerts (e.g., 24, 48, or 72 hours before).
 
 ### **4.2. Databases**
-1. **User Collection**
-   - **Purpose**: Stores user profile and preference information, enabling personalized experiences within the app.  
-   - **Key Fields**:  
-     - `user_id`: Unique identifier for each user  
-     - `name`: User's full name  
-     - `email`: User's email address (linked to Google account)  
-     - `dietary_preference`: User-defined dietary restrictions or preferences (e.g., vegetarian, low-carb)  
-     - `expiration_date_preference`: Customizable rules for how users prefer to track expiry dates  
 
-2. **Fridge Collection**
-   - **Purpose**: Stores the inventory of food items for each user's virtual fridge, including details required for tracking, sorting, and recipe generation.  
-   - **Key Fields**:  
-     - `fridge_id`: Unique identifier for each fridge (linked to `user_id`)  
-     - `food`: Array of food items containing:  
-       - `type`: Name/type of food item (e.g., apple, milk)  
-       - `barcode_id`: Associated barcode identifier if available  
-       - `expiration_date`: Computed or user-specified expiry date  
-       - `nutritional_info`: Nested object with calories, protein, fat, carbs, etc.  
+The Virtual Fridge application uses MongoDB as its primary database, with three main collections: User, FoodItem, and FoodType. Each collection has a corresponding model class that provides CRUD operations and validation.
 
-3. **Food Expiration Reference Collection**
-   - **Purpose**: Provides baseline shelf-life data for different food types to help calculate default expiration dates when new items are logged.  
-   - **Key Fields**:  
-     - `food_type`: Name/type of food item (e.g., apple, bread, chicken)  
-     - `shelf_life_days`: Average number of days the food lasts (used to compute expiration date when logged) 
+---
+
+#### 1. **User Collection**
+   - **Purpose**: Stores user profile and preference information, enabling personalized experiences within the app. Linked to Google accounts for authentication.
+   - **Collection Name**: `users`
+   - **Schema Fields**:
+     - `_id`: ObjectId (auto-generated) - Unique identifier for each user
+     - `googleId`: String (required, unique, indexed) - Google account identifier for OAuth authentication
+     - `email`: String (required, unique, lowercase, trimmed) - User's email address from Google account
+     - `name`: String (required, trimmed) - User's full name from Google account
+     - `profilePicture`: String (optional, trimmed) - URL to user's Google profile picture
+     - `bio`: String (optional, max 500 characters) - User-written biography
+     - `hobbies`: Array of Strings (default: empty) - User hobbies validated against predefined list
+     - `dietaryPreferences`: Object (optional) - User-defined dietary restrictions or preferences
+     - `notificationPreferences`: Object (optional) - Configuration for expiry notification timing
+     - `fcmToken`: String (optional) - Firebase Cloud Messaging token for push notifications
+     - `createdAt`: Date (auto-generated) - Timestamp when user account was created
+     - `updatedAt`: Date (auto-generated) - Timestamp when user account was last modified
+
+   - **Indexes**:
+     - `googleId`: Unique index for fast Google OAuth lookup
+     - `email`: Unique index for user identification
+
+   - **Model Methods**:
+     1. **create**
+        - **Signature**: `User create(GoogleUserInfo userInfo)`
+        - **Parameters**: `userInfo` - Contains googleId, email, name, profilePicture from Google OAuth
+        - **Returns**: `User` - Created user document with MongoDB ID
+        - **Validation**: Uses Zod `createUserSchema` for input validation
+        - **Purpose**: Creates a new user account by storing Google profile information in the database with default preferences.
+
+     2. **update**
+        - **Signature**: `User update(ObjectId userId, Partial<User> updates)`
+        - **Parameters**: `userId` - User's MongoDB ObjectId, `updates` - Partial user object with fields to update
+        - **Returns**: `User | null` - Updated user document or null if not found
+        - **Validation**: Uses Zod `updateProfileSchema` for input validation
+        - **Purpose**: Updates user profile information such as bio, hobbies, dietary preferences, or notification settings.
+
+     3. **delete**
+        - **Signature**: `void delete(ObjectId userId)`
+        - **Parameters**: `userId` - User's MongoDB ObjectId to delete
+        - **Returns**: `void`
+        - **Purpose**: Permanently removes a user account and all associated data from the database.
+
+     4. **findById**
+        - **Signature**: `User | null findById(ObjectId userId)`
+        - **Parameters**: `userId` - User's MongoDB ObjectId
+        - **Returns**: `User | null` - User document or null if not found
+        - **Purpose**: Retrieves user profile by internal MongoDB ID for authenticated operations.
+
+     5. **findByGoogleId**
+        - **Signature**: `User | null findByGoogleId(String googleId)`
+        - **Parameters**: `googleId` - Google OAuth identifier
+        - **Returns**: `User | null` - User document or null if not found
+        - **Purpose**: Looks up user account by Google ID during authentication flow to check if user already exists.
+
+---
+
+#### 2. **FoodItem Collection**
+   - **Purpose**: Stores individual instances of food items in users' virtual fridges. Each food item references a FoodType for shared metadata like nutritional information.
+   - **Collection Name**: `fooditems`
+   - **Schema Fields**:
+     - `_id`: ObjectId (auto-generated) - Unique identifier for this food item instance
+     - `userId`: ObjectId (required, indexed) - Foreign key referencing User collection owner
+     - `typeId`: ObjectId (required) - Foreign key referencing FoodType collection for shared metadata
+     - `expirationDate`: Date (optional) - When this food item expires (calculated or user-specified)
+     - `percentLeft`: Number (required, 0-100) - Remaining quantity as percentage for tracking consumption
+
+   - **Indexes**:
+     - `userId`: Index for fast retrieval of all food items belonging to a specific user
+
+   - **Relationships**:
+     - Many-to-One with User: Multiple food items belong to one user
+     - Many-to-One with FoodType: Multiple food items can share the same type (e.g., multiple apples)
+
+   - **Model Methods**:
+     1. **create**
+        - **Signature**: `FoodItem create(Partial<FoodItem> foodItem)`
+        - **Parameters**: `foodItem` - Object with userId, typeId, expirationDate (optional), percentLeft
+        - **Returns**: `FoodItem` - Created food item document
+        - **Purpose**: Adds a new food item to a user's fridge with initial 100% quantity.
+
+     2. **update**
+        - **Signature**: `FoodItem | null update(ObjectId foodItemId, Partial<FoodItem> updates)`
+        - **Parameters**: `foodItemId` - Food item's ObjectId, `updates` - Fields to update (typically percentLeft)
+        - **Returns**: `FoodItem | null` - Updated food item or null if not found
+        - **Purpose**: Updates food item properties, primarily used for tracking consumption via percentLeft.
+
+     3. **delete**
+        - **Signature**: `FoodItem | null delete(ObjectId foodItemId)`
+        - **Parameters**: `foodItemId` - Food item's ObjectId to delete
+        - **Returns**: `FoodItem | null` - Deleted food item or null if not found
+        - **Purpose**: Removes a food item from the fridge when consumed or expired.
+
+     4. **findById**
+        - **Signature**: `FoodItem | null findById(ObjectId foodItemId)`
+        - **Parameters**: `foodItemId` - Food item's ObjectId
+        - **Returns**: `FoodItem | null` - Food item document or null if not found
+        - **Purpose**: Retrieves a specific food item by its unique identifier.
+
+     5. **findByUserId**
+        - **Signature**: `FoodItem | null findByUserId(ObjectId userId)`
+        - **Parameters**: `userId` - User's ObjectId
+        - **Returns**: `FoodItem | null` - First food item found for user or null
+        - **Purpose**: Finds a single food item belonging to a user (mainly for testing).
+
+     6. **findAllByUserId**
+        - **Signature**: `FoodItem[] findAllByUserId(ObjectId userId)`
+        - **Parameters**: `userId` - User's ObjectId
+        - **Returns**: `FoodItem[]` - Array of all food items in user's fridge
+        - **Purpose**: Retrieves complete fridge inventory for a user for display and sorting.
+
+     7. **getAssociatedFoodType**
+        - **Signature**: `FoodType getAssociatedFoodType(FoodItem foodItem)`
+        - **Parameters**: `foodItem` - Food item document with typeId
+        - **Returns**: `FoodType` - Associated food type metadata
+        - **Purpose**: Populates food item with its type information (name, nutrients, shelf life) by joining with FoodType collection.
+
+---
+
+#### 3. **FoodType Collection**
+   - **Purpose**: Stores reusable metadata about types of food including nutritional information, shelf life, and barcode associations. Acts as a reference library shared across all users.
+   - **Collection Name**: `foodtypes`
+   - **Schema Fields**:
+     - `_id`: ObjectId (auto-generated) - Unique identifier for this food type
+     - `name`: String (required) - Common name of the food (e.g., "Apple", "Milk", "Chicken Breast")
+     - `nutrients`: Nutrients object (optional) - Detailed nutritional breakdown per 100g (see Nutrients schema below)
+     - `shelfLifeDays`: Number (optional) - Default shelf life in days for calculating expiration dates
+     - `barcodeId`: String (optional, indexed) - Product barcode for database lookup
+     - `brand`: String (optional) - Brand name for branded products
+     - `image`: String URL (optional) - Product image URL from Open Food Facts
+     - `allergens`: Array of Strings (optional) - List of allergens present in the food
+
+   - **Indexes**:
+     - `barcodeId`: Index for fast barcode lookup when scanning products
+
+   - **Embedded Schema - Nutrients** (all values per 100g, stored as strings):
+     - `calories`: String (optional) - Energy in kcal
+     - `energyKj`: String (optional) - Energy in kilojoules
+     - `protein`: String (optional) - Protein content
+     - `fat`: String (optional) - Total fat
+     - `saturatedFat`: String (optional) - Saturated fat
+     - `transFat`: String (optional) - Trans fat
+     - `monounsaturatedFat`: String (optional) - Monounsaturated fat
+     - `polyunsaturatedFat`: String (optional) - Polyunsaturated fat
+     - `cholesterol`: String (optional) - Cholesterol
+     - `salt`: String (optional) - Salt content
+     - `sodium`: String (optional) - Sodium
+     - `carbohydrates`: String (optional) - Total carbohydrates
+     - `fiber`: String (optional) - Dietary fiber
+     - `sugars`: String (optional) - Total sugars
+     - `calcium`: String (optional) - Calcium
+     - `iron`: String (optional) - Iron
+     - `potassium`: String (optional) - Potassium
+
+   - **Model Methods**:
+     1. **create**
+        - **Signature**: `FoodType create(Partial<FoodType> foodType)`
+        - **Parameters**: `foodType` - Object with name (required), optional nutrients, shelfLifeDays, barcodeId
+        - **Returns**: `FoodType` - Created food type document
+        - **Purpose**: Adds a new food type to the reference library, typically when a new barcode or image is scanned.
+
+     2. **update**
+        - **Signature**: `FoodType | null update(ObjectId foodTypeId, Partial<FoodType> updates)`
+        - **Parameters**: `foodTypeId` - Food type's ObjectId, `updates` - Fields to update
+        - **Returns**: `FoodType | null` - Updated food type or null if not found
+        - **Purpose**: Updates food type metadata such as adding nutritional information or correcting shelf life estimates.
+
+     3. **delete**
+        - **Signature**: `FoodType | null delete(ObjectId foodTypeId)`
+        - **Parameters**: `foodTypeId` - Food type's ObjectId to delete
+        - **Returns**: `FoodType | null` - Deleted food type or null if not found
+        - **Purpose**: Removes a food type from the reference library (rarely used).
+
+     4. **findById**
+        - **Signature**: `FoodType | null findById(ObjectId foodTypeId)`
+        - **Parameters**: `foodTypeId` - Food type's ObjectId
+        - **Returns**: `FoodType | null` - Food type document or null if not found
+        - **Purpose**: Retrieves food type metadata by ID when populating food items.
+
+     5. **findByBarcode**
+        - **Signature**: `FoodType | null findByBarcode(String barcodeId)`
+        - **Parameters**: `barcodeId` - Product barcode identifier
+        - **Returns**: `FoodType | null` - Food type document or null if not found
+        - **Purpose**: Looks up food type by barcode to check if product is already in the database before querying external APIs.
+
+---
+
+#### **Database Relationships**
+
+```
+User (1) ──────< (Many) FoodItem (Many) >────── (1) FoodType
+  ↑                         ↓
+  └─ userId (indexed)       └─ typeId
+```
+
+- **User → FoodItem**: One-to-Many relationship. Each user can have multiple food items in their fridge.
+- **FoodType → FoodItem**: One-to-Many relationship. A single food type (e.g., "Granny Smith Apple") can be referenced by multiple food item instances across different users' fridges.
+- **Separation of Concerns**: FoodItem stores instance-specific data (expiration, consumption), while FoodType stores shared metadata (nutrients, shelf life). 
 
 ### **4.3. External Modules**
 1. **Google Authenticator**
