@@ -1,22 +1,60 @@
 @startuml
+title Use Case 4: Generate Recipe Suggestions
+
 actor User
-participant Frontend
-participant Backend
-database Database
-User -> Frontend: Clicks "Find Recipes"
-Frontend -> Backend: Get recipes request
-Backend -> Database: Get fridge contents
-Backend <-- Database: Fridge contents
-Backend -> "Recipe API": Get recipes with matching ingredients
-"Recipe API" --> Backend: API response
+participant "Frontend\n(Android)" as Frontend
+participant "Backend\n(Express)" as Backend
+participant "TheMealDB API" as MealDB
+participant "Gemini API" as Gemini
+database "MongoDB" as DB
 
-alt Found recipe(s)
-Backend --> Frontend: Sorted recipe list
-Frontend --> User: Display recipes
+User -> Frontend: Selects items from fridge
+Frontend --> User: Show selected items
+User -> Frontend: Clicks "Find Recipes"\nin bottom corner
 
-else Did not find recipes
-Backend --> Frontend: Error message
-Frontend --> User: Display "No recipes found"
+== Recipe Via API (Default) ==
+Frontend -> Backend: GET /api/recipes?ingredients=apple,chicken,rice
 
+Backend -> DB: FoodItem.findAllByUserId(userId)
+DB --> Backend: User's fridge items
+
+loop For each ingredient
+    Backend -> MealDB: GET /api/json/v1/1/filter.php?i={ingredient}
+    MealDB --> Backend: Array of meals with ingredient
 end
+
+Backend -> Backend: Aggregate and filter recipes\nby matching ingredients
+
+alt Recipes found
+    Backend --> Frontend: 200 OK\nRecipeResult\n(list of 3 recipe summaries with links)
+    Frontend --> User: Display recipe dropdown
+    User -> Frontend: Clicks on recipe
+    Frontend --> User: Open external link\nto recipe details
+else No recipes found
+    Backend --> Frontend: 404 Not Found\n"No matching recipes"
+    Frontend --> User: "No recipes found,\ntry different ingredients"
+end
+
+== Recipe Via AI (User toggles AI) ==
+User -> Frontend: Toggles "AI" option ON
+User -> Frontend: Clicks "Find Recipes"
+Frontend -> Backend: POST /api/recipes/ai\n{ingredients: ["apple", "chicken", "rice"]}
+
+Backend -> Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent\n(prompt: "Create recipe with: apple, chicken, rice")
+Gemini --> Backend: AI-generated recipe\n(markdown format with\ninstructions and ingredients)
+
+Backend --> Frontend: 200 OK\nAiRecipeData\n(formatted markdown recipe)
+Frontend --> User: Display recipe in dropdown
+User -> Frontend: Clicks on AI recipe
+Frontend --> User: Show markdown preview\nwith full recipe
+
+note right of Gemini
+  Gemini generates creative,
+  personalized recipes with:
+  - Ingredient list
+  - Step-by-step instructions
+  - Cooking time
+  - Serving suggestions
+end note
+
 @enduml

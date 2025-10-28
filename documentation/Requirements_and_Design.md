@@ -744,24 +744,79 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 ### **4.5. Dependencies Diagram**
 ![](images/dependencyDiagram.png)
 
-### **4.6. Use Case Sequence Diagram (5 Most Major Use Cases)**
-1. [**Log Food via Image**](#uc1)
+### **4.6. Use Case Sequence Diagrams**
+
+**Note**: All sequence diagrams are defined in PlantUML format in `documentation/diagrams/*.plantuml` and match the interfaces documented in section 4.1 and databases in section 4.2. They include:
+- Actual REST API routes (e.g., `POST /api/fridge/barcode`)
+- Method signatures (e.g., `FoodItem.create()`, `FoodType.findByBarcode()`)
+- Database collections (User, FoodItem, FoodType in MongoDB)
+- External API interactions (Gemini API, Open Food Facts, TheMealDB)
+
+---
+
+#### 1. [**Log Food via Image**](#uc1)
+**Source**: `diagrams/imageDiagram.plantuml`
+
+**Key Interactions**:
+- Frontend captures image → Backend `POST /api/fridge/image`
+- Backend → Gemini API for food identification
+- Backend → Open Food Facts API for nutritional data
+- Database operations: `FoodType.findByName()`, `FoodItem.create()`
 
 ![](images/imageDiagram.png)
 
-2. [**Log Food via Barcode**](#uc2)
+---
+
+#### 2. [**Log Food via Barcode**](#uc2)
+**Source**: `diagrams/barcodeDiagram.plantuml`
+
+**Key Interactions**:
+- ML Kit scans barcode (single scan with back button)
+- Frontend → Backend `POST /api/fridge/barcode`
+- Backend → Open Food Facts API (if not cached)
+- Database operations: `FoodType.findByBarcode()`, `FoodType.create()`, `FoodItem.create()`
+- Includes fridge list refresh after confirmation
 
 ![](images/barcodeDiagram.png)
 
-3. [**View Fridge**](#uc3)
+---
+
+#### 3. [**View Fridge**](#uc3)
+**Source**: `diagrams/viewFridgeDiagram.plantuml`
+
+**Key Interactions**:
+- Frontend → Backend `GET /api/fridge` with JWT authentication
+- Database operations: `FoodItem.findAllByUserId()`, `FoodItem.getAssociatedFoodType()`
+- Client-side sorting by expiration date
+- Update quantity: `PATCH /api/food-item/{itemId}/percent`
+- Remove item: `DELETE /api/food-item/{itemId}`
 
 ![](images/viewFridgeDiagram.png)
 
-4. [**Generate Recipe Suggestions**](#uc4)
+---
+
+#### 4. [**Generate Recipe Suggestions**](#uc4)
+**Source**: `diagrams/generateRecipeSequence.plantuml`
+
+**Key Interactions**:
+- **API Mode**: Frontend → Backend `GET /api/recipes?ingredients={list}`
+  - Backend → TheMealDB API for each ingredient
+  - Returns recipe summaries with external links
+- **AI Mode**: Frontend → Backend `POST /api/recipes/ai`
+  - Backend → Gemini API with ingredient prompt
+  - Returns markdown-formatted custom recipe
 
 ![](images/generateRecipeSequence.svg)
 
-5. [**View Nutritional Facts**](#uc5)
+---
+
+#### 5. [**View Nutritional Facts**](#uc5)
+**Source**: `diagrams/viewNutritionDiagram.plantuml`
+
+**Key Interactions**:
+- Frontend → Backend `GET /api/food-item/{itemId}/nutrition`
+- Database operations: `FoodItem.findById()`, `FoodItem.getAssociatedFoodType()`
+- Returns NutritionInfo from FoodType.nutrients (17 nutritional fields per 100g)
 
 ![](images/viewNutritionDiagram.png)
 
