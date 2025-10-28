@@ -61,7 +61,8 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 9. **Sort by Expiration Date**: Users can sort items to view which foods are closest to expiring, helping to reduce waste.  
 10. **Sort by Added Date**: Users can sort items based on when they were logged into the system.  
 - Use cases for feature 4: Get Recipes
-11. **Generate Recipe Suggestions**: Users can request recipes, and the app provides a list of possible recipe overviews based on the selected ingredients, or, if the user does not select any items, a selection of ingredients that will expire soon.  
+11. **Find Recipe Suggestions**: Users can request recipes, and the app provides a list of possible recipe overviews based on the selected ingredients.
+12. **Generate Recipe Suggestions with AI**: Users can request recipes, and the app provides an AI generated recipe that includes the selected ingredients.
 12. **View Recipe Details**: Users can click on a recipe overview to see more detailed information, including additional required ingredients, step-by-step cooking instructions, and preparation time.
 - Use cases for feature 5: Get Nutrition
 13. **View Nutritional Facts**: The app displays a new screen showing nutritional information such as calories, fat, carbohydrates, and protein.  
@@ -86,20 +87,20 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 8. System adds the food item to the user's fridge inventory.
 
 **Failure scenario(s)**:
-- 1a. Image is too blurry or lighting is insufficient.
-  - 1a1. Gemini API returns low confidence result or error.
-  - 1a2. System displays error and prompts user to retake the photo.
+- 3a. Network connection unavailable or Gemini API is unreachable.
+  - 3a1. System displays error message: "Unable to process image. Please check your connection and try again."  
 
-- 2a. Gemini API cannot identify the item as food.
-  - 2a1. System notifies user that the image does not appear to contain food.
-  - 2a2. System offers alternative methods (barcode scan or manual selection from pre-made list).
+- 4a. Image is too blurry or lighting is insufficient.
+  - 4a1. Gemini API returns low confidence result or error.
+  - 4a2. System displays error and prompts user to retake the photo.
 
-- 3a. Multiple food items detected in the image.
-  - 3a1. Gemini API returns multiple possible food items.
-  - 3a2. System prompts user to select which item they want to add or retake photo with single item.
+- 4b. Gemini API cannot identify the item as food.
+  - 4b1. System notifies user that the image does not appear to contain food.
+  - 4b2. System offers alternative methods (barcode scan or manual selection from pre-made list).
 
-- 4a. Network connection unavailable or Gemini API is unreachable.
-  - 4a1. System displays error message: "Unable to process image. Please check your connection and try again."  
+- 4c. Multiple food items detected in the image.
+  - 4c1. Gemini API returns multiple possible food items.
+  - 4c2. System prompts user to select which item they want to add or retake photo with single item.
 
 <a name="uc2"></a>
 
@@ -111,9 +112,9 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 **Main success scenario**:
 1. User selects "Add Food" and chooses the barcode scan option.
-2. System opens the camera scanner interface with a back button in the top-left corner.
+2. System opens the camera scanner interface
 3. User positions the barcode in the camera view.
-4. System detects and processes the barcode (one scan only).
+4. System detects and processes the barcode
 5. System retrieves details (name, brand, nutritional info) from the Open Food Facts API database.
 6. System displays confirmation screen with food item details.
 7. User reviews the item and clicks "Confirm".
@@ -121,80 +122,60 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 9. System refreshes the fridge list to display the newly added item.
 
 **Failure scenario(s)**:
-- 1a. User wants to cancel scanning.
-  - 1a1. User presses the back button in top-left corner.
-  - 1a2. System closes the scanner and returns to the main fridge screen.
+- 2a. User wants to cancel scanning.
+  - 2a1. User presses the back button
+  - 2a2. System closes the scanner and returns to the main fridge screen.
 
-- 2a. Barcode is unreadable or damaged.
-  - 2a1. System displays error and prompts user to rescan or choose another method.
+- 4a. Barcode is unreadable or damaged.
+  - 4a1. System displays error and prompts user to re-scan or choose another method.
 
-- 3a. Food item not found in database.
-  - 3a1. System notifies user that the product could not be found.
-  - 3a2. System offers alternative methods (image capture or manual selection from pre-made list).
-
-- 4a. Multiple rapid scans detected.
-  - 4a1. System prevents duplicate submissions by processing only the first detected barcode.
-  - 4a2. System ensures only one food item is created per scan session.  
+- 5a. Food item not found in database.
+  - 5a1. System notifies user that the product could not be found.
+  - 5a2. System offers alternative methods (image capture or manual selection from pre-made list).
 
 <a name="uc3"></a>
 
-#### Use Case 3: View Fridge
+#### Use Case 3: View Food Inventory
 
-**Description**: Users view their food inventory sorted in order of soonest to latest expiration.  
+**Description**: Users view a list of all the items in the fridge.
 
-**Primary actor(s)**: User  
+**Primary actor(s)**: User
 
 Main success scenario:
-1. User navigates to the home page with their inventory list.  
-2. User selects the “Sort by Expiration Date” option.  
-3. System reorders food items in ascending order of expiration date.  
-4. User sees items expiring soonest at the top of the list.
-5. User holds and drags left on a food item to decrease food available
-6. System updates the percentage value of food left
-6. User holds and drags food item to 0%
-7. System removes food item from fridge
+1. User navigates to the home page.
+2. System displays a list of all items currently in the user's fridge
 
 Failure scenario(s):
 - 1a. Inventory is empty.  
   - 1a1. System displays message: “No food logged. Add items to view inventory.”  
 
-- 2a. Sorting function fails due to missing expiration data.  
-  - 2a1. System displays error and defaults to unsorted list.
+- 2a. A network error occurs when connecting to the backend
+  - 2a1. System displays message: "Could not connect to VirtualFridge service. Try again later."
 
 <a name="uc4"></a>
 
-#### Use Case 4: Generate Recipe Suggestions
+#### Use Case 4: Find Recipe Suggestions
 
 **Description**: Users request recipe suggestions using one or more ingredients from their virtual fridge.
 
-**Primary actor(s)**: User, The MealDB API, Gemini API  
+**Primary actor(s)**: User, The MealDB API
 
 Main success scenarios:
 For Recipe Via API
-1. User selects recipes in the bottom left corner
-2. User selects ingredients to add to recipe creation
-3. User clicks “Confirm”
+1. User selects ingredients to add to recipe creation
+2. User clicks recipe button
 4. System calls recipe API and fetches 3 recipes containing specified ingredients
 5. System opens screen showcasing dropdown of 3 recipes
 6. User clicks on recipe and is redirected to the link to recipe
 
-For Recipe Via AI
-1. User selects recipes in the bottom left corner
-2. User selects ingredients to add to recipe creation
-3. User toggles on the “AI” toggle
-4. User clicks “Confirm”
-5. System prompts AI for a recipe with the given ingredients
-6. System opens screen showcasing dropdown of 3 recipes
-7. User clicks on recipe and is redirected to a markdown preview of the recipe
-
 Failure scenario(s):
 
-- 1a. No recipes match selected items.  
-  - 1a1. The System notifies the User and suggests adding a different combination of ingredients
-- 2a. The System cannot reach the API
-  - 2a1. The System displays a message saying: “The API cannot be reached. Please try again later.”
-- 3a. The System is not connected to the internet
-  -3a1. The System displays a message saying: “We cannot connect to the Internet. Please try again later.”
+- 3a. No recipes match selected items.  
+  - 3a1. The System notifies the User and suggests adding a different combination of ingredients
+- 3b. The System cannot reach the API
+  - 3b1. The System displays a message saying: “Could not connect to TheMealDB. Please try again later.”
+- 3c. The System is not connected to the internet
+  -3c1. The System displays a message saying: “We cannot connect to the Internet. Please try again later.”
 
 <a name="uc5"></a>
 
@@ -205,41 +186,17 @@ Failure scenario(s):
 **Primary actor(s)**: User, Open Food Facts API
 
 Main success scenario:
-1. From the main menu, User clicks on a food item stored in their fridge
-2. User clicks “Nutrition Info” on the food submenu
+1. From the home page, User clicks on a food item stored in their fridge
+2. User clicks “Nutrition Info” on the food sub-menu
 3. System fetches nutritional data (i.e. calories, fat, carbs, and protein, etc.) for the item
-4. System displays nutritional information (i.e. calories, fat, carbs, and protein, etc.) within the item's submenu
+4. System displays nutritional information (i.e. calories, fat, carbs, and protein, etc.) within the item's sub-menu
 
 Failure scenario(s):
-- 1a. Selected food item does not have nutritional data available.  
-  - 1a1. System informs user and offers manual entry option.  
+- 3a. Selected food item does not have nutritional data available.  
+  - 3a1. System informs user and offers manual entry option.  
 
-- 2a. Database or network error occurs.  
-  - 2a1. System displays error and prompts user to retry.
-
-<a name="uc6"></a>
-
-#### Use Case 6: Expiry Notification
-
-**Description**: The system notifies the user when a stored food item is nearing its expiry date. Users can configure how many hours or days before expiry they would like to be notified.
-
-**Primary actor(s)**: Users: The users of the virtual fridge application are individuals and households who want to manage their food inventory more efficiently. They rely on the app to keep track of what items are currently in their fridge or pantry, monitor expiration dates, reduce food waste, and plan meals based on available ingredients. Users may include busy professionals, students, families, or anyone looking for convenience, organization, and cost savings in their daily food management.
-
-Main success scenario:
-1. From the settings menu, User selects “Expiry Notifications.”
-2. User specifies the preferred notification window (e.g., 48 hours before expiry).
-3. System saves the notification preference.
-4. When a food item in the fridge is approaching its expiry date within the configured window, the system generates a notification.
-5. User receives a notification alerting them about the expiring item(s).
-
-Failure scenario(s):
-- 4a. System fails to process expiry dates due to database or network error.
-  - 4a1. System logs the error and retries later.
-  - 4a2. If the error persists, system displays a notification informing the user that expiry alerts are temporarily unavailable.
-
-#### General Failure Scenario:
-- 1a. The backend server is down.
-  - 1a1. Notifies the user that the backend server is down and their request cannot be processed.
+- 3b. Database or network error occurs.  
+  - 3b1. System displays error and prompts user to retry.
 
 ### **3.6. Screen Mock-ups**
 
