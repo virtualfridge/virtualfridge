@@ -29,10 +29,31 @@ type GeminiResponse = {
   modelVersion?: string;
 };
 
+export type NutrientsPer100g = {
+  calories?: string;
+  energy_kj?: string;
+  protein?: string;
+  fat?: string;
+  saturated_fat?: string;
+  monounsaturated_fat?: string;
+  polyunsaturated_fat?: string;
+  trans_fat?: string;
+  cholesterol?: string;
+  carbs?: string;
+  sugars?: string;
+  fiber?: string;
+  salt?: string;
+  sodium?: string;
+  calcium?: string;
+  iron?: string;
+  potassium?: string;
+};
+
 export type ProduceAnalysis = {
   isProduce: boolean;
   category?: 'fruit' | 'vegetable';
   name?: string;
+  nutrients?: NutrientsPer100g;
 };
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'models/gemini-2.5-flash';
@@ -81,7 +102,7 @@ export class AiVisionService {
           },
         ],
         generationConfig: {
-          responseMimeType: 'application/json',
+          response_mime_type: 'application/json',
         },
       },
       {
@@ -130,7 +151,9 @@ export class AiVisionService {
         | 'vegetable'
         | undefined;
       const name = obj.name ?? obj.label ?? obj.item ?? undefined;
-      return { isProduce, category, name };
+      const nutrientsRaw = obj.nutrients_per_100g ?? obj.nutrients ?? null;
+      const nutrients = nutrientsRaw ? this.normalizeNutrients(nutrientsRaw) : undefined;
+      return { isProduce, category, name, nutrients };
     } catch (e) {
       return null;
     }
@@ -141,6 +164,30 @@ export class AiVisionService {
     if (trimmed.startsWith('{') && trimmed.endsWith('}')) return trimmed;
     const match = text.match(/\{[\s\S]*\}/);
     return match ? match[0] : null;
+  }
+
+  private normalizeNutrients(obj: any): NutrientsPer100g {
+    const pick = (k: string) => obj?.[k] ?? obj?.[k.replace(/_/g, '')] ?? obj?.[k.replace(/_/g, ' ')];
+    const out: NutrientsPer100g = {
+      calories: pick('calories')?.toString(),
+      energy_kj: pick('energy_kj')?.toString(),
+      protein: pick('protein')?.toString(),
+      fat: pick('fat')?.toString(),
+      saturated_fat: pick('saturated_fat')?.toString(),
+      monounsaturated_fat: pick('monounsaturated_fat')?.toString(),
+      polyunsaturated_fat: pick('polyunsaturated_fat')?.toString(),
+      trans_fat: pick('trans_fat')?.toString(),
+      cholesterol: pick('cholesterol')?.toString(),
+      carbs: pick('carbs')?.toString() ?? pick('carbohydrates')?.toString(),
+      sugars: pick('sugars')?.toString(),
+      fiber: pick('fiber')?.toString(),
+      salt: pick('salt')?.toString(),
+      sodium: pick('sodium')?.toString(),
+      calcium: pick('calcium')?.toString(),
+      iron: pick('iron')?.toString(),
+      potassium: pick('potassium')?.toString(),
+    };
+    return out;
   }
 }
 
