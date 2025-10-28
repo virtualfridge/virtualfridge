@@ -37,7 +37,8 @@ export type ProduceAnalysis = {
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'models/gemini-2.5-flash';
 const GEMINI_API_HOST =
-  process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta';
+  process.env.GEMINI_API_URL ||
+  'https://generativelanguage.googleapis.com/v1beta';
 
 export class AiVisionService {
   constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}
@@ -60,7 +61,7 @@ export class AiVisionService {
       'You are a vision model helping identify produce items for a smart fridge.',
       'Analyze the attached image and determine if it contains a single food item that is a fruit or a vegetable only.',
       'If yes, respond strictly as JSON with keys: isProduce (boolean), category ("fruit" or "vegetable"), name (common name in English, snake_case not required).',
-      'If not a single fruit/vegetable, respond: {"isProduce": false}. Do not include any additional text.'
+      'If not a single fruit/vegetable, respond: {"isProduce": false}. Do not include any additional text.',
     ].join('\n');
 
     logger.info('Requesting Gemini vision analysis');
@@ -72,12 +73,14 @@ export class AiVisionService {
           {
             parts: [
               { text: prompt } as GeminiTextPart,
-              { inlineData: { mimeType, data: base64 } } as GeminiInlineDataPart,
+              {
+                inlineData: { mimeType, data: base64 },
+              } as GeminiInlineDataPart,
             ],
           },
         ],
         generationConfig: {
-          response_mime_type: 'application/json',
+          responseMimeType: 'application/json',
         },
       },
       {
@@ -121,7 +124,10 @@ export class AiVisionService {
     try {
       const obj = JSON.parse(jsonText);
       const isProduce = Boolean(obj.isProduce ?? obj.is_produce);
-      const category = (obj.category ?? obj.type) as 'fruit' | 'vegetable' | undefined;
+      const category = (obj.category ?? obj.type) as
+        | 'fruit'
+        | 'vegetable'
+        | undefined;
       const name = obj.name ?? obj.label ?? obj.item ?? undefined;
       return { isProduce, category, name };
     } catch (e) {
@@ -138,4 +144,3 @@ export class AiVisionService {
 }
 
 export const aiVisionService = new AiVisionService();
-
