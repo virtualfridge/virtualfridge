@@ -1,0 +1,43 @@
+@startuml
+title Use Case 5: View Nutritional Facts
+
+actor User
+participant "Frontend\n(Android)" as Frontend
+participant "Backend\n(Express)" as Backend
+database "MongoDB" as DB
+
+User -> Frontend: Clicks on food item\nin fridge list
+Frontend --> User: Display item submenu
+User -> Frontend: Clicks "Nutrition Info"
+
+Frontend -> Backend: GET /api/food-item/{itemId}/nutrition
+
+Backend -> DB: FoodItem.findById(itemId)
+DB --> Backend: FoodItem document
+
+Backend -> DB: FoodItem.getAssociatedFoodType(foodItem)
+DB --> Backend: FoodType with nutrients
+
+alt Nutritional data exists
+    Backend --> Frontend: 200 OK\nNutritionInfo\n(calories, protein, fat, carbs,\nsaturatedFat, fiber, sugars, etc.)
+
+    Frontend --> User: Display nutrition facts screen\nwith detailed breakdown
+
+else No nutritional data available
+    Backend --> Frontend: 404 Not Found\n"Nutritional data not available"
+    Frontend --> User: Display message:\n"No nutrition data available"\nOffer manual entry option
+end
+
+note right of DB
+  Nutrients stored per 100g
+  in FoodType collection:
+  - calories, energyKj
+  - protein, fat, carbs
+  - saturatedFat, transFat
+  - fiber, sugars
+  - sodium, salt
+  - calcium, iron, potassium
+  - cholesterol
+end note
+
+@enduml

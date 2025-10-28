@@ -1,0 +1,40 @@
+@startuml
+title Use Case 1: Log Food via Image
+
+actor User
+participant "Frontend\n(Android)" as Frontend
+participant "Backend\n(Express)" as Backend
+participant "Gemini API" as Gemini
+participant "Open Food Facts\nAPI" as OpenFood
+database "MongoDB" as DB
+
+User -> Frontend: Selects "Add Food"\nand chooses image option
+Frontend -> Frontend: Opens camera
+User -> Frontend: Takes photo of food item
+Frontend -> Backend: POST /api/fridge/image\n(multipart/form-data: image)
+
+Backend -> Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent\n(base64 image data)
+Gemini --> Backend: FoodIdentification\n(food name, confidence score)
+
+alt High confidence identification
+    Backend -> OpenFood: GET /api/v0/product/{foodName}.json
+    OpenFood --> Backend: Nutritional data\n(nutrients, shelf life)
+
+    Backend -> DB: FoodType.findByName()\nor create new FoodType
+    DB --> Backend: FoodType document
+
+    Backend -> DB: FoodItem.create()\n(userId, typeId, expirationDate, percentLeft=100)
+    DB --> Backend: Created FoodItem
+
+    Backend --> Frontend: 200 OK\nFridgeItem with details
+    Frontend --> User: Display confirmation screen
+    User -> Frontend: Clicks "Confirm"
+    Frontend -> Frontend: Navigate to main screen
+    Frontend --> User: Show updated fridge list
+
+else Low confidence or not food
+    Backend --> Frontend: 400 Error\n"Cannot identify food item"
+    Frontend --> User: Display error,\noffer alternative methods
+end
+
+@enduml

@@ -1,1 +1,335 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" data-diagram-type="DESCRIPTION" height="1080px" preserveAspectRatio="none" style="width:580px;height:1080px;background:#FFFFFF;" version="1.1" viewBox="0 0 580 1080" width="580px" zoomAndPan="magnify"><defs/><g><!--cluster Virtual Fridge App--><g class="cluster" data-entity="Virtual Fridge App" data-source-line="6" data-uid="ent0003" id="cluster_Virtual Fridge App"><rect fill="#FFFFFF" height="1062" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="260.71" x="89.91" y="12"/><text fill="#000000" font-family="Verdana" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="69.3369" x="185.5965" y="26.9951">&#171;System&#187;</text><text fill="#000000" font-family="Verdana" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="144.874" x="147.828" y="43.292">Virtual Fridge App</text></g><!--entity signUp--><g class="entity" data-entity="signUp" data-source-line="8" data-uid="ent0004" id="entity_signUp"><ellipse cx="220.259" cy="758.9998" fill="#FFFFFF" rx="84.899" ry="19.3798" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="142.0918" x="149.2131" y="763.6482">Sign Up with Google</text></g><!--entity signIn--><g class="entity" data-entity="signIn" data-source-line="9" data-uid="ent0005" id="entity_signIn"><ellipse cx="220.264" cy="832.0008" fill="#FFFFFF" rx="82.254" ry="18.8508" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="135.96" x="152.2841" y="836.6492">Sign In with Google</text></g><!--entity signOut--><g class="entity" data-entity="signOut" data-source-line="10" data-uid="ent0006" id="entity_signOut"><ellipse cx="220.2567" cy="900.0036" fill="#FFFFFF" rx="45.6867" ry="14.5236" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="60.3682" x="190.0727" y="904.6521">Sign Out</text></g><!--entity deleteAccount--><g class="entity" data-entity="deleteAccount" data-source-line="11" data-uid="ent0007" id="entity_deleteAccount"><ellipse cx="220.2553" cy="965.9971" fill="#FFFFFF" rx="70.3353" ry="16.4671" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="107.2217" x="166.6445" y="970.6455">Delete Account</text></g><!--entity logFood--><g class="entity" data-entity="logFood" data-source-line="14" data-uid="ent0008" id="entity_logFood"><ellipse cx="220.2639" cy="424.0036" fill="#FFFFFF" rx="48.0939" ry="14.5236" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="63.7725" x="188.3777" y="428.6521">Log Food</text></g><!--entity logBarcode--><g class="entity" data-entity="logBarcode" data-source-line="15" data-uid="ent0009" id="entity_logBarcode"><ellipse cx="220.2582" cy="509.9996" fill="#FFFFFF" rx="88.8482" ry="20.1696" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="151.1289" x="144.6937" y="514.6481">Log Food via Barcode</text></g><!--entity logImage--><g class="entity" data-entity="logImage" data-source-line="16" data-uid="ent0010" id="entity_logImage"><ellipse cx="220.2577" cy="339.0035" fill="#FFFFFF" rx="82.8177" ry="18.9635" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="137.2725" x="151.6214" y="343.652">Log Food via Image</text></g><!--entity viewInventory--><g class="entity" data-entity="viewInventory" data-source-line="20" data-uid="ent0011" id="entity_viewInventory"><ellipse cx="220.2641" cy="172.0008" fill="#FFFFFF" rx="85.4541" ry="19.4908" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="143.3701" x="148.579" y="176.6493">View Food Inventory</text></g><!--entity sortExp--><g class="entity" data-entity="sortExp" data-source-line="21" data-uid="ent0012" id="entity_sortExp"><ellipse cx="220.2579" cy="263.9996" fill="#FFFFFF" rx="94.4479" ry="21.2896" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="163.7412" x="138.3873" y="268.648">Sort by Expiration Date</text></g><!--entity sortAdded--><g class="entity" data-entity="sortAdded" data-source-line="22" data-uid="ent0013" id="entity_sortAdded"><ellipse cx="220.2594" cy="81.9959" fill="#FFFFFF" rx="82.9294" ry="18.9859" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="137.5322" x="151.4933" y="86.6443">Sort by Added Date</text></g><!--entity genRecipes--><g class="entity" data-entity="genRecipes" data-source-line="25" data-uid="ent0014" id="entity_genRecipes"><ellipse cx="220.2639" cy="590.0008" fill="#FFFFFF" rx="114.3539" ry="25.2708" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="207.2656" x="116.6311" y="594.6492">Generate Recipe Suggestions</text></g><!--entity viewRecipe--><g class="entity" data-entity="viewRecipe" data-source-line="26" data-uid="ent0015" id="entity_viewRecipe"><ellipse cx="220.2602" cy="686" fill="#FFFFFF" rx="83.3002" ry="19.06" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="138.3936" x="151.0634" y="690.6485">View Recipe Details</text></g><!--entity viewNutrition--><g class="entity" data-entity="viewNutrition" data-source-line="27" data-uid="ent0016" id="entity_viewNutrition"><ellipse cx="220.2595" cy="1038.0019" fill="#FFFFFF" rx="89.8095" ry="20.3619" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="153.3096" x="143.6047" y="1042.6503">View Nutritional Facts</text></g><!--entity User--><g class="entity" data-entity="User" data-source-line="4" data-uid="ent0002" id="entity_User"><ellipse cx="26.9551" cy="729.35" fill="#FFFFFF" rx="8" ry="8" style="stroke:#000000;stroke-width:1;"/><path d="M26.9551,737.35 L26.9551,764.35 M13.9551,745.35 L39.9551,745.35 M26.9551,764.35 L13.9551,779.35 M26.9551,764.35 L39.9551,779.35" fill="none" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="31.9102" x="11" y="794.3451">User</text></g><!--entity googleAuth--><g class="entity" data-entity="googleAuth" data-source-line="39" data-uid="ent0024" id="entity_googleAuth"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="176.5908" x="397.62" y="784.85"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="156.5908" x="407.62" y="807.8451">Google Authentication</text></g><!--entity barcodeApi--><g class="entity" data-entity="barcodeApi" data-source-line="40" data-uid="ent0025" id="entity_barcodeApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="104.3008" x="433.76" y="491.85"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="84.3008" x="443.76" y="514.8451">Barcode API</text></g><!--entity recipeApi--><g class="entity" data-entity="recipeApi" data-source-line="41" data-uid="ent0026" id="entity_recipeApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="94.0264" x="438.9" y="653.85"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="74.0264" x="448.9" y="676.8451">Recipe API</text></g><!--entity nutritionApi--><g class="entity" data-entity="nutritionApi" data-source-line="42" data-uid="ent0027" id="entity_nutritionApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="107.8965" x="431.97" y="1019.85"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="87.8965" x="441.97" y="1042.8451">Nutrition API</text></g><!--entity ComputerVisionAPI--><g class="entity" data-entity="ComputerVisionAPI" data-source-line="43" data-uid="ent0028" id="entity_ComputerVisionAPI"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="162.7344" x="404.55" y="320.85"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="142.7344" x="414.55" y="343.8451">Computer Vision API</text></g><!--entity GeminiAPI--><g class="entity" data-entity="GeminiAPI" data-source-line="44" data-uid="ent0029" id="entity_GeminiAPI"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1;" width="96.3506" x="437.74" y="571.85"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="76.3506" x="447.74" y="594.8451">Gemini API</text></g><!--reverse link logBarcode to logFood--><g class="link" data-entity-1="logBarcode" data-entity-2="logFood" data-source-line="30" data-uid="lnk18" id="link_logBarcode_logFood"><path d="M220.26,483.62 C220.26,468.02 220.26,452.88 220.26,438.85" fill="none" id="logBarcode-backto-logFood" style="stroke:#000000;stroke-width:1;"/><polygon fill="#000000" points="220.26,489.62,224.26,480.62,220.26,484.62,216.26,480.62,220.26,489.62" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="61.1851" x="178.26" y="468.7469">&#171;extend&#187;</text></g><!--link logFood to logImage--><g class="link" data-entity-1="logFood" data-entity-2="logImage" data-source-line="31" data-uid="lnk19" id="link_logFood_logImage"><path d="M220.26,409.19 C220.26,395.12 220.26,379.85 220.26,364.42" fill="none" id="logFood-to-logImage" style="stroke:#000000;stroke-width:1;"/><polygon fill="#000000" points="220.26,358.42,216.26,367.42,220.26,363.42,224.26,367.42,220.26,358.42" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="61.1851" x="178.26" y="388.2869">&#171;extend&#187;</text></g><!--reverse link sortExp to viewInventory--><g class="link" data-entity-1="sortExp" data-entity-2="viewInventory" data-source-line="33" data-uid="lnk21" id="link_sortExp_viewInventory"><path d="M220.26,236.66 C220.26,221.37 220.26,206.93 220.26,191.96" fill="none" id="sortExp-backto-viewInventory" style="stroke:#000000;stroke-width:1;"/><polygon fill="#000000" points="220.26,242.66,224.26,233.66,220.26,237.66,216.26,233.66,220.26,242.66" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="61.1851" x="178.26" y="221.6669">&#171;extend&#187;</text></g><!--link viewInventory to sortAdded--><g class="link" data-entity-1="viewInventory" data-entity-2="sortAdded" data-source-line="34" data-uid="lnk22" id="link_viewInventory_sortAdded"><path d="M220.26,152.03 C220.26,136.9 220.26,122.25 220.26,107.3" fill="none" id="viewInventory-to-sortAdded" style="stroke:#000000;stroke-width:1;"/><polygon fill="#000000" points="220.26,101.3,216.26,110.3,220.26,106.3,224.26,110.3,220.26,101.3" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="61.1851" x="178.26" y="131.3169">&#171;extend&#187;</text></g><!--link genRecipes to viewRecipe--><g class="link" data-entity-1="genRecipes" data-entity-2="viewRecipe" data-source-line="35" data-uid="lnk23" id="link_genRecipes_viewRecipe"><path d="M220.26,615.59 C220.26,631.6 220.26,645.89 220.26,660.57" fill="none" id="genRecipes-to-viewRecipe" style="stroke:#000000;stroke-width:1;"/><polygon fill="#000000" points="220.26,666.57,224.26,657.57,220.26,661.57,216.26,657.57,220.26,666.57" style="stroke:#000000;stroke-width:1;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="61.1851" x="178.26" y="645.6769">&#171;extend&#187;</text></g><!--link User to signUp--><g class="link" data-entity-1="User" data-entity-2="signUp" data-source-line="48" data-uid="lnk30" id="link_User_signUp"><path d="M43.29,759 C63.41,759 100.29,759 135.1,759" fill="none" id="User-signUp" style="stroke:#000000;stroke-width:1;"/></g><!--link User to signIn--><g class="link" data-entity-1="User" data-entity-2="signIn" data-source-line="49" data-uid="lnk31" id="link_User_signIn"><path d="M43.15,771.54 C53.51,779.54 67.86,789.58 81.91,796 C105,806.56 131.75,814.44 155.47,820.1" fill="none" id="User-signIn" style="stroke:#000000;stroke-width:1;"/></g><!--link User to signOut--><g class="link" data-entity-1="User" data-entity-2="signOut" data-source-line="50" data-uid="lnk32" id="link_User_signOut"><path d="M38.02,797.96 C46.09,821.6 59.82,850.49 81.91,868 C108.01,888.68 145.14,896.42 174.22,899.13" fill="none" id="User-signOut" style="stroke:#000000;stroke-width:1;"/></g><!--link User to deleteAccount--><g class="link" data-entity-1="User" data-entity-2="deleteAccount" data-source-line="51" data-uid="lnk33" id="link_User_deleteAccount"><path d="M29.46,798.07 C33.13,837.43 44.93,897.16 81.91,932 C100.42,949.43 126.41,958.33 150.81,962.74" fill="none" id="User-deleteAccount" style="stroke:#000000;stroke-width:1;"/></g><!--link User to logFood--><g class="link" data-entity-1="User" data-entity-2="logFood" data-source-line="52" data-uid="lnk34" id="link_User_logFood"><path d="M30.52,719.99 C35.85,650.4 50.34,508.71 81.91,472 C104.8,445.38 143.33,433.51 173.76,428.23" fill="none" id="User-logFood" style="stroke:#000000;stroke-width:1;"/></g><!--link User to viewInventory--><g class="link" data-entity-1="User" data-entity-2="viewInventory" data-source-line="53" data-uid="lnk35" id="link_User_viewInventory"><path d="M29.55,720.17 C34.65,603.91 51.99,264.22 81.91,225 C98.26,203.56 124.47,190.79 149.62,183.18" fill="none" id="User-viewInventory" style="stroke:#000000;stroke-width:1;"/></g><!--link User to genRecipes--><g class="link" data-entity-1="User" data-entity-2="genRecipes" data-source-line="54" data-uid="lnk36" id="link_User_genRecipes"><path d="M39.44,719.93 C47.96,696.77 61.64,668.27 81.91,649 C100.25,631.56 124.54,618.85 147.59,609.79" fill="none" id="User-genRecipes" style="stroke:#000000;stroke-width:1;"/></g><!--link User to viewRecipe--><g class="link" data-entity-1="User" data-entity-2="viewRecipe" data-source-line="55" data-uid="lnk37" id="link_User_viewRecipe"><path d="M43.15,746.46 C53.51,738.46 67.86,728.42 81.91,722 C104.78,711.55 131.23,703.71 154.78,698.06" fill="none" id="User-viewRecipe" style="stroke:#000000;stroke-width:1;"/></g><!--link User to viewNutrition--><g class="link" data-entity-1="User" data-entity-2="viewNutrition" data-source-line="56" data-uid="lnk38" id="link_User_viewNutrition"><path d="M31.79,797.7 C38.57,858.2 54.57,971.27 81.91,1000 C96.41,1015.24 116.42,1024.54 136.69,1030.18" fill="none" id="User-viewNutrition" style="stroke:#000000;stroke-width:1;"/></g><!--link signUp to googleAuth--><g class="link" data-entity-1="signUp" data-entity-2="googleAuth" data-source-line="59" data-uid="lnk39" id="link_signUp_googleAuth"><path d="M289.85,770.45 C322.65,775.92 362.3,782.54 397.26,788.37" fill="none" id="signUp-googleAuth" style="stroke:#000000;stroke-width:1;"/></g><!--link signIn to googleAuth--><g class="link" data-entity-1="signIn" data-entity-2="googleAuth" data-source-line="60" data-uid="lnk40" id="link_signIn_googleAuth"><path d="M295.06,823.88 C326.89,820.38 364.38,816.26 397.59,812.61" fill="none" id="signIn-googleAuth" style="stroke:#000000;stroke-width:1;"/></g><!--link logBarcode to barcodeApi--><g class="link" data-entity-1="logBarcode" data-entity-2="barcodeApi" data-source-line="61" data-uid="lnk41" id="link_logBarcode_barcodeApi"><path d="M309.42,510 C350.59,510 398.16,510 433.38,510" fill="none" id="logBarcode-barcodeApi" style="stroke:#000000;stroke-width:1;"/></g><!--link genRecipes to recipeApi--><g class="link" data-entity-1="genRecipes" data-entity-2="recipeApi" data-source-line="62" data-uid="lnk42" id="link_genRecipes_recipeApi"><path d="M287.79,610.69 C334.93,625.35 396.97,644.65 438.75,657.64" fill="none" id="genRecipes-recipeApi" style="stroke:#000000;stroke-width:1;"/></g><!--link genRecipes to GeminiAPI--><g class="link" data-entity-1="genRecipes" data-entity-2="GeminiAPI" data-source-line="63" data-uid="lnk43" id="link_genRecipes_GeminiAPI"><path d="M334.99,590 C370.95,590 408.73,590 437.38,590" fill="none" id="genRecipes-GeminiAPI" style="stroke:#000000;stroke-width:1;"/></g><!--link viewRecipe to recipeApi--><g class="link" data-entity-1="viewRecipe" data-entity-2="recipeApi" data-source-line="64" data-uid="lnk44" id="link_viewRecipe_recipeApi"><path d="M301.8,681.72 C346.62,679.34 400.82,676.47 438.57,674.46" fill="none" id="viewRecipe-recipeApi" style="stroke:#000000;stroke-width:1;"/></g><!--link viewNutrition to nutritionApi--><g class="link" data-entity-1="viewNutrition" data-entity-2="nutritionApi" data-source-line="65" data-uid="lnk45" id="link_viewNutrition_nutritionApi"><path d="M310.52,1038 C350.71,1038 396.81,1038 431.51,1038" fill="none" id="viewNutrition-nutritionApi" style="stroke:#000000;stroke-width:1;"/></g><!--link logImage to ComputerVisionAPI--><g class="link" data-entity-1="logImage" data-entity-2="ComputerVisionAPI" data-source-line="66" data-uid="lnk46" id="link_logImage_ComputerVisionAPI"><path d="M303.24,339 C335.44,339 372.29,339 404.35,339" fill="none" id="logImage-ComputerVisionAPI" style="stroke:#000000;stroke-width:1;"/></g><!--SRC=[VPJDRjim3CVlUWhEXtKxv0M6Ba2sjbc0RYiQj7VLvXG1ZcH8SjfYsBkF-h1iATryCl_yYH99YU_S0Oy8Gy-bOZt-Sk0q62aE3Zffi7LIAyPuwxI11uk6CIzo9Ng4vb4QD_8URepi1C9c61gul8JzgtLuXFKQVZE02_XC7sn6saavsN8VCcZa72sst29OATJ30Dn2iwTVeFzdwGwmrPfsQYfofsQI_lz3_XpTZ9Anz7VOeyDDs-fHHUegA92aXisdlzL2I2NWHkkkFdklHP1z1E82qvJ-BzoqkiC2WPFaa1mLlZjoyGOSv8PTG07VIklEsJk3g- -SjlJkPIQF4f__bSc9V3jreZPfynfYUZgYMIzAh8sxVabzetzuUWMofObDlk8EQtpJTTWL2w8IsVcSzzZA0IsyXn-ZC_AjIoDGJPIFjqM5j36cfR0VXK3h5zgcIZ8HESDaNw7ZiZ-ZvmFa1LdojvzUXosFteVyxK4E5ZuSzOdooy_AoWu_JgbCTsVbdzvglRmhd-WfuOj3rQtNIp94YMYy9mL8PDd5AVBKgYfi1K_1vqvL_ABc6LvKjA3_C9OgSasIyRNQtEse8lVVzga2yp0HuVtwAH6R6SngQZGB_YcMQJF8m4zLemsMb0d7cg1qo8fHKoydREvtHNxLns6aJ1wbzVZTBk2J2b6k5stnA9MSu6X59fV73rPejL9ntjfOcw2kLcas5kPE5IODjcmNKoshwVPaksXxLkVc5c3K2YcNAEVW4pnB8Orr7pgtbwK9NegBYq-EkRbiUU5MSpyhFHUPBIvZmPSFcLpBjhFycCXnrkM_]--></g></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentStyleType="text/css" height="1259px" preserveAspectRatio="none" style="width:696px;height:1259px;background:#FFFFFF;" version="1.1" viewBox="0 0 696 1259" width="696px" zoomAndPan="magnify"><defs/><g><!--MD5=[b745dc45e29544b960918ef73a9575a5]
+cluster Virtual Fridge App--><g id="cluster_Virtual Fridge App"><rect fill="#FFFFFF" height="1241" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="318" x="151" y="12"/><text fill="#000000" font-family="Verdana" font-size="14" font-style="italic" lengthAdjust="spacing" textLength="69" x="275.5" y="26.9951">«System»</text><text fill="#000000" font-family="Verdana" font-size="22" font-weight="bold" lengthAdjust="spacing" textLength="232" x="194" y="50.7178">Virtual Fridge App</text></g><g id="elem_signUp"><ellipse cx="309.7915" cy="1008.1583" fill="#FFFFFF" rx="88.7915" ry="20.1583" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="139" x="240.2915" y="1011.005">Sign Up with Google</text></g><g id="elem_signIn"><ellipse cx="310.228" cy="1083.0456" fill="#FFFFFF" rx="85.728" ry="19.5456" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="132" x="244.228" y="1085.8923">Sign In with Google</text></g><g id="elem_signOut"><ellipse cx="310.0937" cy="1152.2277" fill="#FFFFFF" rx="54.0937" ry="14.7277" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="59" x="277.5937" y="1155.9753">Sign Out</text></g><g id="elem_deleteAccount"><ellipse cx="309.8844" cy="1218.9769" fill="#FFFFFF" rx="75.3844" ry="17.4769" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="107" x="253.3844" y="1222.7244">Delete Account</text></g><g id="elem_logFood"><ellipse cx="309.8265" cy="180.7566" fill="#FFFFFF" rx="57.8265" ry="14.7566" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="64" x="274.8265" y="184.5041">Log Food</text></g><g id="elem_logImage"><ellipse cx="310.228" cy="267.0456" fill="#FFFFFF" rx="85.728" ry="19.5456" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="132" x="244.228" y="269.8923">Log Food via Image</text></g><g id="elem_logBarcode"><ellipse cx="309.7771" cy="92.9554" fill="#FFFFFF" rx="92.7771" ry="20.9554" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="148" x="235.7771" y="95.8021">Log Food via Barcode</text></g><g id="elem_viewInventory"><ellipse cx="310.0766" cy="431.9153" fill="#FFFFFF" rx="65.0766" ry="15.4153" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="79" x="267.5766" y="435.6629">View Fridge</text></g><g id="elem_sortExp"><ellipse cx="309.8591" cy="343.1718" fill="#FFFFFF" rx="96.3591" ry="21.6718" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="156" x="231.8591" y="346.0185">Sort by Expiration Date</text></g><g id="elem_sortAdded"><ellipse cx="310.0998" cy="519.22" fill="#FFFFFF" rx="86.5998" ry="19.72" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="134" x="243.0998" y="522.0666">Sort by Added Date</text></g><g id="elem_getRecipes"><ellipse cx="310.1678" cy="589.8336" fill="#FFFFFF" rx="67.1678" ry="15.8336" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="85" x="264.6678" y="593.5811">Get Recipes</text></g><g id="elem_genRecipes"><ellipse cx="310.0569" cy="847.0114" fill="#FFFFFF" rx="143.0569" ry="31.0114" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="256" x="182.0569" y="849.8581">Generate Recipe Suggestions with AI</text></g><g id="elem_findRecipes"><ellipse cx="310.1177" cy="681.1235" fill="#FFFFFF" rx="103.6177" ry="23.1235" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="172" x="224.1177" y="683.9702">Find Recipe Suggestions</text></g><g id="elem_viewRecipe"><ellipse cx="310.0368" cy="932.8074" fill="#FFFFFF" rx="87.0368" ry="19.8074" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="135" x="242.5368" y="935.654">View Recipe Details</text></g><g id="elem_viewNutrition"><ellipse cx="309.8872" cy="759.7774" fill="#FFFFFF" rx="91.8872" ry="20.7774" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="146" x="236.8872" y="762.6241">View Nutritional Facts</text></g><!--MD5=[fee662a292a0353a69bd162820bae93b]
+entity User--><g id="elem_User"><ellipse cx="27" cy="903.5" fill="#FFFFFF" rx="8" ry="8" style="stroke:#000000;stroke-width:1.0;"/><path d="M27,911.5 L27,938.5 M14,919.5 L40,919.5 M27,938.5 L14,953.5 M27,938.5 L40,953.5 " fill="none" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="32" x="11" y="968.4951">User</text></g><!--MD5=[12753c3092c74aec210e9cbec33ec5bf]
+entity googleAuth--><g id="elem_googleAuth"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="174" x="516" y="1031"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="154" x="526" y="1053.9951">Google Authentication</text></g><!--MD5=[9e63ad4cba8ed27cd83badf1df99f268]
+entity barcodeApi--><g id="elem_barcodeApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="103" x="551.5" y="75"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="83" x="561.5" y="97.9951">Barcode API</text></g><!--MD5=[0caf88f9206d0865aa3c3022ceba228a]
+entity recipeApi--><g id="elem_recipeApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="125" x="540.5" y="893"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="105" x="550.5" y="915.9951">TheMealDB API</text></g><!--MD5=[a4df3ab025fe3227257c5fbeefb57adc]
+entity nutritionApi--><g id="elem_nutritionApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="155" x="525.5" y="212"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="135" x="535.5" y="234.9951">OpenFoodFacts API</text></g><!--MD5=[1a1b04567d5353e5d6ab5e80d0428054]
+entity GeminiApi--><g id="elem_GeminiApi"><rect fill="#FFFFFF" height="36.2969" rx="2.5" ry="2.5" style="stroke:#000000;stroke-width:1.0;" width="93" x="556.5" y="691"/><text fill="#000000" font-family="Verdana" font-size="14" lengthAdjust="spacing" textLength="73" x="566.5" y="713.9951">Gemini API</text></g><!--MD5=[3bc1d15eb65c08df458e18d4bb7d2bde]
+reverse link logFood to logImage--><g id="link_logFood_logImage"><path d="M310,201.45 C310,215.4 310,233.75 310,247.49 " fill="none" id="logFood-backto-logImage" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="310,196.16,306,205.16,310,201.16,314,205.16,310,196.16" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="268.5" y="226.3169">«extend»</text></g><!--MD5=[df4ca044fff58f82eda198cb2dbe5305]
+reverse link logFood to logBarcode--><g id="link_logFood_logBarcode"><path d="M310,160.38 C310,146.45 310,128.11 310,114.09 " fill="none" id="logFood-backto-logBarcode" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="310,165.67,314,156.67,310,160.67,306,156.67,310,165.67" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="268.5" y="144.5669">«extend»</text></g><!--MD5=[dc9e1f0521bb42a5022dfdc2e84f23fc]
+reverse link viewInventory to sortExp--><g id="link_viewInventory_sortExp"><path d="M310,411.18 C310,397.2 310,378.81 310,364.66 " fill="none" id="viewInventory-backto-sortExp" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="310,416.5,314,407.5,310,411.5,306,407.5,310,416.5" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="268.5" y="395.0669">«extend»</text></g><!--MD5=[f54fc683000ccb31743ac33070cc8448]
+link sortAdded to viewInventory--><g id="link_sortAdded_viewInventory"><path d="M310,499.26 C310,485.45 310,467.03 310,452.96 " fill="none" id="sortAdded-to-viewInventory" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="310,447.61,306,456.61,310,452.61,314,456.61,310,447.61" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="268.5" y="478.0669">«extend»</text></g><!--MD5=[fb498377364d373638191f97a5e41c27]
+reverse link getRecipes to genRecipes--><g id="link_getRecipes_genRecipes"><path d="M239.33,594.92 C205.77,600.89 167.7,613.54 143,640 C71.42,716.69 98.27,806.36 107,816.5 C122.93,835 144.87,845.78 168.46,851.66 " fill="none" id="getRecipes-backto-genRecipes" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="244.67,594.02,235.1314,591.5675,239.7392,594.8489,236.4577,599.4567,244.67,594.02" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="74" y="812.5669">«extend»</text></g><!--MD5=[394d53a45498e3f3cda1e4ad3a92d0b0]
+link findRecipes to getRecipes--><g id="link_findRecipes_getRecipes"><path d="M310,657.57 C310,643.34 310,625.32 310,611.46 " fill="none" id="findRecipes-to-getRecipes" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="310,606.19,306,615.19,310,611.19,314,615.19,310,606.19" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="268.5" y="636.5669">«extend»</text></g><!--MD5=[cd6b5665ac0ddd6bcdfef2c79dbb1379]
+link viewRecipe to getRecipes--><g id="link_viewRecipe_getRecipes"><path d="M223.46,930.29 C194.99,925.42 165.02,915.47 143,896 C107.14,864.3 115.12,841.67 107,794.5 C96.89,735.75 108.39,675.84 143,640 C168.25,613.86 206.55,601.24 240.11,595.21 " fill="none" id="viewRecipe-to-getRecipes" style="stroke:#000000;stroke-width:1.0;"/><polygon fill="#000000" points="245.45,594.3,235.9045,591.8743,240.5215,595.1428,237.2531,599.7599,245.45,594.3" style="stroke:#000000;stroke-width:1.0;"/><text fill="#000000" font-family="Verdana" font-size="13" lengthAdjust="spacing" textLength="60" x="74" y="790.5669">«extend»</text></g><!--MD5=[248fcdff042707208bedf36c1394513e]
+link User to signUp--><g id="link_User_signUp"><path d="M43.11,938.53 C64.95,946.4 106.72,960.99 143,971 C175.59,979.99 212.24,988.34 242.79,994.83 " fill="none" id="User-signUp" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[a286fda4fdd0a97994f90ade5b59c82f]
+link User to signIn--><g id="link_User_signIn"><path d="M43.01,953.64 C62.9,979.4 100.46,1022.87 143,1046 C170.11,1060.74 202.75,1069.61 231.88,1074.95 " fill="none" id="User-signIn" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[1ab37e841dea56245a635f761111e1ae]
+link User to signOut--><g id="link_User_signOut"><path d="M38.95,971.65 C54.05,1016.73 86.09,1089.03 143,1120 C177.8,1138.94 222.06,1146.8 256.13,1150.01 " fill="none" id="User-signOut" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[35afa110786effc51aa544bdac46bbb2]
+link User to deleteAccount--><g id="link_User_deleteAccount"><path d="M30.51,971.53 C34.57,1011.4 45.21,1074.27 73,1121 C94.39,1156.98 105.69,1165.03 143,1184 C172.8,1199.15 208.81,1207.74 239.66,1212.62 " fill="none" id="User-deleteAccount" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[7a250327ad8380e303fd7c766391774a]
+link User to logFood--><g id="link_User_logFood"><path d="M28.85,894.48 C32.59,761.97 51.7,327.7 143,230 C171.01,200.03 216.34,188.09 252.56,183.47 " fill="none" id="User-logFood" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[a453cad1fb1c3ea82400b0ba5986433a]
+link User to viewInventory--><g id="link_User_viewInventory"><path d="M32.49,894.21 C44.73,795.46 81.91,538.38 143,482 C171.64,455.57 213.79,443.08 248.44,437.2 " fill="none" id="User-viewInventory" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[2aa0845f88992e332d12c3f5aa5d73ad]
+link User to getRecipes--><g id="link_User_getRecipes"><path d="M30.32,894.28 C36.52,829.23 59.3,699.33 143,640 C175.04,617.28 217.55,604.74 251.53,597.89 " fill="none" id="User-getRecipes" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[014524af07042aa6d976adbb478c6f74]
+link User to viewRecipe--><g id="link_User_viewRecipe"><path d="M43.11,933 C76.45,933 158.48,933 222.68,933 " fill="none" id="User-viewRecipe" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[081cebafe3b25333fb92e8822a919b2d]
+link User to viewNutrition--><g id="link_User_viewNutrition"><path d="M27.4,894.32 C29.12,857.7 38.05,804.25 73,776 C120.03,737.99 191.04,738.41 242.88,745.63 " fill="none" id="User-viewNutrition" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[c9a5c2655f7b7462bf0a144a67746968]
+link signUp to googleAuth--><g id="link_signUp_googleAuth"><path d="M385.94,1018.56 C425.68,1024.16 474.69,1031.06 515.98,1036.88 " fill="none" id="signUp-googleAuth" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[3e2c76b942ff60539f2d6f3867adf364]
+link signIn to googleAuth--><g id="link_signIn_googleAuth"><path d="M386.32,1074.2 C425.98,1069.57 474.78,1063.86 515.93,1059.06 " fill="none" id="signIn-googleAuth" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[9282445e992b14196b40a03a73b26e2d]
+link logBarcode to barcodeApi--><g id="link_logBarcode_barcodeApi"><path d="M403.07,93 C452.03,93 510.35,93 551.15,93 " fill="none" id="logBarcode-barcodeApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[4d463e1dd123522e1d54f88ea14b065a]
+link logBarcode to nutritionApi--><g id="link_logBarcode_nutritionApi"><path d="M371.25,108.84 C403.42,118.31 443.24,131.68 477,148 C514.39,166.07 553.87,193.59 578.22,211.68 " fill="none" id="logBarcode-nutritionApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[e6ad6901d6104053bbbeeeceaf614927]
+link logFood to nutritionApi--><g id="link_logFood_nutritionApi"><path d="M359.05,189.09 C404.25,196.7 472.67,208.22 525.4,217.1 " fill="none" id="logFood-nutritionApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[a4f75cc05bfdb05045fc20417df1b94e]
+link logImage to nutritionApi--><g id="link_logImage_nutritionApi"><path d="M385.18,257.57 C428.12,252.11 482.07,245.25 525.41,239.74 " fill="none" id="logImage-nutritionApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[d3fdfdf51af3999ef34000ddf834fe11]
+link logImage to GeminiApi--><g id="link_logImage_GeminiApi"><path d="M395.34,268.95 C424.32,273.65 454.98,283.67 477,304 C594.07,412.05 602.53,627.01 602.35,690.77 " fill="none" id="logImage-GeminiApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[763c23411ff28c8baf082c171a74db03]
+link genRecipes to recipeApi--><g id="link_genRecipes_recipeApi"><path d="M411.15,869.03 C454.06,878.46 502.81,889.19 540.31,897.43 " fill="none" id="genRecipes-recipeApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[8b1d1c382b371e2d2fd53390b7f10714]
+link genRecipes to GeminiApi--><g id="link_genRecipes_GeminiApi"><path d="M409.2,824.63 C432.02,817.8 455.82,809.3 477,799 C516.92,779.58 557.63,747.5 581.32,727.35 " fill="none" id="genRecipes-GeminiApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[8bcbd3c3250e7784f8c7b61d3c4b77f0]
+link viewRecipe to recipeApi--><g id="link_viewRecipe_recipeApi"><path d="M392.83,926.81 C439.57,923.28 497.22,918.92 540.15,915.68 " fill="none" id="viewRecipe-recipeApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[95c3a87fb79eb32ba7e61b419ada65d0]
+link viewNutrition to nutritionApi--><g id="link_viewNutrition_nutritionApi"><path d="M401.14,756.59 C428.6,751.26 456.82,740.81 477,721 C547.23,652.06 590.18,328.55 599.89,248.13 " fill="none" id="viewNutrition-nutritionApi" style="stroke:#000000;stroke-width:1.0;"/></g><!--MD5=[f276481e0dbd03da8dc9d4e8f44f48fc]
+@startuml
+!theme plain
+left to right direction
+
+actor User
+
+rectangle "Virtual Fridge App" << System >> {
+
+  ' ==== Authentication ====
+  usecase signUp as "Sign Up with Google"
+  usecase signIn as "Sign In with Google"
+  usecase signOut as "Sign Out"
+  usecase deleteAccount as "Delete Account"
+
+  ' ==== Logging Food ====
+  usecase logFood as "Log Food"
+  usecase logImage as "Log Food via Image"
+  usecase logBarcode as "Log Food via Barcode"
+'  usecase logList as "Log Food via Pre-Made List"
+
+  ' Extensions (placed right after their base)
+  logImage -left-> logFood : <<extend>>
+  logBarcode -left-> logFood : <<extend>>
+
+  ' ==== Viewing Food ====
+  usecase viewInventory as "View Fridge"
+  usecase sortExp as "Sort by Expiration Date"
+  usecase sortAdded as "Sort by Added Date"
+
+  ' Extensions (placed right after base)
+  sortExp -left-> viewInventory : <<extend>>
+  sortAdded -right-> viewInventory : <<extend>>
+
+  ' ==== Recipes & Nutrition ====
+  usecase getRecipes as "Get Recipes"
+  usecase genRecipes as "Generate Recipe Suggestions with AI"
+  usecase findRecipes as "Find Recipe Suggestions"
+  usecase viewRecipe as "View Recipe Details"
+  usecase viewNutrition as "View Nutritional Facts"
+
+  ' Extensions (placed immediately below related base)
+  genRecipes -left-> getRecipes : <<extend>>
+  findRecipes -right-> getRecipes : <<extend>>
+  viewRecipe -right-> getRecipes : <<extend>>
+}
+
+' ==== External APIs (RHS) ====
+rectangle googleAuth as "Google Authentication"
+rectangle barcodeApi as "Barcode API"
+rectangle recipeApi as "TheMealDB API"
+rectangle nutritionApi as "OpenFoodFacts API"
+rectangle GeminiApi as "Gemini API"
+
+' ==== User connections ====
+User - - signUp
+User - - signIn
+User - - signOut
+User - - deleteAccount
+User - - logFood
+User - - viewInventory
+User - - getRecipes
+User - - viewRecipe
+User - - viewNutrition
+
+' ==== API connections ====
+signUp - - googleAuth
+signIn - - googleAuth
+
+logBarcode - - barcodeApi
+logBarcode - - nutritionApi
+logFood - - nutritionApi
+logImage - - nutritionApi
+logImage - - GeminiApi
+
+genRecipes - - recipeApi
+genRecipes - - GeminiApi
+viewRecipe - - recipeApi
+viewNutrition - - nutritionApi
+@enduml
+
+@startuml
+
+
+
+
+
+
+
+<style>
+  root {
+    BackgroundColor white
+    FontColor black
+    FontName Verdana
+    HyperLinkColor blue
+    LineColor black
+    LineThickness 1
+    Margin 5
+  }
+  caption {
+    LineThickness 0
+  }
+  footer {
+    LineThickness 0
+  }
+  header {
+    LineThickness 0
+  }
+  node {
+    MaximumWidth 300
+  }
+  title {
+    FontSize 22
+    LineThickness 0
+  }
+</style>
+
+skinparam ArrowLollipopColor black
+skinparam BackgroundColor white
+skinparam DefaultFontName Verdana
+skinparam DefaultMonospacedFontName Courier
+skinparam LifelineStrategy nosolid
+skinparam ParticipantPadding 10
+skinparam SequenceLifeLineBorderColor black
+skinparam Shadowing false
+skinparam UseBetaStyle true
+
+skinparam Activity {
+  BackgroundColor white
+  BarColor black
+  BorderColor black
+  FontColor black
+  FontName Verdana
+}
+skinparam Boundary {
+  FontColor black
+}
+skinparam Box {
+  Padding 5
+}
+skinparam CircledCharacter {
+  FontColor black
+  FontName Courier
+  Radius 9
+}
+skinparam Class {
+  BackgroundColor white
+  BorderColor black
+  FontColor black
+  FontName Verdana
+}
+skinparam ClassAttribute {
+  FontColor black
+  FontName Verdana
+}
+skinparam ClassStereotype {
+  FontColor black
+  FontName Verdana
+}
+skinparam Footer {
+  FontColor black
+  FontName Verdana
+}
+skinparam Header {
+  FontColor black
+  FontName Verdana
+}
+skinparam Hyperlink {
+  Color blue
+}
+skinparam IconPackage {
+  Color black
+  BackgroundColor white
+}
+skinparam IconPrivate {
+  Color black
+  BackgroundColor white
+}
+skinparam IconProtected {
+  Color black
+  BackgroundColor white
+}
+skinparam IconPublic {
+  Color black
+  BackgroundColor white
+}
+skinparam Note {
+  FontColor black
+  FontName Verdana
+}
+skinparam Object {
+  BorderColor black
+}
+skinparam Package {
+  BorderColor black
+  FontColor black
+  FontName Verdana
+}
+skinparam State {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam StereotypeA {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam StereotypeC {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam StereotypeE {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam StereotypeI {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam StereotypeN {
+  BackgroundColor white
+  BorderColor black
+}
+skinparam UseCaseStereoType {
+  FontColor black
+  FontName Verdana
+}
+left to right direction
+
+actor User
+
+rectangle "Virtual Fridge App" << System >> {
+
+  usecase signUp as "Sign Up with Google"
+  usecase signIn as "Sign In with Google"
+  usecase signOut as "Sign Out"
+  usecase deleteAccount as "Delete Account"
+
+  usecase logFood as "Log Food"
+  usecase logImage as "Log Food via Image"
+  usecase logBarcode as "Log Food via Barcode"
+
+  logImage -left-> logFood : <<extend>>
+  logBarcode -left-> logFood : <<extend>>
+
+  usecase viewInventory as "View Fridge"
+  usecase sortExp as "Sort by Expiration Date"
+  usecase sortAdded as "Sort by Added Date"
+
+  sortExp -left-> viewInventory : <<extend>>
+  sortAdded -right-> viewInventory : <<extend>>
+
+  usecase getRecipes as "Get Recipes"
+  usecase genRecipes as "Generate Recipe Suggestions with AI"
+  usecase findRecipes as "Find Recipe Suggestions"
+  usecase viewRecipe as "View Recipe Details"
+  usecase viewNutrition as "View Nutritional Facts"
+
+  genRecipes -left-> getRecipes : <<extend>>
+  findRecipes -right-> getRecipes : <<extend>>
+  viewRecipe -right-> getRecipes : <<extend>>
+}
+
+rectangle googleAuth as "Google Authentication"
+rectangle barcodeApi as "Barcode API"
+rectangle recipeApi as "TheMealDB API"
+rectangle nutritionApi as "OpenFoodFacts API"
+rectangle GeminiApi as "Gemini API"
+
+User - - signUp
+User - - signIn
+User - - signOut
+User - - deleteAccount
+User - - logFood
+User - - viewInventory
+User - - getRecipes
+User - - viewRecipe
+User - - viewNutrition
+
+signUp - - googleAuth
+signIn - - googleAuth
+
+logBarcode - - barcodeApi
+logBarcode - - nutritionApi
+logFood - - nutritionApi
+logImage - - nutritionApi
+logImage - - GeminiApi
+
+genRecipes - - recipeApi
+genRecipes - - GeminiApi
+viewRecipe - - recipeApi
+viewNutrition - - nutritionApi
+@enduml
+
+PlantUML version 1.2022.7(Mon Aug 22 17:01:30 UTC 2022)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

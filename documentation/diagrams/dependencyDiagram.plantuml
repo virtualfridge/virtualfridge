@@ -1,0 +1,56 @@
+@startuml
+title Virtual Fridge Dependency Diagram
+left to right direction
+
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor black
+  RoundCorner 10
+}
+
+' --- External modules on the left ---
+rectangle "Camera" as Camera
+rectangle "Barcode Scanner" as BarcodeScanner
+rectangle "Google Notifications" as GoogleNotifications_Front
+rectangle "Google Auth" as GoogleAuth
+
+' --- Frontend ---
+rectangle "Frontend" as Frontend
+
+' --- Backend with internal components ---
+rectangle "Backend" as Backend {
+    rectangle "FoodItem" as FoodItem
+    rectangle "User" as User
+    rectangle "Cron" as Cron
+    rectangle "Recipe" as Recipe
+}
+
+' --- External APIs and DB on the right ---
+rectangle "Open Food Facts API" as OpenFoodFacts
+rectangle "DB" as DB
+rectangle "Google Notifications" as GoogleNotifications_Back
+rectangle "TheMealDB API" as TheMealDB
+rectangle "Gemini" as Gemini
+
+' --- Connections (Left side to Frontend) ---
+Camera <-- Frontend
+BarcodeScanner <-- Frontend
+GoogleNotifications_Front --> Frontend
+GoogleAuth <-- Frontend
+
+' --- Frontend to Backend ---
+Frontend --> FoodItem
+Frontend --> User
+Frontend --> Recipe
+Frontend --> Cron
+
+' --- Backend internal and external connections ---
+FoodItem --> OpenFoodFacts
+FoodItem --> DB
+User --> DB
+Recipe --> DB
+Recipe --> TheMealDB
+Recipe --> Gemini
+Cron --> GoogleNotifications_Back
+
+@enduml

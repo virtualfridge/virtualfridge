@@ -1,0 +1,54 @@
+@startuml
+title Use Case 3: View Fridge
+
+actor User
+participant "Frontend\n(Android)" as Frontend
+participant "Backend\n(Express)" as Backend
+database "MongoDB" as DB
+
+User -> Frontend: Navigates to home page
+Frontend -> Backend: GET /api/fridge\n(Authorization: Bearer <JWT>)
+
+Backend -> Backend: authenticateToken()\nExtract userId from JWT
+
+Backend -> DB: FoodItem.findAllByUserId(userId)
+DB --> Backend: Array of FoodItem documents
+
+loop For each FoodItem
+    Backend -> DB: FoodItem.getAssociatedFoodType(foodItem)
+    DB --> Backend: FoodType document
+end
+
+Backend --> Frontend: 200 OK\nList<FridgeItem>\n(with foodType metadata)
+
+Frontend -> Frontend: sortFridgeItems()\n(by expiration date)
+Frontend --> User: Display sorted inventory
+
+User -> Frontend: Selects "Sort by Expiration Date"
+Frontend -> Frontend: Re-sort items\n(ascending expiration)
+Frontend --> User: Update display\n(soonest expiry at top)
+
+== Update Item Quantity ==
+User -> Frontend: Drags left on food item
+Frontend --> User: Show percentage slider
+User -> Frontend: Adjusts to desired percent
+Frontend -> Backend: PATCH /api/food-item/{itemId}/percent\n{percentRemaining: 50}
+
+Backend -> DB: FoodItem.update(itemId, {percentLeft: 50})
+DB --> Backend: Updated FoodItem
+
+Backend --> Frontend: 200 OK\nUpdated FoodItem
+Frontend --> User: Update UI with new percentage
+
+== Remove Item ==
+User -> Frontend: Drags item to 0%
+Frontend -> Backend: DELETE /api/food-item/{itemId}
+
+Backend -> DB: FoodItem.delete(itemId)
+DB --> Backend: Deleted FoodItem
+
+Backend --> Frontend: 200 OK
+Frontend -> Frontend: Remove from local list
+Frontend --> User: Item disappears from fridge
+
+@enduml

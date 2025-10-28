@@ -5,6 +5,7 @@ left to right direction
 actor User
 
 rectangle "Virtual Fridge App" << System >> {
+
   ' ==== Authentication ====
   usecase signUp as "Sign Up with Google"
   usecase signIn as "Sign In with Google"
@@ -13,37 +14,42 @@ rectangle "Virtual Fridge App" << System >> {
 
   ' ==== Logging Food ====
   usecase logFood as "Log Food"
-  usecase logBarcode as "Log Food via Barcode"
   usecase logImage as "Log Food via Image"
-'   usecase logList as "Log Food via Pre-Made List"
+  usecase logBarcode as "Log Food via Barcode"
+'  usecase logList as "Log Food via Pre-Made List"
+
+  ' Extensions (placed right after their base)
+  logImage -left-> logFood : <<extend>>
+  logBarcode -left-> logFood : <<extend>>
 
   ' ==== Viewing Food ====
-  usecase viewInventory as "View Food Inventory"
+  usecase viewInventory as "View Fridge"
   usecase sortExp as "Sort by Expiration Date"
   usecase sortAdded as "Sort by Added Date"
 
+  ' Extensions (placed right after base)
+  sortExp -left-> viewInventory : <<extend>>
+  sortAdded -right-> viewInventory : <<extend>>
+
   ' ==== Recipes & Nutrition ====
-  usecase genRecipes as "Generate Recipe Suggestions"
+  usecase getRecipes as "Get Recipes"
+  usecase genRecipes as "Generate Recipe Suggestions with AI"
+  usecase findRecipes as "Find Recipe Suggestions"
   usecase viewRecipe as "View Recipe Details"
   usecase viewNutrition as "View Nutritional Facts"
 
-  ' ==== Relationships (moved to right side) ====
-  logFood -left-> logBarcode : <<extend>>
-  logFood -right-> logImage : <<extend>>
-
-  viewInventory -left-> sortExp : <<extend>>
-  viewInventory -right-> sortAdded : <<extend>>
-  genRecipes -right-> viewRecipe : <<extend>>
+  ' Extensions (placed immediately below related base)
+  genRecipes -left-> getRecipes : <<extend>>
+  findRecipes -right-> getRecipes : <<extend>>
+  viewRecipe -right-> getRecipes : <<extend>>
 }
 
 ' ==== External APIs (RHS) ====
 rectangle googleAuth as "Google Authentication"
 rectangle barcodeApi as "Barcode API"
-rectangle recipeApi as "Recipe API"
-rectangle nutritionApi as "Nutrition API"
-rectangle ComputerVisionAPI as "Computer Vision API"
-rectangle GeminiAPI as "Gemini API"
-
+rectangle recipeApi as "TheMealDB API"
+rectangle nutritionApi as "OpenFoodFacts API"
+rectangle GeminiApi as "Gemini API"
 
 ' ==== User connections ====
 User -- signUp
@@ -52,18 +58,24 @@ User -- signOut
 User -- deleteAccount
 User -- logFood
 User -- viewInventory
-User -- genRecipes
+User -- getRecipes
 User -- viewRecipe
 User -- viewNutrition
 
 ' ==== API connections ====
 signUp -- googleAuth
 signIn -- googleAuth
+
 logBarcode -- barcodeApi
+logBarcode -- nutritionApi
+logFood -- nutritionApi
+logImage -- nutritionApi
+logImage -- GeminiApi
+
 genRecipes -- recipeApi
-genRecipes -- GeminiAPI
+genRecipes -- GeminiApi
 viewRecipe -- recipeApi
 viewNutrition -- nutritionApi
-logImage -- ComputerVisionAPI
 
 @enduml
+
