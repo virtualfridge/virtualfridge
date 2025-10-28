@@ -216,8 +216,8 @@ Failure scenario(s):
 
 <a name="nfr3"></a>
 3. **Mobile App Load Time**
-**Description**: The application should load and become interactive within 2.5 seconds of launch.
-**Justification**: Studies indicate that a large portion of visitors will leave if an application takes too long to load. “Statistics indicate that 40% of visitors will leave a website if it takes longer than 3 seconds to load.” [BrowserStack](https://www.browserstack.com/guide/how-fast-should-a-website-load)
+  - **Description**: The application should load and become interactive within 3 seconds of launch.
+  - **Justification**: Studies indicate that a large portion of visitors will leave if an application takes too long to load. “Statistics indicate that 40% of visitors will leave a website if it takes longer than 3 seconds to load.” [BrowserStack](https://www.browserstack.com/guide/how-fast-should-a-website-load)
 
 ---
 
@@ -261,6 +261,9 @@ Failure scenario(s):
         - **Parameters**: `userId` - Authenticated user's ID from JWT token
         - **Returns**: `void`
         - **Purpose**: Permanently removes user account and all associated data from the system.
+    6. **signOut** (Frontend - Internal)
+        - **Signature**: `handleSignOut()`
+        - **Purpose**: Clears the token stored on the frontend, signing the user out from the current device.
 
 2. **Food Logging Component**
    - **Purpose**: Allows users to add food items to their virtual fridge via barcode scan, image recognition, or manual list selection.
