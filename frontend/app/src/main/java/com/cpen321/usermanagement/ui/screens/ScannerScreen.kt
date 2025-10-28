@@ -1,5 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
+import Icon
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.camera.core.CameraSelector
@@ -9,11 +10,19 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.cpen321.usermanagement.R
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
@@ -25,43 +34,71 @@ fun ScannerScreen(
 ) {
     val context = LocalContext.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    var barcodeDetected by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AndroidView(factory = { ctx ->
-            val previewView = PreviewView(ctx)
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = { ctx ->
+                val previewView = PreviewView(ctx)
 
-            val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-            cameraProviderFuture.addListener({
-                val cameraProvider = cameraProviderFuture.get()
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
+                cameraProviderFuture.addListener({
+                    val cameraProvider = cameraProviderFuture.get()
 
-                val preview = androidx.camera.core.Preview.Builder().build()
-                preview.setSurfaceProvider(previewView.surfaceProvider)
+                    val preview = androidx.camera.core.Preview.Builder().build()
+                    preview.setSurfaceProvider(previewView.surfaceProvider)
 
-                val barcodeScanner = BarcodeScanning.getClient()
+                    val barcodeScanner = BarcodeScanning.getClient()
 
-                val analysisUseCase = ImageAnalysis.Builder()
-                    .build()
-                    .also { analysis ->
-                        analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                            processImageProxy(barcodeScanner, imageProxy, onBarcodeDetected)
+                    val analysisUseCase = ImageAnalysis.Builder()
+                        .build()
+                        .also { analysis ->
+                            analysis.setAnalyzer(cameraExecutor) { imageProxy ->
+                                processImageProxy(
+                                    scanner = barcodeScanner,
+                                    imageProxy = imageProxy,
+                                    onBarcodeDetected = { barcode ->
+                                        if (!barcodeDetected) {
+                                            barcodeDetected = true
+                                            onBarcodeDetected(barcode)
+                                        }
+                                    }
+                                )
+                            }
                         }
+
+                    try {
+                        cameraProvider.unbindAll()
+                        cameraProvider.bindToLifecycle(
+                            context as androidx.lifecycle.LifecycleOwner,
+                            CameraSelector.DEFAULT_BACK_CAMERA,
+                            preview,
+                            analysisUseCase
+                        )
+                    } catch (e: Exception) {
+                        Log.e("ScannerScreen", "Camera bind failed", e)
                     }
+                }, ContextCompat.getMainExecutor(ctx))
 
-                try {
-                    cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(
-                        context as androidx.lifecycle.LifecycleOwner,
-                        CameraSelector.DEFAULT_BACK_CAMERA,
-                        preview,
-                        analysisUseCase
-                    )
-                } catch (e: Exception) {
-                    Log.e("ScannerScreen", "Camera bind failed", e)
-                }
-            }, ContextCompat.getMainExecutor(ctx))
+                previewView
+            }
+        )
 
-            previewView
-        })
+        // Back button overlay
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(16.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Icon(name = R.drawable.ic_arrow_back)
+        }
     }
 }
 
