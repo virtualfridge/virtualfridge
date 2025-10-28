@@ -149,6 +149,7 @@ private fun AppNavHost(
                     onManageProfileClick = { navigationStateManager.navigateToManageProfile() },
 //                    onManageHobbiesClick = { navigationStateManager.navigateToManageHobbies() },
                     onAccountDeleted = { navigationStateManager.handleAccountDeletion() },
+                    onSignOut = { navigationStateManager.handleSignOut()},
                 )
             )
         }

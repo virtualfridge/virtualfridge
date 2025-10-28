@@ -52,7 +52,8 @@ data class ProfileScreenActions(
     val onBackClick: () -> Unit,
     val onManageProfileClick: () -> Unit,
 //    val onManageHobbiesClick: () -> Unit,
-    val onAccountDeleted: () -> Unit
+    val onAccountDeleted: () -> Unit,
+    val onSignOut: () -> Unit
 )
 
 private data class ProfileScreenCallbacks(
@@ -64,7 +65,8 @@ private data class ProfileScreenCallbacks(
     val onDeleteDialogConfirm: () -> Unit,
     val onSuccessMessageShown: () -> Unit,
     val onErrorMessageShown: () -> Unit,
-    val onDarkModeToggle: () -> Unit = {}
+    val onDarkModeToggle: () -> Unit = {},
+    val onSignOutClick: () -> Unit
 )
 
 @Composable
@@ -110,7 +112,11 @@ fun ProfileScreen(
             },
             onSuccessMessageShown = profileViewModel::clearSuccessMessage,
             onErrorMessageShown = profileViewModel::clearError,
-            onDarkModeToggle = profileViewModel::toggleDarkMode
+            onDarkModeToggle = profileViewModel::toggleDarkMode,
+            onSignOutClick = {
+                authViewModel.handleSignOut()
+                actions.onSignOut()
+            }
         )
     )
 }
@@ -149,7 +155,8 @@ private fun ProfileContent(
             onManageProfileClick = callbacks.onManageProfileClick,
 //            onManageHobbiesClick = callbacks.onManageHobbiesClick,
             onDeleteAccountClick = callbacks.onDeleteAccountClick,
-            onDarkModeToggle = callbacks.onDarkModeToggle
+            onDarkModeToggle = callbacks.onDarkModeToggle,
+            onSignOutClick = callbacks.onSignOutClick
         )
     }
 
@@ -197,6 +204,7 @@ private fun ProfileBody(
 //    onManageHobbiesClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
     onDarkModeToggle: () -> Unit,
+    onSignOutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -217,7 +225,8 @@ private fun ProfileBody(
                     onManageProfileClick = onManageProfileClick,
 //                    onManageHobbiesClick = onManageHobbiesClick,
                     onDeleteAccountClick = onDeleteAccountClick,
-                    onDarkModeToggle = onDarkModeToggle
+                    onDarkModeToggle = onDarkModeToggle,
+                    onSignOutClick = onSignOutClick
                 )
             }
         }
@@ -231,6 +240,7 @@ private fun ProfileMenuItems(
 //    onManageHobbiesClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
     onDarkModeToggle: () -> Unit,
+    onSignOutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
@@ -254,7 +264,8 @@ private fun ProfileMenuItems(
         )
 
         AccountSection(
-            onDeleteAccountClick = onDeleteAccountClick
+            onDeleteAccountClick = onDeleteAccountClick,
+            onSignOutClick = onSignOutClick
         )
     }
 }
@@ -315,12 +326,14 @@ private fun SettingsSection(
 @Composable
 private fun AccountSection(
     onDeleteAccountClick: () -> Unit,
+    onSignOutClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(LocalSpacing.current.medium)
     ) {
+        SignOutButton(onClick = onSignOutClick)
         DeleteAccountButton(onClick = onDeleteAccountClick)
     }
 }
@@ -344,6 +357,17 @@ private fun ManageHobbiesButton(
         text = stringResource(R.string.manage_hobbies),
         iconRes = R.drawable.ic_heart_smile,
         onClick = onClick,
+    )
+}
+
+@Composable
+private fun SignOutButton(
+    onClick: () -> Unit
+) {
+    MenuButtonItem(
+        text = stringResource(id = R.string.sign_out),
+        iconRes = R.drawable.ic_sign_out,
+        onClick = onClick
     )
 }
 

@@ -155,6 +155,16 @@ class NavigationStateManager @Inject constructor() {
         navigateToAuthWithMessage("Account deleted successfully!")
     }
 
+    fun handleSignOut() {
+        _navigationState.value = _navigationState.value.copy(isNavigating = true)
+        updateAuthenticationState(
+            isAuthenticated = false,
+            needsProfileCompletion = false,
+            isLoading = false,
+        )
+        navigateToAuthWithMessage("Signed out successfully!")
+    }
+
     fun handleProfileCompletion() {
         _navigationState.value = _navigationState.value.copy(needsProfileCompletion = false)
         navigateToMain()
