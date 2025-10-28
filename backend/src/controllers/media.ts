@@ -78,7 +78,7 @@ export class MediaController {
         });
       }
 
-      const displayName = this.toTitleCase(analysis.name);
+      const displayName = toTitleCase(analysis.name);
 
       let foodType = await foodTypeModel.findByName(displayName);
       if (!foodType) {
@@ -118,12 +118,13 @@ export class MediaController {
     }
   }
 
-  private toTitleCase(input: string): string {
-    return input
-      .trim()
-      .toLowerCase()
-      .split(/\s+/)
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-  }
+}
+
+function toTitleCase(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 }
