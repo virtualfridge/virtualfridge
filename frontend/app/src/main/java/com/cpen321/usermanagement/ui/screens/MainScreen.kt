@@ -80,6 +80,7 @@ fun MainScreen(
             showScanner = false
             mainViewModel.handleScannedBarcode(barcode)
         },
+        onScannerClose = { showScanner = false },
         onSuccessMessageShown = {
             mainViewModel.clearSuccessMessage()
             fridgeViewModel.clearSuccessMessage()
@@ -168,6 +169,7 @@ private fun MainContent(
     showScanner: Boolean,
     onScanRequested: () -> Unit,
     onBarcodeDetected: (String) -> Unit,
+    onScannerClose: () -> Unit,
     onSuccessMessageShown: () -> Unit,
     onErrorMessageShown: () -> Unit,
     onItemSelected: (String) -> Unit,
@@ -204,6 +206,7 @@ private fun MainContent(
             paddingValues = paddingValues,
             showScanner = showScanner,
             onBarcodeDetected = onBarcodeDetected,
+            onScannerClose = onScannerClose,
             fridgeUiState = fridgeUiState,
             onItemSelected = onItemSelected,
             onItemPercentChanged = onItemPercentChanged,
@@ -282,6 +285,7 @@ private fun FridgeListBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
     onBarcodeDetected: (String) -> Unit,
+    onScannerClose: () -> Unit,
     fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
     onItemSelected: (String) -> Unit,
     onItemPercentChanged: (String, Int) -> Unit,
@@ -296,7 +300,7 @@ private fun FridgeListBody(
         if (showScanner) {
             ScannerScreen(
                 onBarcodeDetected = onBarcodeDetected,
-                onClose = { /* handled via barcode detection */ }
+                onClose = onScannerClose
             )
         } else {
             when {
