@@ -13,18 +13,23 @@ class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
             return chain.proceed(originalRequest)
         }
 
-        val newRequest = originalRequest.newBuilder()
-            .addHeader("Authorization", "Bearer $token")
+        val authedRequest = originalRequest.newBuilder()
+            .header("Authorization", "Bearer $token")
             .build()
 
-        var response = chain.proceed(newRequest)
+        val response = chain.proceed(authedRequest)
 
-        // Retry if error
-        if (response.code != 200) {
+        // Retry once only on unauthorized, after closing the first response
+        if (response.code == 401) {
+            try {
+                response.close()
+            } catch (_: Exception) {
+            }
+
             val retryRequest = originalRequest.newBuilder()
                 .header("Authorization", "Bearer $token")
                 .build()
-            response = chain.proceed(retryRequest)
+            return chain.proceed(retryRequest)
         }
 
         return response

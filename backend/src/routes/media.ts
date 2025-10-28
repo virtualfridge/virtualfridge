@@ -14,4 +14,11 @@ router.post(
   mediaController.uploadImage
 );
 
+router.post(
+  '/vision',
+  authenticateToken,
+  upload.single('media'),
+  mediaController.visionScan
+);
+
 export default router;
