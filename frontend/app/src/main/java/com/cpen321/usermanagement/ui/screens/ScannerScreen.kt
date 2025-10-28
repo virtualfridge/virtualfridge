@@ -25,6 +25,7 @@ fun ScannerScreen(
 ) {
     val context = LocalContext.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
+    var barcodeDetected by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(factory = { ctx ->
@@ -43,7 +44,16 @@ fun ScannerScreen(
                     .build()
                     .also { analysis ->
                         analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                            processImageProxy(barcodeScanner, imageProxy, onBarcodeDetected)
+                            processImageProxy(
+                                scanner = barcodeScanner,
+                                imageProxy = imageProxy,
+                                onBarcodeDetected = { barcode ->
+                                    if (!barcodeDetected) {
+                                        barcodeDetected = true
+                                        onBarcodeDetected(barcode)
+                                    }
+                                }
+                            )
                         }
                     }
 

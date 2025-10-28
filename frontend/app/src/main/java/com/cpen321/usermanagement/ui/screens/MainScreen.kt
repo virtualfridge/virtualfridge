@@ -56,6 +56,8 @@ fun MainScreen(
     // Navigate to barcode result screen when a barcode is successfully scanned
     LaunchedEffect(mainUiState.barcodeResult) {
         if (mainUiState.barcodeResult != null) {
+            // Refresh fridge items to show the newly added item
+            fridgeViewModel.loadFridgeItems()
             onBarcodeResultClick()
         }
     }
