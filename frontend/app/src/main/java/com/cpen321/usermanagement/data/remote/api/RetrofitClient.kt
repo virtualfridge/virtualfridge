@@ -15,7 +15,9 @@ object RetrofitClient {
     private var authToken: String? = null
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        // Avoid logging large multipart bodies (e.g., images)
+        level = HttpLoggingInterceptor.Level.HEADERS
+        redactHeader("Authorization")
     }
 
     private val authInterceptor = AuthInterceptor { authToken }

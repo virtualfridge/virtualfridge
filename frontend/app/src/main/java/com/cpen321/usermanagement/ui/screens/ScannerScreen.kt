@@ -270,7 +270,7 @@ private suspend fun uploadImageToBackend(file: File): Boolean {
             Log.d("ScannerScreen", "Produce scan succeeded")
             true
         } else {
-            Log.e("ScannerScreen", "Produce scan failed: ${'$'}{response.errorBody()?.string()}")
+            Log.e("ScannerScreen", "Produce scan failed: ${response.errorBody()?.string()}")
             false
         }
     } catch (e: Exception) {
