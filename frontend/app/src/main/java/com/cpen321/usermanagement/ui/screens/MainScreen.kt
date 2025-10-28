@@ -300,7 +300,11 @@ private fun FridgeListBody(
         if (showScanner) {
             ScannerScreen(
                 onBarcodeDetected = onBarcodeDetected,
-                onClose = onScannerClose
+                onClose = onScannerClose,
+                onVisionItemAdded = { _ ->
+                    // Refresh fridge contents after a successful Vision add
+                    fridgeViewModel.loadFridgeItems()
+                }
             )
         } else {
             when {
