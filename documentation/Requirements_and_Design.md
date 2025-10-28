@@ -38,11 +38,15 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 2. **Barcode Scanner**: A module that scans a barcode and retrieves the ID of the associated product.
 
-3. **The MealDB API**: An API that returns structured recipe data based on passed in parameters like ingredients.
+3. **Gemini API**: Google's AI service that processes images of food items to identify and classify them. When given an image, Gemini analyzes the visual content and determines what food item is present, if any.
 
-4. **Open Food Facts API**: An API that returns nutritional data, images, product name, ingredients, and product ID based on passed in parameters.
+4. **The MealDB API**: An API that returns structured recipe data based on passed in parameters like ingredients.
 
-5. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
+5. **Open Food Facts API**: An API that returns nutritional data, images, product name, ingredients, and product ID based on passed in parameters.
+
+6. **DeepSeek (AI)**: An AI service that generates creative and personalized recipe suggestions based on available ingredients using advanced language models.
+
+7. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
 
 ### **3.4. Use Case Description**
 - Use cases for feature 1: Authentication
@@ -51,8 +55,8 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 3. **Sign Out**: Users can securely log out of the application at any time.  
 4. **Delete Account**: Users can permanently remove their account from the system, after which their associated data will be deleted. 
 - Use cases for feature 2: Log Food
-5. **Log Food via Barcode**: Users can scan the barcode of a food item using the in-app barcode scanner to automatically retrieve and log details such as name, brand, and nutritional information.  
-6. **Log Food via Image**: Users can take a photo of a food item without a barcode, and the app will use image recognition to identify and log the item.  
+5. **Log Food via Barcode**: Users can scan the barcode of a food item using the in-app barcode scanner to automatically retrieve and log details such as name, brand, and nutritional information.
+6. **Log Food via Image**: Users can take a photo of a food item without a barcode, and the app will use Gemini API to identify and log the item.
 7. **Log Food via Pre-Made List**: Users can manually select a food item from a curated list within the app to quickly add common items. 
 - Use cases for feature 3: View Fridge
 8. **View Food Inventory**: Users can access the home page to see a list of all logged food items currently in their virtual fridge.  
@@ -67,50 +71,72 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 ### **3.5. Formal Use Case Specifications (5 Most Major Use Cases)**
 <a name="uc1"></a>
 
-#### Use Case 1: Sign Up with Google
+#### Use Case 1: Log Food via Image
 
-**Description**: Users create a new account for the virtual fridge application by linking their Google account. Each Google account can only be registered once.
+**Description**: Users add a food item to their virtual fridge by taking a photo of a food item without a barcode, and the app uses Gemini API to identify and log the item.
 
-**Primary actor(s)**: User 
-    
+**Primary actor(s)**: User, Gemini API, Open Food Facts API
+
 **Main success scenario**:
-1. User selects “Sign Up with Google.”  
-2. System redirects user to Google authentication.  
-3. User enters valid Google credentials.  
-4. System verifies credentials and creates a new unique account.  
-5. User is redirected to the app home page with their new account.  
+1. User selects "Add Food" and chooses the image capture option.
+2. User takes a photo of the food item using the in-app camera.
+3. System sends the image to Gemini API for identification.
+4. Gemini API analyzes the image and identifies the food item.
+5. System retrieves additional details (nutritional info, estimated expiration) from Open Food Facts API using the identified food name.
+6. User reviews the identified food item details.
+7. User clicks "Confirm".
+8. System adds the food item to the user's fridge inventory.
 
 **Failure scenario(s)**:
-- 1a. User cancels Google authentication.  
-  - 1a1. System returns to login screen without creating an account.  
+- 1a. Image is too blurry or lighting is insufficient.
+  - 1a1. Gemini API returns low confidence result or error.
+  - 1a2. System displays error and prompts user to retake the photo.
 
-- 2a. User enters invalid credentials.  
-  - 2a1. System denies access and prompts retry.  
+- 2a. Gemini API cannot identify the item as food.
+  - 2a1. System notifies user that the image does not appear to contain food.
+  - 2a2. System offers alternative methods (barcode scan or manual selection from pre-made list).
 
-- 3a. Google account already linked to an existing user.  
-  - 3a1. System displays error that duplicate registration is not allowed.  
+- 3a. Multiple food items detected in the image.
+  - 3a1. Gemini API returns multiple possible food items.
+  - 3a2. System prompts user to select which item they want to add or retake photo with single item.
+
+- 4a. Network connection unavailable or Gemini API is unreachable.
+  - 4a1. System displays error message: "Unable to process image. Please check your connection and try again."  
 
 <a name="uc2"></a>
 
 #### Use Case 2: Log Food via Barcode
 
-**Description**: Users add a food item to their virtual fridge by scanning its barcode with the in-app scanner.  
+**Description**: Users add a food item to their virtual fridge by scanning its barcode with the in-app scanner.
 
-**Primary actor(s)**: User  
+**Primary actor(s)**: User, Barcode Scanner, Open Food Facts API
 
-Main success scenario:
-1. User selects “Add Food” and chooses the barcode option.  
-2. User scans the barcode of the food item.  
-3. System retrieves details (name, brand, nutritional info) from the database.
-4. User clicks “Confirm”
-4. System adds the food item to the user's fridge inventory.  
+**Main success scenario**:
+1. User selects "Add Food" and chooses the barcode scan option.
+2. System opens the camera scanner interface with a back button in the top-left corner.
+3. User positions the barcode in the camera view.
+4. System detects and processes the barcode (one scan only).
+5. System retrieves details (name, brand, nutritional info) from the Open Food Facts API database.
+6. System displays confirmation screen with food item details.
+7. User reviews the item and clicks "Confirm".
+8. System adds the food item to the user's fridge inventory.
+9. System refreshes the fridge list to display the newly added item.
 
-Failure scenario(s):
-- 1a. Barcode is unreadable or damaged.  
-  - 1a1. System displays error and prompts user to rescan or choose another method.  
+**Failure scenario(s)**:
+- 1a. User wants to cancel scanning.
+  - 1a1. User presses the back button in top-left corner.
+  - 1a2. System closes the scanner and returns to the main fridge screen.
 
-- 2a. Food item not found in database.  
-  - 2a1. System notifies user and offers manual entry.  
+- 2a. Barcode is unreadable or damaged.
+  - 2a1. System displays error and prompts user to rescan or choose another method.
+
+- 3a. Food item not found in database.
+  - 3a1. System notifies user that the product could not be found.
+  - 3a2. System offers alternative methods (image capture or manual selection from pre-made list).
+
+- 4a. Multiple rapid scans detected.
+  - 4a1. System prevents duplicate submissions by processing only the first detected barcode.
+  - 4a2. System ensures only one food item is created per scan session.  
 
 <a name="uc3"></a>
 
@@ -141,9 +167,9 @@ Failure scenario(s):
 
 #### Use Case 4: Generate Recipe Suggestions
 
-**Description**: Users request recipe suggestions using one or more ingredients from their virtual fridge.  
+**Description**: Users request recipe suggestions using one or more ingredients from their virtual fridge.
 
-**Primary actor(s): User  
+**Primary actor(s)**: User, The MealDB API, DeepSeek (AI)  
 
 Main success scenarios:
 For Recipe Via API
@@ -176,9 +202,9 @@ Failure scenario(s):
 
 #### Use Case 5: View Nutritional Facts
 
-**Description**: Users view the nutritional information for a selected food item.  
+**Description**: Users view the nutritional information for a selected food item.
 
-**Primary actor(s)**: User
+**Primary actor(s)**: User, Open Food Facts API
 
 Main success scenario:
 1. From the main menu, User clicks on a food item stored in their fridge
@@ -230,8 +256,8 @@ Failure scenario(s):
 
 <a name="nfr2"></a>
 2. **Image Recognition Accuracy**
-  - **Description**: The image recognition feature should achieve at least a 95% accuracy rate in identifying food items.
-  - **Justification**: Users will be displeased if the OCR consistently makes mistakes when logging produce. The standard acceptance is around 95-97%. A well-implemented solution typically delivers 95-97% accuracy” [softservebs](http://softservebs.com/en/resources/ai-product-recognition/)
+  - **Description**: The Gemini API-based image recognition feature should achieve at least a 95% accuracy rate in identifying food items.
+  - **Justification**: Users will be displeased if the AI consistently makes mistakes when logging produce. The standard acceptance is around 95-97%. A well-implemented solution typically delivers 95-97% accuracy" [softservebs](http://softservebs.com/en/resources/ai-product-recognition/)
 
 <a name="nfr3"></a>
 3. **Mobile App Load Time**
@@ -251,13 +277,13 @@ Failure scenario(s):
         - **Purpose**: Create, update, and delete user accounts in the system database.  
 
 2. **Food Logging Component**
-   - **Purpose**: Allows users to add food items to their virtual fridge via barcode scan, image recognition, or manual list selection.  
-   - **Interfaces**:  
-     1. **Barcode Scanner Interface**  
-        - **Purpose**: Scan and decode food product barcodes.  
-     2. **Image Recognition Module**  
-        - **Purpose**: Process pictures of food items and identify them.  
-     3. **Pre-Made List Selector**  
+   - **Purpose**: Allows users to add food items to their virtual fridge via barcode scan, image recognition, or manual list selection.
+   - **Interfaces**:
+     1. **Barcode Scanner Interface**
+        - **Purpose**: Scan and decode food product barcodes.
+     2. **Image Recognition Module (Gemini API)**
+        - **Purpose**: Process pictures of food items and identify them using Google's Gemini AI.
+     3. **Pre-Made List Selector**
         - **Purpose**: Provide users with a quick list of common foods to log manually.  
 
 3. **Inventory Management Component**
@@ -339,10 +365,10 @@ Failure scenario(s):
    - **Purpose**: Sends push notifications and reminders (e.g., when items are close to expiration) to help users reduce food waste.  
 
 6. **The Meal DB API**
-   - **Purpose**: Provides structured recipe data (overview, ingredients, instructions) that the app can display to users for meal preparation.  
+   - **Purpose**: Provides structured recipe data (overview, ingredients, instructions) that the app can display to users for meal preparation.
 
-7. **OCR**
-   - **Purpose**: Processes images of food items without barcodes, extracting text or features to help identify and log them accurately.  
+7. **Gemini API**
+   - **Purpose**: Google's AI service that processes images of food items to identify and classify them. Analyzes visual content to determine what food item is present, if any, enabling image-based food logging.  
 
 ### **4.4. Frameworks**
 1. **Express.js**
@@ -353,9 +379,9 @@ Failure scenario(s):
 ![](images/dependencyDiagram.png)
 
 ### **4.6. Use Case Sequence Diagram (5 Most Major Use Cases)**
-1. [**Sign up with Google**](#uc1)
+1. [**Log Food via Image**](#uc1)
 
-![](images/signUpDiagram.png)
+![](images/imageDiagram.png)
 
 2. [**Log Food via Barcode**](#uc2)
 
