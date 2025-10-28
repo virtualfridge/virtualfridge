@@ -688,9 +688,58 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
    - **Purpose**: Provides structured recipe data (overview, ingredients, instructions) that the app can display to users for meal preparation.
 
 ### **4.4. Frameworks**
+
+#### **Backend Frameworks**
+
 1. **Express.js**
-  - **Purpose**: Provides a lightweight and flexible web application framework for building the backend server. It handles routing, middleware, and communication between the client, server, and database.  
-  - **Reason**: Express.js is widely adopted, simple to set up, and highly extensible. Its large ecosystem of middleware makes it ideal for quickly developing APIs to connect the virtual fridge application's frontend with MongoDB and external modules. 
+   - **Purpose**: Lightweight and flexible web application framework for building the backend server. Handles routing, middleware, and communication between the client, server, and database.
+   - **Reason**: Express.js is widely adopted, simple to set up, and highly extensible. Its large ecosystem of middleware makes it ideal for quickly developing RESTful APIs to connect the virtual fridge application's frontend with MongoDB and external modules.
+
+2. **Mongoose**
+   - **Purpose**: Object Data Modeling (ODM) library for MongoDB and Node.js. Provides schema-based validation and elegant MongoDB object modeling.
+   - **Reason**: Mongoose simplifies database interactions by providing a straightforward schema-based solution to model application data. It includes built-in type casting, validation, query building, and business logic hooks.
+
+3. **Zod**
+   - **Purpose**: TypeScript-first schema declaration and validation library. Ensures runtime type safety and request validation.
+   - **Reason**: Zod provides compile-time and runtime type safety by validating API request bodies and responses. It integrates seamlessly with TypeScript and prevents invalid data from reaching the database or business logic.
+
+#### **Frontend Frameworks**
+
+4. **Jetpack Compose**
+   - **Purpose**: Modern declarative UI toolkit for building native Android interfaces using Kotlin.
+   - **Reason**: Jetpack Compose simplifies UI development with a declarative approach, reducing boilerplate code and making UI state management more intuitive. It integrates seamlessly with Android's lifecycle and supports Material Design 3.
+
+5. **Hilt (Dagger)**
+   - **Purpose**: Dependency injection framework for Android that reduces boilerplate code for manual DI.
+   - **Reason**: Hilt provides compile-time correctness, runtime performance, and scalability for dependency injection. It manages the lifecycle of components and ensures proper scoping of dependencies (ViewModels, Repositories, API clients).
+
+6. **Retrofit**
+   - **Purpose**: Type-safe HTTP client for Android and Java. Converts REST APIs into callable Java/Kotlin interfaces.
+   - **Reason**: Retrofit simplifies network requests by automatically serializing/deserializing JSON responses using Gson. It integrates with Kotlin Coroutines for asynchronous operations and provides built-in error handling.
+
+7. **Kotlin Coroutines**
+   - **Purpose**: Asynchronous programming framework for Kotlin that simplifies background task execution.
+   - **Reason**: Coroutines provide a lightweight and efficient way to handle asynchronous operations like network requests and database queries without blocking the main thread. They integrate seamlessly with Android lifecycle components.
+
+8. **Navigation Compose**
+   - **Purpose**: Navigation framework for Jetpack Compose that handles screen transitions and deep linking.
+   - **Reason**: Navigation Compose provides type-safe navigation between screens, manages the back stack, and handles argument passing between destinations in a Compose-first architecture.
+
+9. **CameraX**
+   - **Purpose**: Jetpack camera library that simplifies camera app development with consistent behavior across devices.
+   - **Reason**: CameraX abstracts the complexity of the Camera2 API and provides a simple, consistent API for camera operations like preview, image capture, and image analysis (used for barcode scanning).
+
+10. **ML Kit Barcode Scanning**
+    - **Purpose**: Google's mobile SDK for barcode scanning that works on-device without network connectivity.
+    - **Reason**: ML Kit provides fast, accurate barcode scanning with support for multiple formats (UPC, EAN, QR codes). The bundled model ensures immediate availability without downloading additional resources.
+
+11. **Coil**
+    - **Purpose**: Image loading library for Android backed by Kotlin Coroutines.
+    - **Reason**: Coil is lightweight, fast, and integrates natively with Jetpack Compose. It handles image caching, transformations, and lazy loading efficiently.
+
+12. **DataStore (Preferences)**
+    - **Purpose**: Modern data storage solution for storing key-value pairs and typed objects asynchronously.
+    - **Reason**: DataStore provides a safe and asynchronous alternative to SharedPreferences with better consistency guarantees and support for Kotlin Coroutines. Used for storing JWT tokens and user preferences. 
 
 ### **4.5. Dependencies Diagram**
 ![](images/dependencyDiagram.png)
