@@ -742,7 +742,7 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
     - **Reason**: DataStore provides a safe and asynchronous alternative to SharedPreferences with better consistency guarantees and support for Kotlin Coroutines. Used for storing JWT tokens and user preferences. 
 
 ### **4.5. Dependencies Diagram**
-![](images/dependencyDiagram.png)
+![](images/dependencyDiagram.svg)
 
 ### **4.6. Use Case Sequence Diagrams**
 
@@ -763,7 +763,7 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 - Backend → Open Food Facts API for nutritional data
 - Database operations: `FoodType.findByName()`, `FoodItem.create()`
 
-![](images/imageDiagram.png)
+![](images/imageDiagram.svg)
 
 ---
 
@@ -777,7 +777,7 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 - Database operations: `FoodType.findByBarcode()`, `FoodType.create()`, `FoodItem.create()`
 - Includes fridge list refresh after confirmation
 
-![](images/barcodeDiagram.png)
+![](images/barcodeDiagram.svg)
 
 ---
 
@@ -791,7 +791,7 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 - Update quantity: `PATCH /api/food-item/{itemId}/percent`
 - Remove item: `DELETE /api/food-item/{itemId}`
 
-![](images/viewFridgeDiagram.png)
+![](images/viewFridgeDiagram.svg)
 
 ---
 
@@ -818,7 +818,7 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 - Database operations: `FoodItem.findById()`, `FoodItem.getAssociatedFoodType()`
 - Returns NutritionInfo from FoodType.nutrients (17 nutritional fields per 100g)
 
-![](images/viewNutritionDiagram.png)
+![](images/viewNutritionDiagram.svg)
 
 ### **4.7. Design and Ways to Test Non-Functional Requirements**
 1. [**Barcode Scanning Response Time**](#nfr1)
