@@ -4,7 +4,11 @@
 
 | **Change Date**   | **Modified Sections** | **Rationale** |
 | ----------------- | --------------------- | ------------- |
-| 20/09/25          | Initial Commit
+| 20/09/25          | All                   | Initial Commit |
+| 27/09/25          | 3.3 Actors Description | Added Gemini API which was missing |
+| 27/09/25          | 3.5 Formal Use Case Specifications | Fix failure scenario numbering, do not use authentication as a major use case, make naming more consistent|
+| 27/09/25          | 4.4 Frameworks | Filled this in more completely; before it just had express|
+|27/09/25          | 4.2 Databases|Added more details with the actual fields in the database|
 
 ---
 
