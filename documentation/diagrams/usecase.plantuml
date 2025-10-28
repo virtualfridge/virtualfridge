@@ -13,27 +13,31 @@ rectangle "Virtual Fridge App" << System >> {
 
   ' ==== Logging Food ====
   usecase logFood as "Log Food"
-  usecase logBarcode as "Log Food via Barcode"
   usecase logImage as "Log Food via Image"
+  usecase logBarcode as "Log Food via Barcode"
 '   usecase logList as "Log Food via Pre-Made List"
 
   ' ==== Viewing Food ====
-  usecase viewInventory as "View Food Inventory"
+  usecase viewInventory as "View Fridge"
   usecase sortExp as "Sort by Expiration Date"
   usecase sortAdded as "Sort by Added Date"
 
   ' ==== Recipes & Nutrition ====
-  usecase genRecipes as "Generate Recipe Suggestions"
+  usecase genRecipes as "Generate Recipe Suggestions with AI"
+  usecase findRecipes as "Find Recipe Suggestions"
+  usecase getRecipes as "Get Recipes"
   usecase viewRecipe as "View Recipe Details"
   usecase viewNutrition as "View Nutritional Facts"
 
   ' ==== Relationships (moved to right side) ====
-  logFood -right-> logBarcode : <<extend>>
-  logFood -left-> logImage : <<extend>>
+  logBarcode -left-> logFood : <<extend>>
+  logImage -left-> logFood : <<extend>>
 
-  viewInventory -left-> sortExp : <<extend>>
-  viewInventory -right-> sortAdded : <<extend>>
-  genRecipes -right-> viewRecipe : <<extend>>
+  sortExp -left-> viewInventory : <<extend>>
+  sortAdded -right-> viewInventory : <<extend>>
+  viewRecipe -right-> getRecipes : <<extend>>
+  genRecipes -left-> getRecipes : <<extend>>
+  findRecipes -right-> getRecipes : <<extend>>
 }
 
 ' ==== External APIs (RHS) ====
@@ -51,7 +55,7 @@ User -- signOut
 User -- deleteAccount
 User -- logFood
 User -- viewInventory
-User -- genRecipes
+User -- getRecipes
 User -- viewRecipe
 User -- viewNutrition
 
