@@ -268,59 +268,201 @@ Failure scenario(s):
 
 ## 4. Designs Specification
 ### **4.1. Main Components**
+
 1. **Authentication Component**
-   - **Purpose**: Manages all user account operations including sign-up, sign-in, sign-out, and account deletion using Google authentication.  
-   - **Interfaces**:  
-     1. **Google Auth API**  
-        - **Purpose**: Verify user identity and credentials.  
-     2. **User Account Manager**  
-        - **Purpose**: Create, update, and delete user accounts in the system database.  
+   - **Purpose**: Manages all user account operations including sign-up, sign-in, sign-out, and account deletion using Google authentication.
+   - **Interfaces**:
+
+     1. **signUpWithGoogle** (Frontend → Backend)
+        - **REST Route**: `POST /api/auth/signup`
+        - **Signature**: `AuthResult signUpWithGoogle(String idToken)`
+        - **Parameters**: `idToken` - Google OAuth ID token from client
+        - **Returns**: `AuthResult` - Contains JWT access token and user profile data
+        - **Purpose**: Creates a new user account by verifying the Google ID token and storing user information in the database. Returns authentication credentials for subsequent requests.
+
+     2. **signInWithGoogle** (Frontend → Backend)
+        - **REST Route**: `POST /api/auth/signin`
+        - **Signature**: `AuthResult signInWithGoogle(String idToken)`
+        - **Parameters**: `idToken` - Google OAuth ID token from client
+        - **Returns**: `AuthResult` - Contains JWT access token and user profile data
+        - **Purpose**: Authenticates existing users by verifying their Google credentials and returning a session token for API access.
+
+     3. **verifyGoogleToken** (Backend → Google Auth API)
+        - **External API**: Google OAuth2 API
+        - **Signature**: `GoogleUserInfo verifyGoogleToken(String idToken, String audience)`
+        - **Parameters**: `idToken` - Token to verify, `audience` - Expected client ID
+        - **Returns**: `GoogleUserInfo` - Contains googleId, email, name, profilePicture
+        - **Purpose**: Validates the authenticity of Google ID tokens by communicating with Google's authentication servers.
+
+     4. **createUser** (Backend - Internal)
+        - **Signature**: `User createUser(GoogleUserInfo userInfo)`
+        - **Parameters**: `userInfo` - Validated user information from Google
+        - **Returns**: `User` - Created user document with MongoDB ID
+        - **Purpose**: Stores new user profile in the database with default preferences and settings.
+
+     5. **deleteAccount** (Frontend → Backend)
+        - **REST Route**: `DELETE /api/user`
+        - **Signature**: `void deleteAccount(String userId)`
+        - **Parameters**: `userId` - Authenticated user's ID from JWT token
+        - **Returns**: `void`
+        - **Purpose**: Permanently removes user account and all associated data from the system.
 
 2. **Food Logging Component**
    - **Purpose**: Allows users to add food items to their virtual fridge via barcode scan, image recognition, or manual list selection.
    - **Interfaces**:
-     1. **Barcode Scanner Interface**
-        - **Purpose**: Scan and decode food product barcodes.
-     2. **Image Recognition Module (Gemini API)**
-        - **Purpose**: Process pictures of food items and identify them using Google's Gemini AI.
-     3. **Pre-Made List Selector**
-        - **Purpose**: Provide users with a quick list of common foods to log manually.  
+
+     1. **sendBarcode** (Frontend → Backend)
+        - **REST Route**: `POST /api/fridge/barcode`
+        - **Signature**: `FridgeItem sendBarcode(String barcode, String userId)`
+        - **Parameters**: `barcode` - Scanned barcode number, `userId` - Authenticated user ID
+        - **Returns**: `FridgeItem` - Created food item with details and nutritional info
+        - **Purpose**: Processes barcode scan by querying Open Food Facts API and creating a food item in the user's fridge.
+
+     2. **queryBarcodeData** (Backend → Open Food Facts API)
+        - **External API**: `GET https://world.openfoodfacts.org/api/v0/product/{barcode}.json`
+        - **Signature**: `ProductData queryBarcodeData(String barcode)`
+        - **Parameters**: `barcode` - Product barcode identifier
+        - **Returns**: `ProductData` - Product name, brand, nutrients, image, expiration info
+        - **Purpose**: Retrieves comprehensive product information from the Open Food Facts database using the barcode.
+
+     3. **identifyFoodFromImage** (Frontend → Backend)
+        - **REST Route**: `POST /api/fridge/image`
+        - **Signature**: `FridgeItem identifyFoodFromImage(Image image, String userId)`
+        - **Parameters**: `image` - Captured food image (multipart/form-data), `userId` - Authenticated user ID
+        - **Returns**: `FridgeItem` - Identified food item with details
+        - **Purpose**: Sends food image to Gemini API for identification and creates a fridge item with the recognized food.
+
+     4. **analyzeImageWithGemini** (Backend → Gemini API)
+        - **External API**: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
+        - **Signature**: `FoodIdentification analyzeImageWithGemini(byte[] imageData)`
+        - **Parameters**: `imageData` - Base64-encoded image bytes
+        - **Returns**: `FoodIdentification` - Identified food name, confidence score, alternatives
+        - **Purpose**: Uses Google's Gemini AI to analyze the image and identify what food item is present.
+
+     5. **addManualFoodItem** (Frontend → Backend)
+        - **REST Route**: `POST /api/food-item`
+        - **Signature**: `FridgeItem addManualFoodItem(String foodTypeName, String userId)`
+        - **Parameters**: `foodTypeName` - Name of food from pre-made list, `userId` - Authenticated user ID
+        - **Returns**: `FridgeItem` - Created food item with default expiration and nutrition
+        - **Purpose**: Adds a food item to the fridge by manual selection from a curated list of common foods.
 
 3. **Inventory Management Component**
-   - **Purpose**: Displays and manages the list of all food items in the virtual fridge, including sorting by expiration date, added date, or nutritional values.  
-   - **Interfaces**:  
-     1. **Inventory Display UI**  
-        - **Purpose**: Show all logged food items to the user.  
-     2. **Sorting Engine**  
-        - **Purpose**: Apply user-selected sorting criteria (expiration, date added, nutrition).  
+   - **Purpose**: Displays and manages the list of all food items in the virtual fridge, including sorting by expiration date, added date, or nutritional values.
+   - **Interfaces**:
+
+     1. **getFridgeItems** (Frontend → Backend)
+        - **REST Route**: `GET /api/fridge`
+        - **Signature**: `List<FridgeItem> getFridgeItems(String userId)`
+        - **Parameters**: `userId` - Authenticated user ID from JWT token
+        - **Returns**: `List<FridgeItem>` - All food items in user's fridge with complete details
+        - **Purpose**: Retrieves the complete inventory of food items for display and management in the UI.
+
+     2. **updateFoodItemPercent** (Frontend → Backend)
+        - **REST Route**: `PATCH /api/food-item/{itemId}/percent`
+        - **Signature**: `FridgeItem updateFoodItemPercent(String itemId, int percentRemaining)`
+        - **Parameters**: `itemId` - Food item identifier, `percentRemaining` - Updated percentage (0-100)
+        - **Returns**: `FridgeItem` - Updated food item
+        - **Purpose**: Updates the remaining quantity of a food item as users consume it through drag gestures.
+
+     3. **deleteFoodItem** (Frontend → Backend)
+        - **REST Route**: `DELETE /api/food-item/{itemId}`
+        - **Signature**: `void deleteFoodItem(String itemId, String userId)`
+        - **Parameters**: `itemId` - Food item to remove, `userId` - Authenticated user ID
+        - **Returns**: `void`
+        - **Purpose**: Removes a food item from the fridge when it's consumed or expired.
+
+     4. **sortFridgeItems** (Frontend - Client-side)
+        - **Signature**: `List<FridgeItem> sortFridgeItems(List<FridgeItem> items, SortOption sortBy)`
+        - **Parameters**: `items` - List of fridge items, `sortBy` - Sorting criteria (expiration, added date, nutrition, name)
+        - **Returns**: `List<FridgeItem>` - Sorted list of items
+        - **Purpose**: Organizes food items according to user-selected criteria for better inventory visualization.
 
 4. **Recipe Suggestion Component**
-   - **Purpose**: Generates recipe suggestions based on selected ingredients and provides detailed recipe instructions.  
-   - **Interfaces**:  
-     1. **Ingredient Selector**  
-        - **Purpose**: Allow users to choose items from their inventory.  
-     2. **Recipe Engine**  
-        - **Purpose**: Match selected ingredients with recipes and return suggestions.  
-     3. **Recipe Details UI**  
-        - **Purpose**: Display additional ingredients, instructions, and cooking steps.  
+   - **Purpose**: Generates recipe suggestions based on selected ingredients and provides detailed recipe instructions.
+   - **Interfaces**:
+
+     1. **fetchRecipesFromAPI** (Frontend → Backend)
+        - **REST Route**: `GET /api/recipes?ingredients={ingredients}`
+        - **Signature**: `RecipeResult fetchRecipesFromAPI(List<String> ingredients)`
+        - **Parameters**: `ingredients` - List of ingredient names from user's fridge
+        - **Returns**: `RecipeResult` - List of recipe summaries with links
+        - **Purpose**: Queries TheMealDB API to find recipes matching the selected ingredients.
+
+     2. **queryMealDB** (Backend → MealDB API)
+        - **External API**: `GET https://www.themealdb.com/api/json/v1/1/filter.php?i={ingredient}`
+        - **Signature**: `MealDBResponse queryMealDB(String ingredient)`
+        - **Parameters**: `ingredient` - Single ingredient to search for
+        - **Returns**: `MealDBResponse` - Array of meals containing the ingredient
+        - **Purpose**: Fetches recipe data from TheMealDB's public API based on available ingredients.
+
+     3. **generateAIRecipe** (Frontend → Backend)
+        - **REST Route**: `POST /api/recipes/ai`
+        - **Signature**: `AiRecipeData generateAIRecipe(List<String> ingredients)`
+        - **Parameters**: `ingredients` - List of ingredient names
+        - **Returns**: `AiRecipeData` - AI-generated recipe in markdown format
+        - **Purpose**: Uses DeepSeek AI to create custom recipes based on selected ingredients with creative suggestions.
+
+     4. **promptDeepSeekAI** (Backend → DeepSeek/Gemini API)
+        - **External API**: `POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`
+        - **Signature**: `String promptDeepSeekAI(String prompt, List<String> ingredients)`
+        - **Parameters**: `prompt` - Recipe generation instructions, `ingredients` - Available ingredients
+        - **Returns**: `String` - Formatted recipe in markdown
+        - **Purpose**: Generates creative recipe suggestions by sending structured prompts to AI language models.
 
 5. **Nutrition Information Component**
-   - **Purpose**: Provides detailed nutritional information for food items in the fridge.  
-   - **Interfaces**:  
-     1. **Nutrition Database Connector**  
-        - **Purpose**: Retrieve nutritional facts (calories, carbs, protein, fat).  
-     2. **Nutrition Display UI**  
-        - **Purpose**: Show nutritional information and allow comparisons between items.  
+   - **Purpose**: Provides detailed nutritional information for food items in the fridge.
+   - **Interfaces**:
+
+     1. **getNutritionalFacts** (Frontend → Backend)
+        - **REST Route**: `GET /api/food-item/{itemId}/nutrition`
+        - **Signature**: `NutritionInfo getNutritionalFacts(String itemId)`
+        - **Parameters**: `itemId` - Food item identifier
+        - **Returns**: `NutritionInfo` - Detailed nutrients (calories, protein, fat, carbs, vitamins, etc.)
+        - **Purpose**: Retrieves comprehensive nutritional data for display when user selects a food item.
+
+     2. **fetchNutritionData** (Backend → Open Food Facts API)
+        - **External API**: `GET https://world.openfoodfacts.org/api/v0/product/{barcode}.json`
+        - **Signature**: `NutritionData fetchNutritionData(String barcode)`
+        - **Parameters**: `barcode` - Product barcode or food identifier
+        - **Returns**: `NutritionData` - Complete nutritional breakdown per 100g/serving
+        - **Purpose**: Queries external database to get accurate nutritional information for food products.
+
+     3. **displayNutritionFacts** (Frontend - UI Component)
+        - **Signature**: `void displayNutritionFacts(NutritionInfo nutrition)`
+        - **Parameters**: `nutrition` - Nutritional data to display
+        - **Returns**: `void`
+        - **Purpose**: Renders nutritional information in a user-friendly format with charts and comparisons.
 
 6. **Expiry Notification Component**
-  - **Purpose**: Monitors expiry dates of logged food items and sends timely notifications to users based on their configured preferences.
-  - **Interfaces**:
-    1. **Cron**
-      - **Purpose**: Schedule and trigger notifications when items approach their expiry within the user-defined time window.
-    2. **Food Database Interface**
-      - **Purpose**: Retrieve expiry dates and user-configured notification settings for stored food items.
-    3. **User Notification Service**
-      - **Purpose**: Deliver expiry alerts to the user via mobile push notifications or in-app messages.
+   - **Purpose**: Monitors expiry dates of logged food items and sends timely notifications to users based on their configured preferences.
+   - **Interfaces**:
+
+     1. **sendTestNotification** (Frontend → Backend)
+        - **REST Route**: `POST /api/notifications/test`
+        - **Signature**: `NotificationResponse sendTestNotification(String userId)`
+        - **Parameters**: `userId` - Authenticated user ID
+        - **Returns**: `NotificationResponse` - Status and count of expiring items
+        - **Purpose**: Manually triggers a notification check to test the expiry alert system.
+
+     2. **checkExpiringItems** (Backend - Cron Job)
+        - **Signature**: `List<FridgeItem> checkExpiringItems(String userId, int hoursThreshold)`
+        - **Parameters**: `userId` - User to check, `hoursThreshold` - User's notification preference (e.g., 48 hours)
+        - **Returns**: `List<FridgeItem>` - Items expiring within the threshold
+        - **Purpose**: Scheduled job that periodically scans the database for items approaching expiration.
+
+     3. **sendPushNotification** (Backend → Firebase Cloud Messaging)
+        - **External API**: Firebase Cloud Messaging API
+        - **Signature**: `void sendPushNotification(String fcmToken, String title, String body)`
+        - **Parameters**: `fcmToken` - User's device token, `title` - Notification title, `body` - Message content
+        - **Returns**: `void`
+        - **Purpose**: Delivers push notifications to users' devices when food items are nearing expiration.
+
+     4. **updateNotificationPreferences** (Frontend → Backend)
+        - **REST Route**: `PATCH /api/user/notification-preferences`
+        - **Signature**: `User updateNotificationPreferences(String userId, NotificationPreferences prefs)`
+        - **Parameters**: `userId` - Authenticated user ID, `prefs` - New notification settings (hours before expiry)
+        - **Returns**: `User` - Updated user profile
+        - **Purpose**: Allows users to customize when they receive expiration alerts (e.g., 24, 48, or 72 hours before).
 
 ### **4.2. Databases**
 1. **User Collection**
