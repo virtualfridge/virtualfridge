@@ -60,7 +60,8 @@ export class AiVisionService {
     const prompt = [
       'You are a vision model helping identify produce items for a smart fridge.',
       'Analyze the attached image and determine if it contains a single food item that is a fruit or a vegetable only.',
-      'If yes, respond strictly as JSON with keys: isProduce (boolean), category ("fruit" or "vegetable"), name (common name in English, snake_case not required).',
+      'If yes, respond strictly as JSON with keys: isProduce (boolean), category ("fruit" or "vegetable"), name (common English name), nutrients_per_100g (object).',
+      'The nutrients_per_100g object should include as many of these string fields as you can estimate: calories, energy_kj, protein, fat, saturated_fat, monounsaturated_fat, polyunsaturated_fat, trans_fat, cholesterol, carbs, sugars, fiber, salt, sodium, calcium, iron, magnesium, potassium, zinc, caffeine.',
       'If not a single fruit/vegetable, respond: {"isProduce": false}. Do not include any additional text.',
     ].join('\n');
 
