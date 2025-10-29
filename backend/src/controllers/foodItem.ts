@@ -19,7 +19,7 @@ export class FoodItemController {
       const foodItem = await foodItemModel.create(req.body);
       res.status(200).json({
         message: 'FoodItem created successfully',
-        data: { foodItem: foodItem },
+        data: { foodItem },
       });
     } catch (error) {
       logger.error('Failed to create foodItem:', error);

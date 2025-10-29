@@ -7,7 +7,7 @@ import { userModel } from '../models/user';
 
 export class UserController {
   getProfile(req: Request, res: Response<GetProfileResponse>) {
-    const user = (req as any).user!;
+    const user = req.user!;
 
     res.status(200).json({
       message: 'Profile fetched successfully',
@@ -21,7 +21,7 @@ export class UserController {
     next: NextFunction
   ) {
     try {
-      const user = (req as any).user!;
+      const user = req.user!;
 
       const updatedUser = await userModel.update(user._id, req.body);
 
@@ -50,7 +50,7 @@ export class UserController {
 
   async deleteProfile(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = (req as any).user!;
+      const user = req.user!;
 
       await MediaService.deleteAllUserImages(user._id.toString());
 

@@ -9,6 +9,7 @@ import { aiVisionService, NutrientsPer100g } from '../services/aiVision';
 import { foodTypeModel } from '../models/foodType';
 import { foodItemModel } from '../models/foodItem';
 import { FridgeItemResponse } from '../types/fridge';
+import { Nutrients } from '../types/foodType';
 
 export class MediaController {
   async uploadImage(
@@ -23,7 +24,7 @@ export class MediaController {
         });
       }
 
-      const user = (req as any).user!;
+      const user = req.user!;
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const image = await MediaService.saveImage(
         sanitizedFilePath,
@@ -85,7 +86,7 @@ export class MediaController {
         foodType = await foodTypeModel.create({
           name: displayName,
           shelfLifeDays: 14,
-        } as any);
+        });
       }
 
       const expirationDate = new Date();
@@ -95,9 +96,11 @@ export class MediaController {
       if (analysis.nutrients) {
         try {
           const camel = snakeToCamelNutrients(analysis.nutrients);
-          await foodTypeModel.update((foodType as any)._id, { nutrients: camel } as any);
+          await foodTypeModel.update(foodType._id, {
+            nutrients: camel,
+          });
           // Refresh foodType after update
-          const refreshed = await foodTypeModel.findById((foodType as any)._id);
+          const refreshed = await foodTypeModel.findById(foodType._id);
           if (refreshed) {
             foodType = refreshed;
           }
@@ -113,18 +116,12 @@ export class MediaController {
         percentLeft: 100,
       });
 
-      // Respond with snake_case nutrients for client display consistency
-      const responseFoodType = {
-        ...(foodType as any).toObject?.() ?? (foodType as any),
-        nutrients: analysis.nutrients ?? (foodType as any).nutrients,
-      };
-
       return res.status(200).json({
         message: 'Produce item added to fridge',
         data: {
           fridgeItem: {
             foodItem,
-            foodType: responseFoodType,
+            foodType: foodType,
           },
         },
       });
@@ -138,7 +135,6 @@ export class MediaController {
       next(error);
     }
   }
-
 }
 
 function toTitleCase(input: string): string {
@@ -150,8 +146,8 @@ function toTitleCase(input: string): string {
     .join(' ');
 }
 
-function snakeToCamelNutrients(n: NutrientsPer100g) {
-  const out: any = {};
+function snakeToCamelNutrients(n: NutrientsPer100g): Partial<Nutrients> {
+  const out: Nutrients = {};
   if (n.calories) out.calories = n.calories;
   if (n.energy_kj) out.energyKj = n.energy_kj;
   if (n.protein) out.protein = n.protein;

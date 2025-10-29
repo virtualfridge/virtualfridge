@@ -5,23 +5,21 @@ import { foodItemModel } from '../models/foodItem';
 import { foodTypeModel } from '../models/foodType';
 
 export class NotificationController {
-  async sendTestNotification(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  async sendTestNotification(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = (req as any).user!;
+      const user = req.user!;
 
       // Check if user has FCM token
       if (!user.fcmToken) {
         return res.status(400).json({
-          message: 'No FCM token registered for this user. Please register your device first.',
+          message:
+            'No FCM token registered for this user. Please register your device first.',
         });
       }
 
       // Get user's notification preferences
-      const expiryThresholdDays = user.notificationPreferences?.expiryThresholdDays ?? 2;
+      const expiryThresholdDays =
+        user.notificationPreferences?.expiryThresholdDays ?? 2;
 
       // Get all food items for the user
       const foodItems = await foodItemModel.findAllByUserId(user._id);
@@ -41,7 +39,10 @@ export class NotificationController {
       const expiringItems = [];
 
       for (const item of foodItems) {
-        if (item.expirationDate && new Date(item.expirationDate) <= thresholdDate) {
+        if (
+          item.expirationDate &&
+          new Date(item.expirationDate) <= thresholdDate
+        ) {
           // Get food type info to get the name
           const foodType = await foodTypeModel.findById(item.typeId);
           if (foodType) {

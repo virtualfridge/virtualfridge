@@ -11,24 +11,24 @@ import {
   defaultAiIngredients,
 } from '../types/recipe';
 
-type GeminiContentPart = {
+interface GeminiContentPart {
   text?: string;
 };
 
-type GeminiCandidate = {
+interface GeminiCandidate {
   content?: {
     parts?: GeminiContentPart[];
   };
 };
 
-type GeminiResponse = {
+interface GeminiResponse {
   candidates?: GeminiCandidate[];
   modelVersion?: string;
 };
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'models/gemini-2.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? 'models/gemini-2.5-flash';
 const GEMINI_API_HOST =
-  process.env.GEMINI_API_URL ||
+  process.env.GEMINI_API_URL ??
   'https://generativelanguage.googleapis.com/v1beta';
 
 export class AiRecipeService {
@@ -142,7 +142,7 @@ export class AiRecipeService {
     return cleaned
       .split(' ')
       .filter(Boolean)
-      .map(part => part[0]?.toUpperCase() + part.slice(1))
+      .map(part => part[0].toUpperCase() + part.slice(1))
       .join(' ');
   }
 }

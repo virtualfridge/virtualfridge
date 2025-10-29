@@ -8,21 +8,21 @@ export const barcodeRequestSchema = z.object({
 
 export type barcodeRequestBody = z.infer<typeof barcodeRequestSchema>;
 
-export type FridgeItem = {
+export interface FridgeItem {
   foodItem: FoodItem;
   foodType: FoodType;
-};
+}
 
-export type FridgeItemsResponse = {
+export interface FridgeItemsResponse {
   message: string;
   data?: {
     fridgeItems: FridgeItem[];
   };
-};
+}
 
-export type FridgeItemResponse = {
+export interface FridgeItemResponse {
   message: string;
   data?: {
     fridgeItem: FridgeItem;
   };
-};
+}

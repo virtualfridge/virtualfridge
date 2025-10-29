@@ -9,6 +9,7 @@ import logger from '../util/logger';
 import { foodTypeModel } from '../models/foodType';
 import axios from 'axios';
 import { dateDiffInDays, parseDate } from '../util/dates';
+import { FoodType } from '../types/foodType';
 export class FridgeService {
   async findAllFridgeItemsByUserId(
     req: Request,
@@ -16,25 +17,25 @@ export class FridgeService {
     next: NextFunction
   ) {
     try {
-      const userId = (req as any).user!._id;
+      const userId = (req as any).user?._id;
       const foodItems = await foodItemModel.findAllByUserId(userId);
 
       // Get the associated foodTypes
       const fridgeItems = await Promise.all(
         foodItems.map(async foodItem => {
           const foodType = await foodItemModel.getAssociatedFoodType(foodItem);
-          return { foodItem: foodItem, foodType: foodType };
+          return { foodItem, foodType: foodType };
         })
       );
       res.status(200).json({
         message: 'Fridge items fetched successfully',
         data: {
-          fridgeItems: fridgeItems,
+          fridgeItems,
         },
       });
     } catch (error) {
       logger.error(
-        `Failed to get fridge items for user with UserId ${(req as any).user?._id || 'N/A'}:`,
+        `Failed to get fridge items for user with UserId ${req.user?._id || 'N/A'}:`,
         error
       );
 
@@ -48,7 +49,7 @@ export class FridgeService {
     }
   }
   async createFromBarcode(
-    req: Request<{}, {}, barcodeRequestBody>,
+    req: Request<object, {}, barcodeRequestBody>,
     res: Response<FridgeItemResponse>,
     next: NextFunction
   ) {
@@ -63,7 +64,7 @@ export class FridgeService {
         const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
         const { data } = await axios.get(url);
 
-        if (!data || !data.product)
+        if (!data?.product)
           return res
             .status(404)
             .json({ message: 'Product not found in OpenFoodFacts' });
@@ -73,7 +74,7 @@ export class FridgeService {
         const nutriments = product.nutriments || {};
 
         // Extract expiration or shelf-life related info if available
-        let shelfLifeDays = undefined;
+        let shelfLifeDays;
         const expirationDate =
           product.expiration_date || product.expiry_date || null;
         if (expirationDate) {
@@ -89,19 +90,16 @@ export class FridgeService {
           nutriments['energy-kcal'] ??
           null;
 
-        if (!calories && nutriments['energy_100g']) {
+        if (!calories && nutriments.energy_100g) {
           // Convert from kJ to kcal if needed
-          calories = Math.round(nutriments['energy_100g'] / 4.184);
+          calories = Math.round(nutriments.energy_100g / 4.184);
         }
 
-        let productData = {
+        let productData: Partial<FoodType> = {
           name: product.product_name_en || product.product_name || null,
           brand: product.brands || null,
-          quantity: product.quantity || null,
-          ingredients:
-            product.ingredients_text_en || product.ingredients_text || null,
           image: product.image_url || null,
-          expiration_date: expirationDate,
+          shelfLifeDays: shelfLifeDays,
           allergens:
             product.allergens_hierarchy
               ?.filter((a: string) => a.startsWith('en:'))
@@ -109,26 +107,26 @@ export class FridgeService {
 
           nutrients: {
             calories,
-            energy_kj:
-              nutriments['energy-kj_100g'] ?? nutriments['energy_100g'] ?? null,
+            energyKj:
+              nutriments['energy-kj_100g'] ?? nutriments.energy_100g ?? null,
             protein: nutriments.proteins_100g ?? null,
             fat: nutriments.fat_100g ?? null,
-            saturated_fat: nutriments['saturated-fat_100g'] ?? null,
-            monounsaturated_fat: nutriments['monounsaturated-fat_100g'] ?? null,
-            polyunsaturated_fat: nutriments['polyunsaturated-fat_100g'] ?? null,
-            trans_fat: nutriments['trans-fat_100g'] ?? null,
+            saturatedFat: nutriments['saturated-fat_100g'] ?? null,
+            monounsaturatedFat: nutriments['monounsaturated-fat_100g'] ?? null,
+            polyunsaturatedFat: nutriments['polyunsaturated-fat_100g'] ?? null,
+            transFat: nutriments['trans-fat_100g'] ?? null,
             cholesterol: nutriments.cholesterol_100g ?? null,
-            carbs: nutriments.carbohydrates_100g ?? null,
-            sugars: nutriments['sugars_100g'] ?? null,
-            fiber: nutriments['fiber_100g'] ?? null,
-            salt: nutriments['salt_100g'] ?? null,
-            sodium: nutriments['sodium_100g'] ?? null,
-            calcium: nutriments['calcium_100g'] ?? null,
-            iron: nutriments['iron_100g'] ?? null,
-            magnesium: nutriments['magnesium_100g'] ?? null,
-            potassium: nutriments['potassium_100g'] ?? null,
-            zinc: nutriments['zinc_100g'] ?? null,
-            caffeine: nutriments['caffeine_100g'] ?? null,
+            carbohydrates: nutriments.carbohydrates_100g ?? null,
+            sugars: nutriments.sugars_100g ?? null,
+            fiber: nutriments.fiber_100g ?? null,
+            salt: nutriments.salt_100g ?? null,
+            sodium: nutriments.sodium_100g ?? null,
+            calcium: nutriments.calcium_100g ?? null,
+            iron: nutriments.iron_100g ?? null,
+            magnesium: nutriments.magnesium_100g ?? null,
+            potassium: nutriments.potassium_100g ?? null,
+            zinc: nutriments.zinc_100g ?? null,
+            caffeine: nutriments.caffeine_100g ?? null,
           },
         };
         logger.debug('Product data retrieved and stored:', productData);
@@ -144,15 +142,15 @@ export class FridgeService {
       }
 
       const foodItem = await foodItemModel.create({
-        userId: (req as any).user!._id,
-        typeId: foodType!._id,
-        expirationDate: expirationDate,
+        userId: (req as any).user?._id,
+        typeId: foodType?._id,
+        expirationDate,
         percentLeft: 100,
       });
 
       logger.debug('Fridge item created:', {
-        foodItem: foodItem,
-        foodType: foodType,
+        foodItem,
+        foodType,
       });
       return res.status(200).json({
         message: 'Successfully created item from barcode',
@@ -163,7 +161,7 @@ export class FridgeService {
           },
         },
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         logger.error('Error handling barcode:', error.message || error);
         return res.status(500).json({ message: 'Internal server error' });

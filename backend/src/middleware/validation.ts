@@ -59,8 +59,8 @@ export const validateParams = <T>(
 
 export const validateQuery = <T>(
   schema: z.ZodSchema<T>
-): RequestHandler<{}, {}, {}, T> => {
-  return (req: Request<{}, {}, {}, T>, res: Response, next: NextFunction) => {
+): RequestHandler<object, {}, {}, T> => {
+  return (req: Request<object, {}, {}, T>, res: Response, next: NextFunction) => {
     try {
       req.query = schema.parse(req.query);
       next();
