@@ -18,25 +18,37 @@ const foodTypeController = new FoodTypeController();
 router.post(
   '/',
   validateBody<CreateFoodTypeBody>(createFoodTypeSchema),
-  foodTypeController.createFoodType
+  foodTypeController.createFoodType.bind(foodTypeController)
 );
 
 router.put(
-  '/',
+  '/:_id',
+  validateParams<FindFoodTypeParams>(findFoodTypeSchema),
   validateBody<UpdateFoodTypeBody>(updateFoodTypeSchema),
-  foodTypeController.updateFoodType
+  foodTypeController.updateFoodType.bind(foodTypeController)
+);
+
+router.patch(
+  '/:_id',
+  validateParams<FindFoodTypeParams>(findFoodTypeSchema),
+  foodTypeController.updateFoodType.bind(foodTypeController)
+);
+
+router.get(
+  '/barcode/:barcodeId',
+  foodTypeController.findFoodTypeByBarcode.bind(foodTypeController)
 );
 
 router.get(
   '/:_id',
   validateParams<FindFoodTypeParams>(findFoodTypeSchema),
-  foodTypeController.findFoodTypeById
+  foodTypeController.findFoodTypeById.bind(foodTypeController)
 );
 
 router.delete(
   '/:_id',
   validateParams<DeleteFoodTypeParams>(deleteFoodTypeSchema),
-  foodTypeController.deleteFoodType
+  foodTypeController.deleteFoodType.bind(foodTypeController)
 );
 
 export default router;

@@ -41,7 +41,7 @@ export class AiRecipeService {
 
     if (!this.apiKey) {
       throw new Error(
-        'GEMINI_API_KEY is not set. Please add it to your backend .env file.'
+        'GEMINI_API_KEY is not set'
       );
     }
 

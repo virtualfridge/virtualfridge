@@ -36,7 +36,7 @@ export const foodTypeSchema = z.object({
   barcodeId: z.string().optional(),
   brand: z.string().optional(),
   image: z.url().optional(),
-  allergens: z.array(z.string()),
+  allergens: z.array(z.string()).optional(),
 });
 
 export type FoodType = z.infer<typeof foodTypeSchema>;
