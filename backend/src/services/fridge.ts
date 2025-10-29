@@ -20,7 +20,7 @@ export class FridgeService {
       if (!req.user) {
         return;
       }
-      const userId = req.user!._id;
+      const userId = req.user._id;
       const foodItems = await foodItemModel.findAllByUserId(userId);
 
       // Get the associated foodTypes
