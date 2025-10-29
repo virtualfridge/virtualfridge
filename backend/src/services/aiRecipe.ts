@@ -1,8 +1,8 @@
 import axios from 'axios';
-import dotenv from "dotenv";
-import path from "path";
+import dotenv from 'dotenv';
+import path from 'path';
 
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 import logger from '../util/logger';
 import {
@@ -10,26 +10,8 @@ import {
   AiRecipeRequestBody,
   defaultAiIngredients,
 } from '../types/recipe';
-
-interface GeminiContentPart {
-  text?: string;
-};
-
-interface GeminiCandidate {
-  content?: {
-    parts?: GeminiContentPart[];
-  };
-};
-
-interface GeminiResponse {
-  candidates?: GeminiCandidate[];
-  modelVersion?: string;
-};
-
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? 'models/gemini-2.5-flash';
-const GEMINI_API_HOST =
-  process.env.GEMINI_API_URL ??
-  'https://generativelanguage.googleapis.com/v1beta';
+import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
+import { GeminiResponse } from '../types/ai';
 
 export class AiRecipeService {
   constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}

@@ -35,7 +35,7 @@ export class FridgeService {
       });
     } catch (error) {
       logger.error(
-        `Failed to get fridge items for user with UserId ${req.user?._id || 'N/A'}:`,
+        `Failed to get fridge items for user with UserId ${req.user?._id ?? 'N/A'}:`,
         error
       );
 
