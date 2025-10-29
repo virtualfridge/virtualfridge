@@ -7,6 +7,9 @@ import { foodTypeModel } from '../models/foodType';
 export class NotificationController {
   async sendTestNotification(req: Request, res: Response, next: NextFunction) {
     try {
+      if (!req.user) {
+        return;
+      }
       const user = req.user!;
 
       // Check if user has FCM token
