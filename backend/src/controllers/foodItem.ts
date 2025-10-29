@@ -10,6 +10,7 @@ import { foodItemModel } from '../models/foodItem';
 import logger from '../util/logger';
 
 export class FoodItemController {
+  // TODO: use user field instead of relying on the fronted to be well-behaved and send their own userId in the foodItem
   async createFoodItem(
     req: Request<unknown, unknown, CreateFoodItemBody>,
     res: Response<FoodItemResponse>,

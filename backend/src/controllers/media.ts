@@ -24,9 +24,14 @@ export class MediaController {
       }
 
       if (!req.user) {
-        return;
+        logger.error(
+          'Media controller must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
       }
-      const user = req.user!;
+      const user = req.user;
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const image = await MediaService.saveImage(
         sanitizedFilePath,
@@ -63,9 +68,14 @@ export class MediaController {
       }
 
       if (!req.user) {
-        return;
+        logger.error(
+          'Media controller must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
       }
-      const user = req.user!;
+      const user = req.user;
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const storedPath = await MediaService.saveImage(
         sanitizedFilePath,

@@ -18,7 +18,12 @@ export class FridgeService {
   ) {
     try {
       if (!req.user) {
-        return;
+        logger.error(
+          'User controller must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
       }
       const userId = req.user._id;
       const foodItems = await foodItemModel.findAllByUserId(userId);
@@ -57,6 +62,14 @@ export class FridgeService {
     next: NextFunction
   ) {
     try {
+      if (!req.user) {
+        logger.error(
+          'Fridge service must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
+      }
       const { barcode } = req.body;
 
       logger.debug('Received barcode:', barcode);
@@ -136,6 +149,11 @@ export class FridgeService {
 
         foodType = await foodTypeModel.create(productData);
       }
+      if (!foodType) {
+        return res.status(500).json({
+          message: 'Failed to find or create foodType',
+        });
+      }
 
       // Create a food item instance for the user
       const expirationDate = new Date();
@@ -145,8 +163,8 @@ export class FridgeService {
       }
 
       const foodItem = await foodItemModel.create({
-        userId: req.user?._id,
-        typeId: foodType?._id,
+        userId: req.user._id,
+        typeId: foodType._id,
         expirationDate,
         percentLeft: 100,
       });

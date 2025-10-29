@@ -8,9 +8,10 @@ import { userModel } from '../models/user';
 export class UserController {
   getProfile(req: Request, res: Response<GetProfileResponse>) {
     if (!req.user) {
-      throw new Error(
-        'User controller must always be used with auth middleware!'
-      );
+      logger.error('User controller must always be used with auth middleware!');
+      return res.status(500).json({
+        message: 'Internal server error',
+      });
     }
     const user = req.user;
 
@@ -27,9 +28,12 @@ export class UserController {
   ) {
     try {
       if (!req.user) {
-        throw new Error(
+        logger.error(
           'User controller must always be used with auth middleware!'
         );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
       }
       const user = req.user;
 
@@ -61,9 +65,12 @@ export class UserController {
   async deleteProfile(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) {
-        throw new Error(
+        logger.error(
           'User controller must always be used with auth middleware!'
         );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
       }
       const user = req.user;
 

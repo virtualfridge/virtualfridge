@@ -8,9 +8,14 @@ export class NotificationController {
   async sendTestNotification(req: Request, res: Response, next: NextFunction) {
     try {
       if (!req.user) {
-        return;
+        logger.error(
+          'Notification controller must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
       }
-      const user = req.user!;
+      const user = req.user;
 
       // Check if user has FCM token
       if (!user.fcmToken) {
