@@ -17,6 +17,9 @@ export class FridgeService {
     next: NextFunction
   ) {
     try {
+      if (!req.user) {
+        return;
+      }
       const userId = req.user!._id;
       const foodItems = await foodItemModel.findAllByUserId(userId);
 
