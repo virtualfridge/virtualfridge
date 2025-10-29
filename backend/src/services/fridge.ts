@@ -17,14 +17,14 @@ export class FridgeService {
     next: NextFunction
   ) {
     try {
-      const userId = (req as any).user?._id;
+      const userId = req.user!._id;
       const foodItems = await foodItemModel.findAllByUserId(userId);
 
       // Get the associated foodTypes
       const fridgeItems = await Promise.all(
         foodItems.map(async foodItem => {
           const foodType = await foodItemModel.getAssociatedFoodType(foodItem);
-          return { foodItem, foodType: foodType };
+          return { foodItem, foodType };
         })
       );
       res.status(200).json({
@@ -142,7 +142,7 @@ export class FridgeService {
       }
 
       const foodItem = await foodItemModel.create({
-        userId: (req as any).user?._id,
+        userId: req.user?._id,
         typeId: foodType?._id,
         expirationDate,
         percentLeft: 100,
