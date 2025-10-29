@@ -1,12 +1,12 @@
 import axios from 'axios';
 import logger from '../util/logger';
+import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
+import { GeminiResponse } from '../types/ai';
 import {
   AiRecipeData,
   AiRecipeRequestBody,
   defaultAiIngredients,
 } from '../types/recipe';
-import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
-import { GeminiResponse } from '../types/ai';
 
 export class AiRecipeService {
   constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}
