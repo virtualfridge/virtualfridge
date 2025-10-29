@@ -18,7 +18,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('*', notFoundHandler);
 app.use(errorHandler);
 
-void connectDB();
+connectDB();
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

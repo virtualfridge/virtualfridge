@@ -52,7 +52,7 @@ export class FridgeService {
     }
   }
   async createFromBarcode(
-    req: Request<object, {}, barcodeRequestBody>,
+    req: Request<unknown, unknown, barcodeRequestBody>,
     res: Response<FridgeItemResponse>,
     next: NextFunction
   ) {
@@ -102,7 +102,7 @@ export class FridgeService {
           name: product.product_name_en || product.product_name || null,
           brand: product.brands || null,
           image: product.image_url || null,
-          shelfLifeDays: shelfLifeDays,
+          shelfLifeDays,
           allergens:
             product.allergens_hierarchy
               ?.filter((a: string) => a.startsWith('en:'))
