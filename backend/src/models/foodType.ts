@@ -84,7 +84,7 @@ export class FoodTypeModel {
     }
   }
 
-  async findByBarcode(barcodeId: String): Promise<FoodType | null> {
+  async findByBarcode(barcodeId: string): Promise<FoodType | null> {
     try {
       const foodType = await this.foodType.findOne({ barcodeId });
       return foodType;

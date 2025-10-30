@@ -37,7 +37,7 @@ export type UpdateFoodItemBody = z.infer<typeof updateFoodItemSchema>;
 export type FindFoodItemByIdParams = z.infer<typeof findFoodItemByIdSchema>;
 export type DeleteFoodItemParams = z.infer<typeof deleteFoodItemSchema>;
 
-export type FoodItemResponse = {
+export interface FoodItemResponse {
   message: string;
   data?: {
     foodItem: FoodItem;

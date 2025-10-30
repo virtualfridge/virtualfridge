@@ -5,7 +5,7 @@ import { MediaService } from '../services/media';
 import { UploadImageRequest, UploadImageResponse } from '../types/media';
 import { sanitizeInput } from '../util/sanitizeInput';
 import path from 'path';
-import { aiVisionService, NutrientsPer100g } from '../services/aiVision';
+import { aiVisionService } from '../services/aiVision';
 import { foodTypeModel } from '../models/foodType';
 import { foodItemModel } from '../models/foodItem';
 import { FridgeItemResponse } from '../types/fridge';
@@ -23,7 +23,15 @@ export class MediaController {
         });
       }
 
-      const user = (req as any).user!;
+      if (!req.user) {
+        logger.error(
+          'Media controller must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
+      }
+      const user = req.user;
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const image = await MediaService.saveImage(
         sanitizedFilePath,
@@ -59,7 +67,15 @@ export class MediaController {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
-      const user = (req as any).user!;
+      if (!req.user) {
+        logger.error(
+          'Media controller must always be used with auth middleware!'
+        );
+        return res.status(500).json({
+          message: 'Internal server error',
+        });
+      }
+      const user = req.user;
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const storedPath = await MediaService.saveImage(
         sanitizedFilePath,
@@ -85,7 +101,15 @@ export class MediaController {
         foodType = await foodTypeModel.create({
           name: displayName,
           shelfLifeDays: 14,
-        } as any);
+        });
+      }
+      if (!foodType) {
+        logger.error(
+          'Error finding or creating foodType for MediaController.visionScan()'
+        );
+        return res.status(500).json({
+          message: 'Failed to find or create foodType',
+        });
       }
 
       const expirationDate = new Date();
@@ -94,10 +118,11 @@ export class MediaController {
       // If nutrients were returned from Gemini, save them on the FoodType
       if (analysis.nutrients) {
         try {
-          const camel = snakeToCamelNutrients(analysis.nutrients);
-          await foodTypeModel.update((foodType as any)._id, { nutrients: camel } as any);
+          await foodTypeModel.update(foodType._id, {
+            nutrients: analysis.nutrients,
+          });
           // Refresh foodType after update
-          const refreshed = await foodTypeModel.findById((foodType as any)._id);
+          const refreshed = await foodTypeModel.findById(foodType._id);
           if (refreshed) {
             foodType = refreshed;
           }
@@ -113,18 +138,12 @@ export class MediaController {
         percentLeft: 100,
       });
 
-      // Respond with snake_case nutrients for client display consistency
-      const responseFoodType = {
-        ...(foodType as any).toObject?.() ?? (foodType as any),
-        nutrients: analysis.nutrients ?? (foodType as any).nutrients,
-      };
-
       return res.status(200).json({
         message: 'Produce item added to fridge',
         data: {
           fridgeItem: {
             foodItem,
-            foodType: responseFoodType,
+            foodType,
           },
         },
       });
@@ -138,7 +157,6 @@ export class MediaController {
       next(error);
     }
   }
-
 }
 
 function toTitleCase(input: string): string {
@@ -148,26 +166,4 @@ function toTitleCase(input: string): string {
     .split(/\s+/)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
-}
-
-function snakeToCamelNutrients(n: NutrientsPer100g) {
-  const out: any = {};
-  if (n.calories) out.calories = n.calories;
-  if (n.energy_kj) out.energyKj = n.energy_kj;
-  if (n.protein) out.protein = n.protein;
-  if (n.fat) out.fat = n.fat;
-  if (n.saturated_fat) out.saturatedFat = n.saturated_fat;
-  if (n.trans_fat) out.transFat = n.trans_fat;
-  if (n.monounsaturated_fat) out.monounsaturatedFat = n.monounsaturated_fat;
-  if (n.polyunsaturated_fat) out.polyunsaturatedFat = n.polyunsaturated_fat;
-  if (n.cholesterol) out.cholesterol = n.cholesterol;
-  if (n.carbs) out.carbohydrates = n.carbs;
-  if (n.sugars) out.sugars = n.sugars;
-  if (n.fiber) out.fiber = n.fiber;
-  if (n.salt) out.salt = n.salt;
-  if (n.sodium) out.sodium = n.sodium;
-  if (n.calcium) out.calcium = n.calcium;
-  if (n.iron) out.iron = n.iron;
-  if (n.potassium) out.potassium = n.potassium;
-  return out;
 }
