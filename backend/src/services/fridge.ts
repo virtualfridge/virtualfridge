@@ -150,6 +150,9 @@ export class FridgeService {
         foodType = await foodTypeModel.create(productData);
       }
       if (!foodType) {
+        logger.error(
+          'Error finding or creating foodType in FridgeService.createFromBarcode()'
+        );
         return res.status(500).json({
           message: 'Failed to find or create foodType',
         });

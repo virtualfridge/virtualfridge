@@ -103,6 +103,14 @@ export class MediaController {
           shelfLifeDays: 14,
         });
       }
+      if (!foodType) {
+        logger.error(
+          'Error finding or creating foodType for MediaController.visionScan()'
+        );
+        return res.status(500).json({
+          message: 'Failed to find or create foodType',
+        });
+      }
 
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + 14);
@@ -135,7 +143,7 @@ export class MediaController {
         data: {
           fridgeItem: {
             foodItem,
-            foodType: foodType,
+            foodType,
           },
         },
       });
