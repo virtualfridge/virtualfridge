@@ -45,7 +45,26 @@ describe('UserModel', () => {
         email: '', // Invalid empty email
       };
 
-      await expect(userModel.create(invalidUser as any)).rejects.toThrow();
+      await expect(userModel.create(invalidUser as any)).rejects.toThrow('Invalid update data');
+    });
+
+    test('should throw "Invalid update data" on Zod validation error', async () => {
+      const invalidUser = {
+        googleId: 'test-id',
+        email: 'test@example.com',
+        name: '', // Empty name should fail validation
+        profilePicture: 'https://example.com/pic.jpg',
+      };
+
+      await expect(userModel.create(invalidUser as any)).rejects.toThrow('Invalid update data');
+    });
+
+    test('should throw "Failed to update user" on database error during create', async () => {
+      // Create a user first
+      await userModel.create(mockGoogleUserInfo);
+
+      // Try to create with same googleId (duplicate key error)
+      await expect(userModel.create(mockGoogleUserInfo)).rejects.toThrow('Failed to update user');
     });
   });
 
@@ -64,6 +83,17 @@ describe('UserModel', () => {
 
       expect(foundUser).toBeNull();
     });
+
+    test('should throw error when database operation fails', async () => {
+      // Mock the internal user model to throw error
+      const originalFindOne = userModel['user'].findOne;
+      userModel['user'].findOne = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(userModel.findByGoogleId('test-id')).rejects.toThrow('Failed to find user');
+
+      // Restore original
+      userModel['user'].findOne = originalFindOne;
+    });
   });
 
   describe('findById', () => {
@@ -81,6 +111,17 @@ describe('UserModel', () => {
       const foundUser = await userModel.findById(fakeId as any);
 
       expect(foundUser).toBeNull();
+    });
+
+    test('should throw error when database operation fails', async () => {
+      // Mock the internal user model to throw error
+      const originalFindOne = userModel['user'].findOne;
+      userModel['user'].findOne = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(userModel.findById('507f1f77bcf86cd799439011' as any)).rejects.toThrow('Failed to find user');
+
+      // Restore original
+      userModel['user'].findOne = originalFindOne;
     });
   });
 
@@ -110,6 +151,19 @@ describe('UserModel', () => {
 
       expect(result).toBeNull();
     });
+
+    test('should throw error when database operation fails', async () => {
+      const createdUser = await userModel.create(mockGoogleUserInfo);
+
+      // Mock the internal user model to throw error
+      const originalFindByIdAndUpdate = userModel['user'].findByIdAndUpdate;
+      userModel['user'].findByIdAndUpdate = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(userModel.update(createdUser._id, { name: 'Test' })).rejects.toThrow('Failed to update user');
+
+      // Restore original
+      userModel['user'].findByIdAndUpdate = originalFindByIdAndUpdate;
+    });
   });
 
   describe('delete', () => {
@@ -126,6 +180,19 @@ describe('UserModel', () => {
       const fakeId = '507f1f77bcf86cd799439011';
 
       await expect(userModel.delete(fakeId as any)).resolves.not.toThrow();
+    });
+
+    test('should throw error when database operation fails', async () => {
+      const createdUser = await userModel.create(mockGoogleUserInfo);
+
+      // Mock the internal user model to throw error
+      const originalFindByIdAndDelete = userModel['user'].findByIdAndDelete;
+      userModel['user'].findByIdAndDelete = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(userModel.delete(createdUser._id)).rejects.toThrow('Failed to delete user');
+
+      // Restore original
+      userModel['user'].findByIdAndDelete = originalFindByIdAndDelete;
     });
   });
 });

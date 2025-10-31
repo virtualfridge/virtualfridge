@@ -43,6 +43,17 @@ describe('FoodTypeModel', () => {
       expect(foodType.nutrients).toBeUndefined();
       expect(foodType.barcodeId).toBeUndefined();
     });
+
+    test('should throw error when database operation fails', async () => {
+      // Mock the internal foodType model to throw error
+      const originalCreate = foodTypeModel['foodType'].create;
+      foodTypeModel['foodType'].create = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(foodTypeModel.create(mockFoodType)).rejects.toThrow('Failed to create foodType');
+
+      // Restore original
+      foodTypeModel['foodType'].create = originalCreate;
+    });
   });
 
   describe('findById', () => {
@@ -61,6 +72,16 @@ describe('FoodTypeModel', () => {
 
       expect(found).toBeNull();
     });
+
+    test('should throw error when database operation fails', async () => {
+      const originalFindOne = foodTypeModel['foodType'].findOne;
+      foodTypeModel['foodType'].findOne = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(foodTypeModel.findById('507f1f77bcf86cd799439011' as any)).rejects.toThrow('Failed to find foodType');
+
+      // Restore original
+      foodTypeModel['foodType'].findOne = originalFindOne;
+    });
   });
 
   describe('findByBarcode', () => {
@@ -78,6 +99,16 @@ describe('FoodTypeModel', () => {
 
       expect(found).toBeNull();
     });
+
+    test('should throw error when database operation fails', async () => {
+      const originalFindOne = foodTypeModel['foodType'].findOne;
+      foodTypeModel['foodType'].findOne = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(foodTypeModel.findByBarcode('123456789')).rejects.toThrow('Failed to find foodType');
+
+      // Restore original
+      foodTypeModel['foodType'].findOne = originalFindOne;
+    });
   });
 
   describe('findByName', () => {
@@ -93,6 +124,16 @@ describe('FoodTypeModel', () => {
       const found = await foodTypeModel.findByName('NonExistentFood');
 
       expect(found).toBeNull();
+    });
+
+    test('should throw error when database operation fails', async () => {
+      const originalFindOne = foodTypeModel['foodType'].findOne;
+      foodTypeModel['foodType'].findOne = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(foodTypeModel.findByName('Apple')).rejects.toThrow('Failed to find foodType');
+
+      // Restore original
+      foodTypeModel['foodType'].findOne = originalFindOne;
     });
   });
 
@@ -111,6 +152,19 @@ describe('FoodTypeModel', () => {
       expect(updated?.shelfLifeDays).toBe(updates.shelfLifeDays);
       expect(updated?.barcodeId).toBe(mockFoodType.barcodeId); // Unchanged
     });
+
+    test('should throw error when database operation fails', async () => {
+      const created = await foodTypeModel.create(mockFoodType);
+
+      // Mock the internal foodType model to throw error
+      const originalFindByIdAndUpdate = foodTypeModel['foodType'].findByIdAndUpdate;
+      foodTypeModel['foodType'].findByIdAndUpdate = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(foodTypeModel.update(created._id, { name: 'Test' })).rejects.toThrow('Failed to update foodType');
+
+      // Restore original
+      foodTypeModel['foodType'].findByIdAndUpdate = originalFindByIdAndUpdate;
+    });
   });
 
   describe('delete', () => {
@@ -124,6 +178,19 @@ describe('FoodTypeModel', () => {
 
       const found = await foodTypeModel.findById(created._id);
       expect(found).toBeNull();
+    });
+
+    test('should throw error when database operation fails', async () => {
+      const created = await foodTypeModel.create(mockFoodType);
+
+      // Mock the internal foodType model to throw error
+      const originalFindByIdAndDelete = foodTypeModel['foodType'].findByIdAndDelete;
+      foodTypeModel['foodType'].findByIdAndDelete = jest.fn().mockRejectedValue(new Error('Database connection error'));
+
+      await expect(foodTypeModel.delete(created._id)).rejects.toThrow('Failed to delete foodType');
+
+      // Restore original
+      foodTypeModel['foodType'].findByIdAndDelete = originalFindByIdAndDelete;
     });
   });
 });

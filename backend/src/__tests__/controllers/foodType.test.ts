@@ -61,6 +61,29 @@ describe('FoodType Controller Integration Tests', () => {
         .send(mockFoodType)
         .expect(401);
     });
+
+    test('should handle Error exceptions during creation', async () => {
+      jest.spyOn(foodTypeModel, 'create').mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .post('/api/food-type')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(mockFoodType)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('Database error');
+    });
+
+    test('should handle non-Error exceptions during creation', async () => {
+      jest.spyOn(foodTypeModel, 'create').mockRejectedValueOnce('string error');
+
+      await request(app)
+        .post('/api/food-type')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(mockFoodType)
+        .expect(500);
+    });
   });
 
   describe('GET /api/food-type/:id', () => {
@@ -84,6 +107,27 @@ describe('FoodType Controller Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
+
+    test('should handle Error exceptions during findById', async () => {
+      jest.spyOn(foodTypeModel, 'findById').mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .get('/api/food-type/507f1f77bcf86cd799439011')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('Database error');
+    });
+
+    test('should handle non-Error exceptions during findById', async () => {
+      jest.spyOn(foodTypeModel, 'findById').mockRejectedValueOnce('string error');
+
+      await request(app)
+        .get('/api/food-type/507f1f77bcf86cd799439011')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
+    });
   });
 
   describe('GET /api/food-type/barcode/:barcodeId', () => {
@@ -105,6 +149,27 @@ describe('FoodType Controller Integration Tests', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
+
+    test('should handle Error exceptions during findByBarcode', async () => {
+      jest.spyOn(foodTypeModel, 'findByBarcode').mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .get('/api/food-type/barcode/123456')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('Database error');
+    });
+
+    test('should handle non-Error exceptions during findByBarcode', async () => {
+      jest.spyOn(foodTypeModel, 'findByBarcode').mockRejectedValueOnce('string error');
+
+      await request(app)
+        .get('/api/food-type/barcode/123456')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
+    });
   });
 
   describe('PATCH /api/food-type/:id', () => {
@@ -124,6 +189,48 @@ describe('FoodType Controller Integration Tests', () => {
       expect(response.body.name).toBe(updates.name);
       expect(response.body.shelfLifeDays).toBe(updates.shelfLifeDays);
     });
+
+    test('should return 404 for non-existent food type', async () => {
+      const fakeId = '507f1f77bcf86cd799439011';
+
+      await request(app)
+        .patch(`/api/food-type/${fakeId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Test' })
+        .expect(404);
+    });
+
+    test('should return 401 without authentication token', async () => {
+      const fakeId = '507f1f77bcf86cd799439011';
+
+      await request(app)
+        .patch(`/api/food-type/${fakeId}`)
+        .send({ name: 'Test' })
+        .expect(401);
+    });
+
+    test('should handle Error exceptions during update', async () => {
+      jest.spyOn(foodTypeModel, 'update').mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .patch('/api/food-type/507f1f77bcf86cd799439011')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Test' })
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('Database error');
+    });
+
+    test('should handle non-Error exceptions during update', async () => {
+      jest.spyOn(foodTypeModel, 'update').mockRejectedValueOnce('string error');
+
+      await request(app)
+        .patch('/api/food-type/507f1f77bcf86cd799439011')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Test' })
+        .expect(500);
+    });
   });
 
   describe('DELETE /api/food-type/:id', () => {
@@ -138,6 +245,44 @@ describe('FoodType Controller Integration Tests', () => {
       // Verify deletion
       const found = await foodTypeModel.findById(created._id);
       expect(found).toBeNull();
+    });
+
+    test('should return 404 for non-existent food type', async () => {
+      const fakeId = '507f1f77bcf86cd799439011';
+
+      await request(app)
+        .delete(`/api/food-type/${fakeId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    test('should return 401 without authentication token', async () => {
+      const fakeId = '507f1f77bcf86cd799439011';
+
+      await request(app)
+        .delete(`/api/food-type/${fakeId}`)
+        .expect(401);
+    });
+
+    test('should handle Error exceptions during deletion', async () => {
+      jest.spyOn(foodTypeModel, 'delete').mockRejectedValueOnce(new Error('Database error'));
+
+      const response = await request(app)
+        .delete('/api/food-type/507f1f77bcf86cd799439011')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
+
+      expect(response.body).toHaveProperty('message');
+      expect(response.body.message).toBe('Database error');
+    });
+
+    test('should handle non-Error exceptions during deletion', async () => {
+      jest.spyOn(foodTypeModel, 'delete').mockRejectedValueOnce('string error');
+
+      await request(app)
+        .delete('/api/food-type/507f1f77bcf86cd799439011')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(500);
     });
   });
 });
