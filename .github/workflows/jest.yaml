@@ -1,5 +1,8 @@
 name: jest
 on: pull_request
+
+env:
+  JWT_SECRET: "fake-secret"
 jobs:
   test:
     runs-on: ubuntu-latest
