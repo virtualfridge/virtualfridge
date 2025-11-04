@@ -22,7 +22,21 @@ describe('storage utility', () => {
         require('../../util/storage');
       });
 
-      // The module should check and create the directory
+      // Verify that the directory was created
+      expect(mockedFs.mkdirSync).toHaveBeenCalled();
+    });
+
+    test('should not create IMAGES_DIR if it already exists', () => {
+      mockedFs.existsSync = jest.fn().mockReturnValue(true);
+      mockedFs.mkdirSync = jest.fn();
+
+      jest.isolateModules(() => {
+        require('../../util/storage');
+      });
+
+      // Should check existence but not create
+      expect(mockedFs.existsSync).toHaveBeenCalled();
+      expect(mockedFs.mkdirSync).not.toHaveBeenCalled();
     });
   });
 
@@ -32,6 +46,95 @@ describe('storage utility', () => {
         mockedFs.existsSync = jest.fn().mockReturnValue(true);
         const { upload } = require('../../util/storage');
         expect(upload).toBeDefined();
+      });
+    });
+
+    test('should call destination callback with IMAGES_DIR', () => {
+      jest.isolateModules(() => {
+        mockedFs.existsSync = jest.fn().mockReturnValue(true);
+        const { upload } = require('../../util/storage');
+        const { IMAGES_DIR } = require('../../config/constants');
+
+        const storage = (upload as any).storage;
+        const mockReq = {} as any;
+        const mockFile = {} as any;
+        const mockCallback = jest.fn();
+
+        // Call the destination callback
+        storage.getDestination(mockReq, mockFile, mockCallback);
+
+        expect(mockCallback).toHaveBeenCalledWith(null, IMAGES_DIR);
+      });
+    });
+
+    test('should call filename callback with unique name and extension', () => {
+      jest.isolateModules(() => {
+        mockedFs.existsSync = jest.fn().mockReturnValue(true);
+        const { upload } = require('../../util/storage');
+
+        const storage = (upload as any).storage;
+        const mockReq = {} as any;
+        const mockFile = {
+          originalname: 'test-image.jpg',
+        } as any;
+        const mockCallback = jest.fn();
+
+        // Call the filename callback
+        storage.getFilename(mockReq, mockFile, mockCallback);
+
+        // Verify callback was called and filename has .jpg extension
+        expect(mockCallback).toHaveBeenCalled();
+        const filename = mockCallback.mock.calls[0][1];
+        expect(filename).toMatch(/\.jpg$/);
+      });
+    });
+
+    test('should generate unique filenames for each file', () => {
+      jest.isolateModules(() => {
+        mockedFs.existsSync = jest.fn().mockReturnValue(true);
+        const { upload } = require('../../util/storage');
+
+        const storage = (upload as any).storage;
+        const mockReq = {} as any;
+        const mockFile = {
+          originalname: 'test.png',
+        } as any;
+
+        const filenames: string[] = [];
+
+        // Generate multiple filenames
+        for (let i = 0; i < 3; i++) {
+          const mockCallback = jest.fn();
+          storage.getFilename(mockReq, mockFile, mockCallback);
+          filenames.push(mockCallback.mock.calls[0][1]);
+        }
+
+        // All filenames should be unique
+        const uniqueFilenames = new Set(filenames);
+        expect(uniqueFilenames.size).toBe(3);
+      });
+    });
+
+    test('should preserve file extension in generated filename', () => {
+      jest.isolateModules(() => {
+        mockedFs.existsSync = jest.fn().mockReturnValue(true);
+        const { upload } = require('../../util/storage');
+
+        const storage = (upload as any).storage;
+        const mockReq = {} as any;
+        const extensions = ['.jpg', '.png', '.gif', '.webp'];
+
+        extensions.forEach((ext) => {
+          const mockFile = {
+            originalname: `test${ext}`,
+          } as any;
+          const mockCallback = jest.fn();
+
+          storage.getFilename(mockReq, mockFile, mockCallback);
+
+          const filename = mockCallback.mock.calls[0][1];
+          expect(filename).toMatch(new RegExp(`\\${ext}$`));
+        });
       });
     });
   });

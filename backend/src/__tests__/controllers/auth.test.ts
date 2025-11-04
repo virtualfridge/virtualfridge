@@ -6,7 +6,7 @@ import { userModel } from '../../models/user';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
 // Setup mock before any imports
-const mockVerifyIdToken = jest.fn();
+const mockVerifyIdToken: jest.Mock = jest.fn();
 jest.mock('google-auth-library', () => ({
   OAuth2Client: jest.fn().mockImplementation(() => ({
     verifyIdToken: mockVerifyIdToken,
@@ -50,7 +50,7 @@ describe('Auth Controller Integration Tests', () => {
 
       mockVerifyIdToken.mockResolvedValue({
         getPayload: () => mockPayload,
-      } as any);
+      });
 
       const response = await request(app)
         .post('/api/auth/google')
@@ -82,7 +82,7 @@ describe('Auth Controller Integration Tests', () => {
           name: newUserInfo.name,
           picture: newUserInfo.profilePicture,
         }),
-      } as any);
+      });
 
       const response = await request(app)
         .post('/api/auth/google')
@@ -148,7 +148,7 @@ describe('Auth Controller Integration Tests', () => {
           name: newUserInfo.name,
           picture: newUserInfo.profilePicture,
         }),
-      } as any);
+      });
 
       const response = await request(app)
         .post('/api/auth/signup')
@@ -190,7 +190,7 @@ describe('Auth Controller Integration Tests', () => {
           name: mockGoogleUserInfo.name,
           picture: mockGoogleUserInfo.profilePicture,
         }),
-      } as any);
+      });
 
       const response = await request(app)
         .post('/api/auth/signup')
@@ -209,7 +209,7 @@ describe('Auth Controller Integration Tests', () => {
           name: 'Test User',
           picture: 'https://example.com/pic.jpg',
         }),
-      } as any);
+      });
 
       // Mock userModel.create to throw specific error
       jest.spyOn(userModel, 'create').mockRejectedValueOnce(new Error('Failed to process user'));
@@ -247,7 +247,7 @@ describe('Auth Controller Integration Tests', () => {
           name: mockGoogleUserInfo.name,
           picture: mockGoogleUserInfo.profilePicture,
         }),
-      } as any);
+      });
 
       const response = await request(app)
         .post('/api/auth/signin')
@@ -290,7 +290,7 @@ describe('Auth Controller Integration Tests', () => {
           name: nonExistentUser.name,
           picture: nonExistentUser.picture,
         }),
-      } as any);
+      });
 
       const response = await request(app)
         .post('/api/auth/signin')
@@ -312,7 +312,7 @@ describe('Auth Controller Integration Tests', () => {
           name: mockGoogleUserInfo.name,
           picture: mockGoogleUserInfo.profilePicture,
         }),
-      } as any);
+      });
 
       // Mock authService to throw specific error
       const { authService } = require('../../services/auth');

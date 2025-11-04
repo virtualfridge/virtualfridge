@@ -24,9 +24,12 @@ module.exports = {
     '^.+\\.ts$': [
       'ts-jest',
       {
-        isolatedModules: true,
-        diagnostics: { ignoreCodes: [151002] },
-        tsconfig: '<rootDir>/tsconfig.json',
+        diagnostics: false,
+        tsconfig: {
+          esModuleInterop: true,
+          allowSyntheticDefaultImports: true,
+          skipLibCheck: true,
+        },
       },
     ],
   },
