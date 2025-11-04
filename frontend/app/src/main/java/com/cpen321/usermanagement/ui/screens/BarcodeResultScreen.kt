@@ -176,161 +176,174 @@ private fun SuccessContent(
     fridgeItem: FridgeItem,
     modifier: Modifier = Modifier
 ) {
-    val foodItem = fridgeItem.foodItem
-    val foodType = fridgeItem.foodType
-    
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Success indicator
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "✅",
-                style = MaterialTheme.typography.displayMedium
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                text = "Product Added Successfully!",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+        SuccessHeader()
+        ProductInfoCard(fridgeItem = fridgeItem)
+        fridgeItem.foodType.nutrients?.let { nutrients ->
+            NutritionalInfoCard(nutrients = nutrients)
         }
-
-        // Product Information Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = "Product Information",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                ProductDetailRow(label = "Name", value = foodType.name)
-                ProductDetailRow(label = "Brand", value = foodType.brand)
-                ProductDetailRow(label = "Quantity", value = foodType.quantity)
-                
-                foodType.shelfLifeDays?.let { days ->
-                    ProductDetailRow(
-                        label = "Shelf Life", 
-                        value = "$days days"
-                    )
-                }
-                
-                foodItem.expirationDate?.let { date ->
-                    ProductDetailRow(
-                        label = "Your Item Expiration Date", 
-                        value = formatDate(date)
-                    )
-                }
-                
-                foodType.expiration_date?.let { date ->
-                    ProductDetailRow(
-                        label = "Product Expiration Date", 
-                        value = date
-                    )
-                }
-                
-                ProductDetailRow(
-                    label = "Quantity Left", 
-                    value = "${foodItem.percentLeft}%"
-                )
-            }
+        fridgeItem.foodType.ingredients?.let { ingredients ->
+            IngredientsCard(ingredients = ingredients)
         }
-
-        // Nutritional Information Card
-        foodType.nutrients?.let { nutrients ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Nutritional Information (per 100g)",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    NutrientGrid(nutrients = nutrients)
-                }
-            }
-        }
-
-        // Ingredients Card
-        foodType.ingredients?.let { ingredients ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Ingredients",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    
-                    SelectionContainer {
-                        Text(
-                            text = ingredients,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        }
-
-        // Allergens Card
-        foodType.allergens?.let { allergens ->
+        fridgeItem.foodType.allergens?.let { allergens ->
             if (allergens.isNotEmpty()) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "⚠️ Allergens",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                        
-                        SelectionContainer {
-                            Text(
-                                text = allergens.joinToString(", "),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        }
-                    }
-                }
+                AllergensCard(allergens = allergens)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SuccessHeader() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "✅",
+            style = MaterialTheme.typography.displayMedium
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = "Product Added Successfully!",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Composable
+private fun ProductInfoCard(fridgeItem: FridgeItem) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Product Information",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            ProductDetailRow(label = "Name", value = fridgeItem.foodType.name)
+            ProductDetailRow(label = "Brand", value = fridgeItem.foodType.brand)
+            ProductDetailRow(label = "Quantity", value = fridgeItem.foodType.quantity)
+
+            fridgeItem.foodType.shelfLifeDays?.let { days ->
+                ProductDetailRow(
+                    label = "Shelf Life",
+                    value = "$days days"
+                )
+            }
+
+            fridgeItem.foodItem.expirationDate?.let { date ->
+                ProductDetailRow(
+                    label = "Your Item Expiration Date",
+                    value = formatDate(date)
+                )
+            }
+
+            fridgeItem.foodType.expiration_date?.let { date ->
+                ProductDetailRow(
+                    label = "Product Expiration Date",
+                    value = date
+                )
+            }
+
+            ProductDetailRow(
+                label = "Quantity Left",
+                value = "${fridgeItem.foodItem.percentLeft}%"
+            )
+        }
+    }
+}
+
+@Composable
+private fun NutritionalInfoCard(nutrients: Nutrients) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Nutritional Information (per 100g)",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            NutrientGrid(nutrients = nutrients)
+        }
+    }
+}
+
+@Composable
+private fun IngredientsCard(ingredients: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Ingredients",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            SelectionContainer {
+                Text(
+                    text = ingredients,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AllergensCard(allergens: List<String>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "⚠️ Allergens",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+
+            SelectionContainer {
+                Text(
+                    text = allergens.joinToString(", "),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
             }
         }
     }
@@ -427,7 +440,7 @@ private fun formatDate(dateString: String): String {
         val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
-    } catch (e: Exception) {
+    } catch (e: java.text.ParseException) {
         dateString // Return original string if parsing fails
     }
 }

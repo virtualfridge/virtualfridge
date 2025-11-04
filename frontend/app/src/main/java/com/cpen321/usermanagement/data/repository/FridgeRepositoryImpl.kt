@@ -54,6 +54,18 @@ class FridgeRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while fetching fridge items", e)
             Result.failure(e)
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Network timeout while fetching fridge items", e)
+            Result.failure(e)
+        } catch (e: UnknownHostException) {
+            Log.e(TAG, "Network connection failed while fetching fridge items", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Log.e(TAG, "IO error while fetching fridge items", e)
+            Result.failure(e)
+        } catch (e: HttpException) {
+            Log.e(TAG, "HTTP error while fetching fridge items", e)
+            Result.failure(e)
         } catch (e: Exception) {
             Log.e(TAG, "Unexpected error while fetching fridge items", e)
             Result.failure(e)

@@ -69,18 +69,21 @@ fun MainScreen(
         }
     }
 
-    MainContent(
-        mainUiState = mainUiState,
-        fridgeUiState = fridgeUiState,
-        snackBarHostState = snackBarHostState,
-        onProfileClick = onProfileClick,
-        showScanner = showScanner,
-        onScanRequested = { showScanner = true },
+    val fridgeListActions = FridgeListActions(
+        onItemSelected = fridgeViewModel::toggleItemSelection,
+        onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
+        onItemRemove = fridgeViewModel::removeFoodItem,
+        onSortOptionChanged = fridgeViewModel::setSortOption,
         onBarcodeDetected = { barcode ->
             showScanner = false
             mainViewModel.handleScannedBarcode(barcode)
         },
-        onScannerClose = { showScanner = false },
+        onScannerClose = { showScanner = false }
+    )
+
+    val mainScreenActions = MainScreenActions(
+        onProfileClick = onProfileClick,
+        onScanRequested = { showScanner = true },
         onSuccessMessageShown = {
             mainViewModel.clearSuccessMessage()
             fridgeViewModel.clearSuccessMessage()
@@ -89,10 +92,6 @@ fun MainScreen(
             mainViewModel.clearScanError()
             fridgeViewModel.clearError()
         },
-        onItemSelected = fridgeViewModel::toggleItemSelection,
-        onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
-        onItemRemove = fridgeViewModel::removeFoodItem,
-        onSortOptionChanged = fridgeViewModel::setSortOption,
         onTestBarcodeClick = onTestBarcodeClick,
         onRecipeButtonClick = {
             if (fridgeUiState.selectedItems.isNotEmpty()) {
@@ -104,55 +103,79 @@ fun MainScreen(
         }
     )
 
-    // Recipe Options Bottom Sheet
+    MainContent(
+        mainUiState = mainUiState,
+        fridgeUiState = fridgeUiState,
+        snackBarHostState = snackBarHostState,
+        showScanner = showScanner,
+        actions = mainScreenActions,
+        fridgeListActions = fridgeListActions
+    )
+
+    MainScreenBottomSheets(
+        mainViewModel = mainViewModel,
+        fridgeViewModel = fridgeViewModel,
+        mainUiState = mainUiState,
+        showRecipeSheet = showRecipeSheet,
+        onDismissRecipeSheet = { showRecipeSheet = false },
+        showRecipeResults = showRecipeResults,
+        onDismissRecipeResults = { showRecipeResults = false },
+        sheetState = sheetState,
+        resultsSheetState = resultsSheetState
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MainScreenBottomSheets(
+    mainViewModel: MainViewModel,
+    fridgeViewModel: FridgeViewModel,
+    mainUiState: MainUiState,
+    showRecipeSheet: Boolean,
+    onDismissRecipeSheet: () -> Unit,
+    showRecipeResults: Boolean,
+    onDismissRecipeResults: () -> Unit,
+    sheetState: SheetState,
+    resultsSheetState: SheetState
+) {
     if (showRecipeSheet) {
         RecipeOptionsBottomSheet(
             sheetState = sheetState,
             onDismiss = {
-                showRecipeSheet = false
+                onDismissRecipeSheet()
                 fridgeViewModel.hideRecipeOptions()
             },
             onMealDBRecipe = {
-                showRecipeSheet = false
+                onDismissRecipeSheet()
                 fridgeViewModel.hideRecipeOptions()
-                // Get selected items and convert to ingredient names
                 val selectedItems = fridgeViewModel.getSelectedItemsData()
                 val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
                     fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
                 }
-                // Show results sheet immediately (will show loading state)
-                showRecipeResults = true
-                // Trigger MealDB recipe generation directly
+                onDismissRecipeResults() // Show results sheet immediately
                 mainViewModel.fetchRecipes(ingredientNames)
-                // Clear selection after generating
                 fridgeViewModel.clearSelection()
             },
             onAIRecipe = {
-                showRecipeSheet = false
+                onDismissRecipeSheet()
                 fridgeViewModel.hideRecipeOptions()
-                // Get selected items and convert to ingredient names
                 val selectedItems = fridgeViewModel.getSelectedItemsData()
                 val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
                     fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
                 }
-                // Show results sheet immediately (will show loading state)
-                showRecipeResults = true
-                // Trigger AI recipe generation directly
+                onDismissRecipeResults() // Show results sheet immediately
                 mainViewModel.generateAiRecipe(ingredientNames)
-                // Clear selection after generating
                 fridgeViewModel.clearSelection()
             }
         )
     }
 
-    // Recipe Results Bottom Sheet
     if (showRecipeResults) {
         RecipeResultsBottomSheet(
             sheetState = resultsSheetState,
             mainUiState = mainUiState,
             onDismiss = {
-                showRecipeResults = false
-                // Clear recipe data when dismissed
+                onDismissRecipeResults()
                 mainViewModel.clearRecipeError()
                 mainViewModel.clearAiError()
             }
@@ -160,60 +183,63 @@ fun MainScreen(
     }
 }
 
+private data class FridgeListActions(
+    val onItemSelected: (String) -> Unit,
+    val onItemPercentChanged: (String, Int) -> Unit,
+    val onItemRemove: (String) -> Unit,
+    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    val onBarcodeDetected: (String) -> Unit,
+    val onScannerClose: () -> Unit
+)
+
+private data class MainScreenActions(
+    val onProfileClick: () -> Unit,
+    val onScanRequested: () -> Unit,
+    val onSuccessMessageShown: () -> Unit,
+    val onErrorMessageShown: () -> Unit,
+    val onTestBarcodeClick: () -> Unit,
+    val onRecipeButtonClick: () -> Unit,
+    val onNotificationClick: () -> Unit
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainContent(
     mainUiState: MainUiState,
     fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
     snackBarHostState: SnackbarHostState,
-    onProfileClick: () -> Unit,
     showScanner: Boolean,
-    onScanRequested: () -> Unit,
-    onBarcodeDetected: (String) -> Unit,
-    onScannerClose: () -> Unit,
-    onSuccessMessageShown: () -> Unit,
-    onErrorMessageShown: () -> Unit,
-    onItemSelected: (String) -> Unit,
-    onItemPercentChanged: (String, Int) -> Unit,
-    onItemRemove: (String) -> Unit,
-    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
-    onTestBarcodeClick: () -> Unit,
-    onRecipeButtonClick: () -> Unit,
-    onNotificationClick: () -> Unit,
+    actions: MainScreenActions,
+    fridgeListActions: FridgeListActions,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { MainTopBar(onProfileClick = onProfileClick) },
+        topBar = { MainTopBar(onProfileClick = actions.onProfileClick) },
         snackbarHost = {
             MainSnackbarHost(
                 hostState = snackBarHostState,
                 successMessage = mainUiState.successMessage ?: fridgeUiState.successMessage,
                 errorMessage = mainUiState.scanError ?: fridgeUiState.errorMessage,
-                onSuccessMessageShown = onSuccessMessageShown,
-                onErrorMessageShown = onErrorMessageShown
+                onSuccessMessageShown = actions.onSuccessMessageShown,
+                onErrorMessageShown = actions.onErrorMessageShown
             )
         },
         bottomBar = {
             MainBottomBar(
                 hasSelectedItems = fridgeUiState.selectedItems.isNotEmpty(),
-                onScanClick = onScanRequested,
-                onTestBarcodeClick = onTestBarcodeClick,
-                onRecipeClick = onRecipeButtonClick,
-                onNotificationClick = onNotificationClick
+                onScanClick = actions.onScanRequested,
+                onTestBarcodeClick = actions.onTestBarcodeClick,
+                onRecipeClick = actions.onRecipeButtonClick,
+                onNotificationClick = actions.onNotificationClick
             )
         }
     ) { paddingValues ->
         FridgeListBody(
             paddingValues = paddingValues,
             showScanner = showScanner,
-            onBarcodeDetected = onBarcodeDetected,
-            onScannerClose = onScannerClose,
             fridgeUiState = fridgeUiState,
-            onItemSelected = onItemSelected,
-            onItemPercentChanged = onItemPercentChanged,
-            onItemRemove = onItemRemove,
-            onSortOptionChanged = onSortOptionChanged
+            actions = fridgeListActions
         )
     }
 }
@@ -287,13 +313,8 @@ private fun MainSnackbarHost(
 private fun FridgeListBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
-    onBarcodeDetected: (String) -> Unit,
-    onScannerClose: () -> Unit,
     fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
-    onItemSelected: (String) -> Unit,
-    onItemPercentChanged: (String, Int) -> Unit,
-    onItemRemove: (String) -> Unit,
-    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    actions: FridgeListActions,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
@@ -306,8 +327,8 @@ private fun FridgeListBody(
     ) {
         if (showScanner) {
             ScannerScreen(
-                onBarcodeDetected = onBarcodeDetected,
-                onClose = onScannerClose
+                onBarcodeDetected = actions.onBarcodeDetected,
+                onClose = actions.onScannerClose
             )
         } else {
             when {
@@ -337,44 +358,12 @@ private fun FridgeListBody(
                                 fontWeight = FontWeight.Medium
                             )
 
-                            Box {
-                                Button(
-                                    onClick = { showSortMenu = !showSortMenu }
-                                ) {
-                                    Text(
-                                        text = when (fridgeUiState.sortOption) {
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
-                                        }
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = showSortMenu,
-                                    onDismissRequest = { showSortMenu = false }
-                                ) {
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = when (option) {
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
-                                                    }
-                                                )
-                                            },
-                                            onClick = {
-                                                onSortOptionChanged(option)
-                                                showSortMenu = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
+                            SortOptionsDropdown(
+                                sortOption = fridgeUiState.sortOption,
+                                onSortOptionChanged = actions.onSortOptionChanged,
+                                showSortMenu = showSortMenu,
+                                onToggleSortMenu = { showSortMenu = !showSortMenu }
+                            )
                         }
 
                         // Fridge items list
@@ -382,12 +371,57 @@ private fun FridgeListBody(
                             items = fridgeUiState.fridgeItems,
                             selectedItems = fridgeUiState.selectedItems,
                             isUpdating = fridgeUiState.isUpdating,
-                            onItemSelected = onItemSelected,
-                            onItemPercentChanged = onItemPercentChanged,
-                            onItemRemove = onItemRemove
+                            onItemSelected = actions.onItemSelected,
+                            onItemPercentChanged = actions.onItemPercentChanged,
+                            onItemRemove = actions.onItemRemove
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SortOptionsDropdown(
+    sortOption: com.cpen321.usermanagement.ui.viewmodels.SortOption,
+    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    showSortMenu: Boolean,
+    onToggleSortMenu: () -> Unit
+) {
+    Box {
+        Button(onClick = onToggleSortMenu) {
+            Text(
+                text = when (sortOption) {
+                    com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                    com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                }
+            )
+        }
+
+        DropdownMenu(
+            expanded = showSortMenu,
+            onDismissRequest = onToggleSortMenu
+        ) {
+            com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = when (option) {
+                                com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                                com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                            }
+                        )
+                    },
+                    onClick = {
+                        onSortOptionChanged(option)
+                        onToggleSortMenu()
+                    }
+                )
             }
         }
     }
@@ -561,96 +595,81 @@ private fun MainBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Scan Barcode Button
-            Button(
-                onClick = onScanClick,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "📷",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Scan",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
+            ScanButton(onClick = onScanClick, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.width(8.dp))
-
-            // Test Barcode Button
-            OutlinedButton(
-                onClick = onTestBarcodeClick,
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🧪",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Test",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
+            TestButton(onClick = onTestBarcodeClick, modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.width(8.dp))
-
-            // Recipe Button (enabled only when items are selected)
-            Button(
+            RecipeButton(
                 onClick = onRecipeClick,
-                modifier = Modifier.weight(1f),
                 enabled = hasSelectedItems,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                )
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🍳",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = if (!hasSelectedItems) Modifier.alpha(0.4f) else Modifier
-                    )
-                    Text(
-                        text = "Recipe",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Notification Test Button
-            OutlinedButton(
-                onClick = onNotificationClick,
                 modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🔔",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Notify",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            NotificationButton(onClick = onNotificationClick, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun ScanButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "📷", style = MaterialTheme.typography.titleMedium)
+            Text(text = "Scan", style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+private fun TestButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "🧪", style = MaterialTheme.typography.titleMedium)
+            Text(text = "Test", style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+private fun RecipeButton(onClick: () -> Unit, enabled: Boolean, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "🍳",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = if (!enabled) Modifier.alpha(0.4f) else Modifier
+            )
+            Text(text = "Recipe", style = MaterialTheme.typography.labelSmall)
+        }
+    }
+}
+
+@Composable
+private fun NotificationButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "🔔", style = MaterialTheme.typography.titleMedium)
+            Text(text = "Notify", style = MaterialTheme.typography.labelSmall)
         }
     }
 }
@@ -675,130 +694,138 @@ private fun RecipeOptionsBottomSheet(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            RecipeOptionsHeader()
+            Spacer(modifier = Modifier.height(8.dp))
+            MealDBOption(onClick = onMealDBRecipe)
+            AIOption(onClick = onAIRecipe)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun RecipeOptionsHeader() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "👨‍🍳",
+            fontSize = 48.sp
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Choose Your Recipe Style",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "Let's cook something delicious!",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun MealDBOption(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "👨‍🍳",
-                    fontSize = 48.sp
+                    text = "🍳",
+                    fontSize = 32.sp
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+            }
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
-                    text = "Choose Your Recipe Style",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "Recipe Database",
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Let's cook something delicious!",
+                    text = "Discover proven recipes from MealDB",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
             }
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // MealDB API Option
-            Card(
+@Composable
+private fun AIOption(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onMealDBRecipe() },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "🍳",
-                            fontSize = 32.sp
-                        )
-                    }
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Recipe Database",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Discover proven recipes from MealDB",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                        )
-                    }
-                }
+                Text(
+                    text = "✨",
+                    fontSize = 32.sp
+                )
             }
-
-            // Gemini AI Option
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onAIRecipe() },
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "✨",
-                            fontSize = 32.sp
-                        )
-                    }
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "AI Chef",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Custom recipes powered by Gemini AI",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
-                        )
-                    }
-                }
+                Text(
+                    text = "AI Chef",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Custom recipes powered by Gemini AI",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -822,184 +849,195 @@ private fun RecipeResultsBottomSheet(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Loading states
             if (mainUiState.isFetchingRecipes) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    Text(
-                        text = "Fetching recipes from MealDB...",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                LoadingState(text = "Fetching recipes from MealDB...")
             }
 
             if (mainUiState.isGeneratingAiRecipe) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    Text(
-                        text = "Generating AI recipe with Gemini...",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                LoadingState(text = "Generating AI recipe with Gemini...")
             }
 
-            // Error states
             mainUiState.recipeError?.let { error ->
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                ErrorState(error = error)
             }
 
             mainUiState.aiError?.let { error ->
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                ErrorState(error = error)
             }
 
-            // MealDB Results
-            if (!mainUiState.isFetchingRecipes && !mainUiState.isGeneratingAiRecipe &&
-                mainUiState.recipeSummaries.isEmpty() && mainUiState.aiRecipe == null &&
-                mainUiState.recipeError == null && mainUiState.aiError == null) {
-                // Show "No Recipes Found" when done loading but no results
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Text(
-                            text = "🔍",
-                            fontSize = 48.sp
-                        )
-                        Text(
-                            text = "No Recipes Found",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Text(
-                            text = "Try selecting different ingredients or check back later",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+            val showNoRecipesFound = !mainUiState.isFetchingRecipes &&
+                    !mainUiState.isGeneratingAiRecipe &&
+                    mainUiState.recipeSummaries.isEmpty() &&
+                    mainUiState.aiRecipe == null &&
+                    mainUiState.recipeError == null &&
+                    mainUiState.aiError == null
+
+            if (showNoRecipesFound) {
+                NoRecipesFoundState()
             }
 
             if (mainUiState.recipeSummaries.isNotEmpty()) {
-                Text(
-                    text = "🍳 Recipes from MealDB",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                if (mainUiState.recipeIngredients.isNotEmpty()) {
-                    Text(
-                        text = "Ingredients: ${mainUiState.recipeIngredients.joinToString(", ")}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                mainUiState.recipeSummaries.forEach { meal ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = meal.strMeal,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = "Meal ID: ${meal.idMeal}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                            )
-
-                            meal.strMealThumb?.takeIf { it.isNotBlank() }?.let { url ->
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Image: $url",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-                    }
-                }
+                MealDBResults(mainUiState = mainUiState)
             }
 
-            // AI Recipe Results
             mainUiState.aiRecipe?.let { aiRecipeText ->
-                Text(
-                    text = "✨ AI Chef Recipe",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                if (mainUiState.aiIngredients.isNotEmpty()) {
-                    Text(
-                        text = "Ingredients: ${mainUiState.aiIngredients.joinToString(", ")}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                mainUiState.aiModel?.let { model ->
-                    Text(
-                        text = "Generated by: $model",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Text(
-                        text = aiRecipeText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+                AIResults(mainUiState = mainUiState, aiRecipeText = aiRecipeText)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+}
+
+@Composable
+private fun LoadingState(text: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+private fun ErrorState(error: String) {
+    Text(
+        text = error,
+        color = MaterialTheme.colorScheme.error,
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
+
+@Composable
+private fun NoRecipesFoundState() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "🔍",
+                fontSize = 48.sp
+            )
+            Text(
+                text = "No Recipes Found",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Try selecting different ingredients or check back later",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun MealDBResults(mainUiState: MainUiState) {
+    Text(
+        text = "🍳 Recipes from MealDB",
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold
+    )
+
+    if (mainUiState.recipeIngredients.isNotEmpty()) {
+        Text(
+            text = "Ingredients: ${mainUiState.recipeIngredients.joinToString(", ")}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    mainUiState.recipeSummaries.forEach { meal ->
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = meal.strMeal,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = "Meal ID: ${meal.idMeal}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                )
+
+                meal.strMealThumb?.takeIf { it.isNotBlank() }?.let { url ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Image: $url",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AIResults(mainUiState: MainUiState, aiRecipeText: String) {
+    Text(
+        text = "✨ AI Chef Recipe",
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold
+    )
+
+    if (mainUiState.aiIngredients.isNotEmpty()) {
+        Text(
+            text = "Ingredients: ${mainUiState.aiIngredients.joinToString(", ")}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    mainUiState.aiModel?.let { model ->
+        Text(
+            text = "Generated by: $model",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Text(
+            text = aiRecipeText,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

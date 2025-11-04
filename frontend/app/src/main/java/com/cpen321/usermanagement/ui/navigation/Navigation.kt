@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.*
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -109,98 +110,127 @@ private fun AppNavHost(
     navigationStateManager: NavigationStateManager
 ) {
     NavHost(navController = navController, startDestination = NavRoutes.LOADING) {
-        composable(NavRoutes.LOADING) {
-            LoadingScreen(message = stringResource(R.string.checking_authentication))
-        }
+        addLoadingScreen()
+        addAuthScreen(authViewModel, profileViewModel)
+        addMainScreen(mainViewModel, navigationStateManager)
+        addProfileScreen(authViewModel, profileViewModel, navigationStateManager)
+        addManageProfileScreen(profileViewModel, navigationStateManager)
+        addRecipeScreen(mainViewModel, navigationStateManager)
+        addTestBarcodeScreen(mainViewModel, navigationStateManager)
+        addBarcodeResultScreen(mainViewModel, navigationStateManager)
+        addFridgeScreen(navigationStateManager)
+    }
+}
 
-        composable(NavRoutes.AUTH) {
-            AuthScreen(authViewModel = authViewModel, profileViewModel = profileViewModel)
-        }
+private fun NavGraphBuilder.addLoadingScreen() {
+    composable(NavRoutes.LOADING) {
+        LoadingScreen(message = stringResource(R.string.checking_authentication))
+    }
+}
 
-//        composable(NavRoutes.PROFILE_COMPLETION) {
-////            ProfileCompletionScreen(
-////                profileViewModel = profileViewModel,
-////                onProfileCompleted = { navigationStateManager.handleProfileCompletion() },
-////                onProfileCompletedWithMessage = { message ->
-////                    Log.d("AppNavigation", "Profile completed with message: $message")
-////                    navigationStateManager.handleProfileCompletionWithMessage(message)
-////                }
-////            )
-//        }
+private fun NavGraphBuilder.addAuthScreen(
+    authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel
+) {
+    composable(NavRoutes.AUTH) {
+        AuthScreen(authViewModel = authViewModel, profileViewModel = profileViewModel)
+    }
+}
 
-        composable(NavRoutes.MAIN) {
-            MainScreen(
-                mainViewModel = mainViewModel,
-                fridgeViewModel = hiltViewModel(),
-                onProfileClick = { navigationStateManager.navigateToProfile() },
-                onRecipeClick = { navigationStateManager.navigateToRecipe() },
-                onTestBarcodeClick = { navigationStateManager.navigateToTestBarcode() },
-                onBarcodeResultClick = { navigationStateManager.navigateToBarcodeResult() },
-                onFridgeClick = { navigationStateManager.navigateToFridge() }
+private fun NavGraphBuilder.addMainScreen(
+    mainViewModel: MainViewModel,
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.MAIN) {
+        MainScreen(
+            mainViewModel = mainViewModel,
+            fridgeViewModel = hiltViewModel(),
+            onProfileClick = { navigationStateManager.navigateToProfile() },
+            onRecipeClick = { navigationStateManager.navigateToRecipe() },
+            onTestBarcodeClick = { navigationStateManager.navigateToTestBarcode() },
+            onBarcodeResultClick = { navigationStateManager.navigateToBarcodeResult() },
+            onFridgeClick = { navigationStateManager.navigateToFridge() }
+        )
+    }
+}
+
+private fun NavGraphBuilder.addProfileScreen(
+    authViewModel: AuthViewModel,
+    profileViewModel: ProfileViewModel,
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.PROFILE) {
+        ProfileScreen(
+            authViewModel = authViewModel,
+            profileViewModel = profileViewModel,
+            actions = ProfileScreenActions(
+                onBackClick = { navigationStateManager.navigateBack() },
+                onManageProfileClick = { navigationStateManager.navigateToManageProfile() },
+                onAccountDeleted = { navigationStateManager.handleAccountDeletion() },
+                onSignOut = { navigationStateManager.handleSignOut() },
             )
-        }
+        )
+    }
+}
 
-        composable(NavRoutes.PROFILE) {
-            ProfileScreen(
-                authViewModel = authViewModel,
-                profileViewModel = profileViewModel,
-                actions = ProfileScreenActions(
-                    onBackClick = { navigationStateManager.navigateBack() },
-                    onManageProfileClick = { navigationStateManager.navigateToManageProfile() },
-//                    onManageHobbiesClick = { navigationStateManager.navigateToManageHobbies() },
-                    onAccountDeleted = { navigationStateManager.handleAccountDeletion() },
-                    onSignOut = { navigationStateManager.handleSignOut()},
-                )
-            )
-        }
+private fun NavGraphBuilder.addManageProfileScreen(
+    profileViewModel: ProfileViewModel,
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.MANAGE_PROFILE) {
+        ManageProfileScreen(
+            profileViewModel = profileViewModel,
+            onBackClick = { navigationStateManager.navigateBack() }
+        )
+    }
+}
 
-        composable(NavRoutes.MANAGE_PROFILE) {
-            ManageProfileScreen(
-                profileViewModel = profileViewModel,
-                onBackClick = { navigationStateManager.navigateBack() }
-            )
-        }
+private fun NavGraphBuilder.addRecipeScreen(
+    mainViewModel: MainViewModel,
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.RECIPE) {
+        RecipeScreen(
+            mainViewModel = mainViewModel,
+            onBackClick = { navigationStateManager.navigateBack() }
+        )
+    }
+}
 
-//        composable(NavRoutes.MANAGE_HOBBIES) {
-//            ManageHobbiesScreen(
-//                profileViewModel = profileViewModel,
-//                onBackClick = { navigationStateManager.navigateBack() }
-//            )
-//        }
+private fun NavGraphBuilder.addTestBarcodeScreen(
+    mainViewModel: MainViewModel,
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.TEST_BARCODE) {
+        TestBarcodeScreen(
+            mainViewModel = mainViewModel,
+            onBackClick = { navigationStateManager.navigateBack() }
+        )
+    }
+}
 
-        // Placeholder for scanner screen; implement separately
-        composable(NavRoutes.SCANNER) {
-        }
+private fun NavGraphBuilder.addBarcodeResultScreen(
+    mainViewModel: MainViewModel,
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.BARCODE_RESULT) {
+        BarcodeResultScreen(
+            mainViewModel = mainViewModel,
+            onBackClick = {
+                mainViewModel.clearBarcodeResult()
+                navigationStateManager.navigateBack()
+            }
+        )
+    }
+}
 
-        composable(NavRoutes.RECIPE) {
-            RecipeScreen(
-                mainViewModel = mainViewModel,
-                onBackClick = { navigationStateManager.navigateBack() }
-            )
-        }
-
-        composable(NavRoutes.TEST_BARCODE) {
-            TestBarcodeScreen(
-                mainViewModel = mainViewModel,
-                onBackClick = { navigationStateManager.navigateBack() }
-            )
-        }
-
-        composable(NavRoutes.BARCODE_RESULT) {
-            BarcodeResultScreen(
-                mainViewModel = mainViewModel,
-                onBackClick = { 
-                    mainViewModel.clearBarcodeResult()
-                    navigationStateManager.navigateBack() 
-                }
-            )
-        }
-
-        composable(NavRoutes.FRIDGE) {
-            FridgeScreen(
-                fridgeViewModel = hiltViewModel(),
-                onBackClick = { navigationStateManager.navigateBack() }
-            )
-        }
+private fun NavGraphBuilder.addFridgeScreen(
+    navigationStateManager: NavigationStateManager
+) {
+    composable(NavRoutes.FRIDGE) {
+        FridgeScreen(
+            fridgeViewModel = hiltViewModel(),
+            onBackClick = { navigationStateManager.navigateBack() }
+        )
     }
 }

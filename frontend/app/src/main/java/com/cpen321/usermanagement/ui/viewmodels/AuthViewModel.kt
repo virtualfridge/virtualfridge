@@ -58,33 +58,40 @@ class AuthViewModel @Inject constructor(
 
     private fun checkAuthenticationStatus() {
         viewModelScope.launch {
-            try {
-                _uiState.value = _uiState.value.copy(isCheckingAuth = true)
-                updateNavigationState(isLoading = true)
-
-                val isAuthenticated = authRepository.isUserAuthenticated()
-                val user = if (isAuthenticated) authRepository.getCurrentUser() else null
-                val needsProfileCompletion = user?.bio == null || user.bio.isBlank()
-
-                _uiState.value = _uiState.value.copy(
-                    isAuthenticated = isAuthenticated,
-                    user = user,
-                    isCheckingAuth = false
-                )
-
-                updateNavigationState(
-                    isAuthenticated = isAuthenticated,
-                    needsProfileCompletion = needsProfileCompletion,
-                    isLoading = false
-                )
-            } catch (e: java.net.SocketTimeoutException) {
-                handleAuthError("Network timeout. Please check your connection.", e)
-            } catch (e: java.net.UnknownHostException) {
-                handleAuthError("No internet connection. Please check your network.", e)
-            } catch (e: java.io.IOException) {
-                handleAuthError("Connection error. Please try again.", e)
-            }
+            _uiState.value = _uiState.value.copy(isCheckingAuth = true)
+            updateNavigationState(isLoading = true)
+            authenticateUser()
         }
+    }
+
+    private suspend fun authenticateUser() {
+        try {
+            val isAuthenticated = authRepository.isUserAuthenticated()
+            val user = if (isAuthenticated) authRepository.getCurrentUser() else null
+            processAuthenticationResult(isAuthenticated, user)
+        } catch (e: java.net.SocketTimeoutException) {
+            handleAuthError("Network timeout. Please check your connection.", e)
+        } catch (e: java.net.UnknownHostException) {
+            handleAuthError("No internet connection. Please check your network.", e)
+        } catch (e: java.io.IOException) {
+            handleAuthError("Connection error. Please try again.", e)
+        }
+    }
+
+    private fun processAuthenticationResult(isAuthenticated: Boolean, user: User?) {
+        val needsProfileCompletion = user?.bio == null || user.bio.isBlank()
+
+        _uiState.value = _uiState.value.copy(
+            isAuthenticated = isAuthenticated,
+            user = user,
+            isCheckingAuth = false
+        )
+
+        updateNavigationState(
+            isAuthenticated = isAuthenticated,
+            needsProfileCompletion = needsProfileCompletion,
+            isLoading = false
+        )
     }
 
     private fun updateNavigationState(
@@ -120,7 +127,6 @@ class AuthViewModel @Inject constructor(
         authOperation: suspend (String) -> Result<AuthData>
     ) {
         viewModelScope.launch {
-            // Update loading state based on operation type
             _uiState.value = _uiState.value.copy(
                 isSigningIn = !isSignUp,
                 isSigningUp = isSignUp
@@ -128,35 +134,42 @@ class AuthViewModel @Inject constructor(
 
             authOperation(credential.idToken)
                 .onSuccess { authData ->
-                    val needsProfileCompletion =
-                        authData.user.bio == null || authData.user.bio.isBlank()
-
-                    _uiState.value = _uiState.value.copy(
-                        isSigningIn = false,
-                        isSigningUp = false,
-                        isAuthenticated = true,
-                        user = authData.user,
-                        errorMessage = null
-                    )
-
-                    // Trigger navigation through NavigationStateManager
-                    navigationStateManager.updateAuthenticationState(
-                        isAuthenticated = true,
-                        needsProfileCompletion = needsProfileCompletion,
-                        isLoading = false,
-                        currentRoute = NavRoutes.AUTH
-                    )
+                    onGoogleAuthSuccess(authData)
                 }
                 .onFailure { error ->
-                    val operationType = if (isSignUp) "sign up" else "sign in"
-                    Log.e(TAG, "Google $operationType failed", error)
-                    _uiState.value = _uiState.value.copy(
-                        isSigningIn = false,
-                        isSigningUp = false,
-                        errorMessage = error.message
-                    )
+                    onGoogleAuthFailure(error, isSignUp)
                 }
         }
+    }
+
+    private fun onGoogleAuthSuccess(authData: AuthData) {
+        val needsProfileCompletion =
+            authData.user.bio == null || authData.user.bio.isBlank()
+
+        _uiState.value = _uiState.value.copy(
+            isSigningIn = false,
+            isSigningUp = false,
+            isAuthenticated = true,
+            user = authData.user,
+            errorMessage = null
+        )
+
+        navigationStateManager.updateAuthenticationState(
+            isAuthenticated = true,
+            needsProfileCompletion = needsProfileCompletion,
+            isLoading = false,
+            currentRoute = NavRoutes.AUTH
+        )
+    }
+
+    private fun onGoogleAuthFailure(error: Throwable, isSignUp: Boolean) {
+        val operationType = if (isSignUp) "sign up" else "sign in"
+        Log.e(TAG, "Google $operationType failed", error)
+        _uiState.value = _uiState.value.copy(
+            isSigningIn = false,
+            isSigningUp = false,
+            errorMessage = error.message
+        )
     }
 
     fun handleGoogleSignInResult(credential: GoogleIdTokenCredential) {

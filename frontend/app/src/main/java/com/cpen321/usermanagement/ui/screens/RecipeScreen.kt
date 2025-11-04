@@ -45,6 +45,13 @@ import com.cpen321.usermanagement.ui.viewmodels.IngredientOption
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 
+private data class RecipeScreenActions(
+    val onIngredientSelectionChanged: (String, Boolean) -> Unit,
+    val onGenerateMealDb: () -> Unit,
+    val onGenerateAi: () -> Unit,
+    val onShowRawJsonChange: (Boolean) -> Unit
+)
+
 @Composable
 fun RecipeScreen(
     mainViewModel: MainViewModel,
@@ -57,6 +64,15 @@ fun RecipeScreen(
         showRawJson = false
     }
 
+    val actions = RecipeScreenActions(
+        onIngredientSelectionChanged = { key, selected ->
+            mainViewModel.setIngredientSelection(key, selected)
+        },
+        onGenerateMealDb = { mainViewModel.fetchRecipes() },
+        onGenerateAi = { mainViewModel.generateAiRecipe() },
+        onShowRawJsonChange = { showRawJson = it }
+    )
+
     Scaffold(
         topBar = {
             RecipeTopBar(
@@ -68,12 +84,7 @@ fun RecipeScreen(
             paddingValues = paddingValues,
             uiState = uiState,
             ingredientOptions = mainViewModel.getIngredientOptions(),
-            onIngredientSelectionChanged = { key, selected ->
-                mainViewModel.setIngredientSelection(key, selected)
-            },
-            onGenerateMealDb = { mainViewModel.fetchRecipes() },
-            onGenerateAi = { mainViewModel.generateAiRecipe() },
-            onShowRawJsonChange = { showRawJson = it },
+            actions = actions,
             showRawJson = showRawJson,
         )
     }
@@ -111,10 +122,7 @@ private fun RecipeScreenContent(
     paddingValues: PaddingValues,
     uiState: MainUiState,
     ingredientOptions: List<IngredientOption>,
-    onIngredientSelectionChanged: (String, Boolean) -> Unit,
-    onGenerateMealDb: () -> Unit,
-    onGenerateAi: () -> Unit,
-    onShowRawJsonChange: (Boolean) -> Unit,
+    actions: RecipeScreenActions,
     showRawJson: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -136,13 +144,13 @@ private fun RecipeScreenContent(
         IngredientSelectionSection(
             ingredientOptions = ingredientOptions,
             uiState = uiState,
-            onIngredientSelectionChanged = onIngredientSelectionChanged
+            onIngredientSelectionChanged = actions.onIngredientSelectionChanged
         )
 
         ActionButtonsSection(
             uiState = uiState,
-            onGenerateMealDb = onGenerateMealDb,
-            onGenerateAi = onGenerateAi
+            onGenerateMealDb = actions.onGenerateMealDb,
+            onGenerateAi = actions.onGenerateAi
         )
 
         uiState.recipeError?.let { error ->
@@ -168,7 +176,7 @@ private fun RecipeScreenContent(
                     RawJsonSection(
                         json = json,
                         showRawJson = showRawJson,
-                        onToggle = onShowRawJsonChange,
+                        onToggle = actions.onShowRawJsonChange,
                         source = uiState.recipeSource
                     )
                 }
