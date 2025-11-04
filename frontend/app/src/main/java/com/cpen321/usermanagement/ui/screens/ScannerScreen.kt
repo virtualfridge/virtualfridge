@@ -1,6 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
-import Icon
+import com.cpen321.usermanagement.ui.components.Icon
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.camera.core.CameraSelector

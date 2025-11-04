@@ -1,6 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
-import Button
+import com.cpen321.usermanagement.ui.components.Button
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

@@ -1,7 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
-import Icon
-import androidx.compose.foundation.BorderStroke
+import com.cpen321.usermanagement.ui.components.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

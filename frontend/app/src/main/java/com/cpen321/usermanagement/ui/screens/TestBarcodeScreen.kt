@@ -1,6 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
-import Icon
+import com.cpen321.usermanagement.ui.components.Icon
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues

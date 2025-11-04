@@ -1,6 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
-import Icon
+import com.cpen321.usermanagement.ui.components.Icon
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,6 +40,7 @@ import com.cpen321.usermanagement.ui.components.FridgeItemCard
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
+import com.cpen321.usermanagement.ui.viewmodels.FridgeUiState
 import com.cpen321.usermanagement.ui.viewmodels.FridgeViewModel
 import com.cpen321.usermanagement.ui.viewmodels.SortOption
 
@@ -67,7 +68,6 @@ fun FridgeScreen(
             paddingValues = paddingValues,
             uiState = uiState,
             onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
-            onRefreshClick = fridgeViewModel::loadFridgeItems,
             onSortOptionChanged = fridgeViewModel::setSortOption,
             onRemove = fridgeViewModel::removeFoodItem,
         )
@@ -104,15 +104,13 @@ private fun FridgeTopBar(
 @Composable
 private fun FridgeContent(
     paddingValues: PaddingValues,
-    uiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    uiState: FridgeUiState,
     onItemPercentChanged: (String, Int) -> Unit,
-    onRefreshClick: () -> Unit,
     onSortOptionChanged: (SortOption) -> Unit,
     onRemove: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    var showSortMenu by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -121,51 +119,7 @@ private fun FridgeContent(
             .padding(horizontal = spacing.large, vertical = spacing.medium),
         verticalArrangement = Arrangement.spacedBy(spacing.medium)
     ) {
-        // Sort options
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Sort by:",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
-
-            Button(
-                onClick = { showSortMenu = !showSortMenu }) {
-                Text(
-                    text = when (uiState.sortOption) {
-                        SortOption.EXPIRATION_DATE -> "Expiration Date"
-                        SortOption.ADDED_DATE -> "Added Date"
-                        SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                        SortOption.NAME -> "Name"
-                    }
-                )
-            }
-        }
-
-        DropdownMenu(
-            expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
-            SortOption.entries.forEach { option ->
-                DropdownMenuItem(text = {
-                    Text(
-                        text = when (option) {
-                            SortOption.EXPIRATION_DATE -> "Expiration Date"
-                            SortOption.ADDED_DATE -> "Added Date"
-                            SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                            SortOption.NAME -> "Name"
-                        }
-                    )
-                }, onClick = {
-                    onSortOptionChanged(option)
-                    showSortMenu = false
-                })
-            }
-        }
-
-        // Content
+        FridgeSortOptions(uiState, onSortOptionChanged)
         when {
             uiState.isLoading -> {
                 LoadingContent()
@@ -183,6 +137,57 @@ private fun FridgeContent(
                     onRemove = onRemove
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun FridgeSortOptions(
+    uiState: FridgeUiState,
+    onSortOptionChanged: (SortOption) -> Unit,
+) {
+    var showSortMenu by remember { mutableStateOf(false) }
+    // Sort options
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Sort by:",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium
+        )
+
+        Button(
+            onClick = { showSortMenu = !showSortMenu }) {
+            Text(
+                text = when (uiState.sortOption) {
+                    SortOption.EXPIRATION_DATE -> "Expiration Date"
+                    SortOption.ADDED_DATE -> "Added Date"
+                    SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                    SortOption.NAME -> "Name"
+                }
+            )
+        }
+    }
+
+    DropdownMenu(
+        expanded = showSortMenu, onDismissRequest = { showSortMenu = false }) {
+        SortOption.entries.forEach { option ->
+            DropdownMenuItem(text = {
+                Text(
+                    text = when (option) {
+                        SortOption.EXPIRATION_DATE -> "Expiration Date"
+                        SortOption.ADDED_DATE -> "Added Date"
+                        SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                        SortOption.NAME -> "Name"
+                    }
+                )
+            }, onClick = {
+                onSortOptionChanged(option)
+                showSortMenu = false
+            })
         }
     }
 }

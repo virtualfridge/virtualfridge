@@ -280,10 +280,10 @@ class MainViewModel @Inject constructor(
     }
 
     private fun formatIngredients(rawIngredients: List<String>): List<String> {
-        return rawIngredients.mapNotNull { ingredient ->
+        return rawIngredients.mapNotNull( fun (ingredient): String? {
             val cleaned = ingredient.replace('_', ' ').trim()
-            if (cleaned.isEmpty()) return@mapNotNull null
-            cleaned
+            if (cleaned.isEmpty()) return null
+            return cleaned
                 .lowercase()
                 .split(" ")
                 .filter { it.isNotBlank() }
@@ -293,7 +293,7 @@ class MainViewModel @Inject constructor(
                         else char.toString()
                     }
                 }
-        }
+        })
     }
 
     private fun resolveIngredients(ingredients: List<String>?): List<String> {

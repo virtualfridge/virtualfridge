@@ -1,3 +1,5 @@
+package com.cpen321.usermanagement.ui.components
+
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

@@ -107,61 +107,11 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun deleteProfile() {
-        viewModelScope.launch {
-            val user = _uiState.value.user
-            if (user == null) {
-                Log.e("ProfileViewModel", "Cannot delete profile: user is null")
-                return@launch
+        _uiState.value.user?.let { user ->
+            viewModelScope.launch {
+                profileRepository.deleteProfile(user)
             }
-            profileRepository.deleteProfile(user)
-        }
-    }
-
-    fun toggleHobby(hobby: String) {
-        val currentSelected = _uiState.value.selectedHobbies.toMutableSet()
-        if (currentSelected.contains(hobby)) {
-            currentSelected.remove(hobby)
-        } else {
-            currentSelected.add(hobby)
-        }
-        _uiState.value = _uiState.value.copy(selectedHobbies = currentSelected)
-    }
-
-    fun saveHobbies() {
-        viewModelScope.launch {
-            val originalHobbies = _uiState.value.user?.hobbies?.toSet() ?: emptySet()
-
-            _uiState.value =
-                _uiState.value.copy(
-                    isSavingProfile = true,
-                    errorMessage = null,
-                    successMessage = null
-                )
-
-            val selectedHobbiesList = _uiState.value.selectedHobbies.toList()
-            val result = profileRepository.updateUserHobbies(selectedHobbiesList)
-
-            if (result.isSuccess) {
-                val updatedUser = result.getOrNull()!!
-                _uiState.value = _uiState.value.copy(
-                    isSavingProfile = false,
-                    user = updatedUser,
-                    successMessage = "Hobbies updated successfully!"
-                )
-            } else {
-                // Revert to original hobbies on failure
-                val error = result.exceptionOrNull()
-                Log.d(TAG, "error: $error")
-                Log.e(TAG, "Failed to update hobbies", error)
-                val errorMessage = error?.message ?: "Failed to update hobbies"
-
-                _uiState.value = _uiState.value.copy(
-                    isSavingProfile = false,
-                    selectedHobbies = originalHobbies, // Revert the selected hobbies
-                    errorMessage = errorMessage
-                )
-            }
-        }
+        } ?: Log.e("ProfileViewModel", "Cannot delete profile: user is null")
     }
 
     fun clearError() {
@@ -177,19 +127,22 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun uploadProfilePicture(pictureUri: Uri) {
+        val currentUser = _uiState.value.user
+        if (currentUser == null) {
+            Log.e(TAG, "Cannot upload profile picture: user is null")
+            return
+        }
         viewModelScope.launch {
-            val currentUser = _uiState.value.user
-            if (currentUser == null) {
-                Log.e(TAG, "Cannot upload profile picture: user is null")
-                return@launch
-            }
-
-            val imageResult = profileRepository.uploadImage(pictureUri);
+            val imageResult = profileRepository.uploadImage(pictureUri)
             if (imageResult.isSuccess) {
-                val result = profileRepository.updateProfile(null, null, imageResult.getOrNull()!!)
+                val result = profileRepository.updateProfile(null, imageResult.getOrNull())
                 if (result.isSuccess) {
                     val updatedUser = currentUser.copy(profilePicture = pictureUri.toString())
-                    _uiState.value = _uiState.value.copy(isLoadingPhoto = false, user= updatedUser, successMessage = "Profile picture updated successfully!")
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingPhoto = false,
+                        user = updatedUser,
+                        successMessage = "Profile picture updated successfully!"
+                    )
                 } else {
                     val error = result.exceptionOrNull()
                     Log.e(TAG, "Failed to upload photo", error)
@@ -222,7 +175,6 @@ class ProfileViewModel @Inject constructor(
 
             val result = profileRepository.updateProfile(
                 name, null,
-                orNull = TODO() //not sure why this works
             )
             if (result.isSuccess) {
                 val updatedUser = result.getOrNull()!!

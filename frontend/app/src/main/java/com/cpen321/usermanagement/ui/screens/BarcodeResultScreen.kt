@@ -1,6 +1,7 @@
 package com.cpen321.usermanagement.ui.screens
 
-import Icon
+import android.util.Log
+import com.cpen321.usermanagement.ui.components.Icon
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,7 +48,6 @@ fun BarcodeResultScreen(
     onBackClick: () -> Unit
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
-    val spacing = LocalSpacing.current
 
     Scaffold(
         topBar = {
@@ -441,6 +441,7 @@ private fun formatDate(dateString: String): String {
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
     } catch (e: java.text.ParseException) {
+        Log.e("BarcodeResultScreen", "Error parsing date $dateString: $e")
         dateString // Return original string if parsing fails
     }
 }

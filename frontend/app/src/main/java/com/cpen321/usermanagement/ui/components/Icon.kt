@@ -1,3 +1,5 @@
+package com.cpen321.usermanagement.ui.components
+
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
