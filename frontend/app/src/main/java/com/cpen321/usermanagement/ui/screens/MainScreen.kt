@@ -92,6 +92,7 @@ fun MainScreen(
         onItemSelected = fridgeViewModel::toggleItemSelection,
         onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
         onItemRemove = fridgeViewModel::removeFoodItem,
+        onSortOptionChanged = fridgeViewModel::setSortOption,
         onTestBarcodeClick = onTestBarcodeClick,
         onRecipeButtonClick = {
             if (fridgeUiState.selectedItems.isNotEmpty()) {
@@ -175,6 +176,7 @@ private fun MainContent(
     onItemSelected: (String) -> Unit,
     onItemPercentChanged: (String, Int) -> Unit,
     onItemRemove: (String) -> Unit,
+    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
     onTestBarcodeClick: () -> Unit,
     onRecipeButtonClick: () -> Unit,
     onNotificationClick: () -> Unit,
@@ -210,7 +212,8 @@ private fun MainContent(
             fridgeUiState = fridgeUiState,
             onItemSelected = onItemSelected,
             onItemPercentChanged = onItemPercentChanged,
-            onItemRemove = onItemRemove
+            onItemRemove = onItemRemove,
+            onSortOptionChanged = onSortOptionChanged
         )
     }
 }
@@ -290,8 +293,12 @@ private fun FridgeListBody(
     onItemSelected: (String) -> Unit,
     onItemPercentChanged: (String, Int) -> Unit,
     onItemRemove: (String) -> Unit,
+    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val spacing = LocalSpacing.current
+    var showSortMenu by remember { mutableStateOf(false) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -311,14 +318,75 @@ private fun FridgeListBody(
                     EmptyFridgeContent()
                 }
                 else -> {
-                    FridgeItemsList(
-                        items = fridgeUiState.fridgeItems,
-                        selectedItems = fridgeUiState.selectedItems,
-                        isUpdating = fridgeUiState.isUpdating,
-                        onItemSelected = onItemSelected,
-                        onItemPercentChanged = onItemPercentChanged,
-                        onItemRemove = onItemRemove
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = spacing.large)
+                    ) {
+                        // Sort options row
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = spacing.medium),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Sort by:",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+
+                            Box {
+                                Button(
+                                    onClick = { showSortMenu = !showSortMenu }
+                                ) {
+                                    Text(
+                                        text = when (fridgeUiState.sortOption) {
+                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                                        }
+                                    )
+                                }
+
+                                DropdownMenu(
+                                    expanded = showSortMenu,
+                                    onDismissRequest = { showSortMenu = false }
+                                ) {
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = when (option) {
+                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                                                    }
+                                                )
+                                            },
+                                            onClick = {
+                                                onSortOptionChanged(option)
+                                                showSortMenu = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Fridge items list
+                        FridgeItemsList(
+                            items = fridgeUiState.fridgeItems,
+                            selectedItems = fridgeUiState.selectedItems,
+                            isUpdating = fridgeUiState.isUpdating,
+                            onItemSelected = onItemSelected,
+                            onItemPercentChanged = onItemPercentChanged,
+                            onItemRemove = onItemRemove
+                        )
+                    }
                 }
             }
         }
@@ -420,9 +488,7 @@ private fun FridgeItemsList(
     val spacing = LocalSpacing.current
 
     LazyColumn(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = spacing.large),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(spacing.medium),
         contentPadding = PaddingValues(vertical = spacing.medium)
     ) {
