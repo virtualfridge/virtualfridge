@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "User Management"
 include(":app")
+include(":macrobenchmark")

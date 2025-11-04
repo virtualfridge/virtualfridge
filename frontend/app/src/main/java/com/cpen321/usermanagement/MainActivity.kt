@@ -29,6 +29,10 @@ import com.cpen321.usermanagement.ui.viewmodels.AuthViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import android.app.Activity
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -67,6 +71,13 @@ class MainActivity : ComponentActivity() {
             val isDarkMode by themePreferencesManager.isDarkMode.collectAsState(initial = false)
 
             UserManagementTheme(darkTheme = isDarkMode) {
+                val context = LocalContext.current
+                val activity = context as? Activity
+
+                LaunchedEffect(Unit) {
+                    activity?.reportFullyDrawn()
+                }
+
                 UserManagementApp()
             }
         }
