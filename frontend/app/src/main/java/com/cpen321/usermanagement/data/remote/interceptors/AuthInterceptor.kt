@@ -1,6 +1,5 @@
 package com.cpen321.usermanagement.data.remote.interceptors
 
-import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Response
 

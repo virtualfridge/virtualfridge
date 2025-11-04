@@ -1,15 +1,13 @@
 package com.cpen321.usermanagement.data.remote.api
 
 import com.cpen321.usermanagement.data.remote.dto.ApiResponse
-import com.cpen321.usermanagement.data.remote.dto.ProfileData
 import com.cpen321.usermanagement.data.remote.dto.FridgeItemData
+import com.cpen321.usermanagement.data.remote.dto.ProfileData
 import com.cpen321.usermanagement.data.remote.dto.UpdateProfileRequest
 import com.cpen321.usermanagement.data.remote.dto.UploadImageData
-import com.cpen321.usermanagement.data.remote.dto.User
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.HTTP
 import retrofit2.http.Header
