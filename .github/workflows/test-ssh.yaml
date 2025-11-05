@@ -10,7 +10,7 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ../private.key
-          sudo chmod 600 ~/.ssh/private-key
+          sudo chmod 600 ../private.key
           ssh-keyscan -H $DEPLOYMENT_HOST > ~/.ssh/known_hosts
         shell: bash
         env:
