@@ -38,7 +38,7 @@ describe('Notification Controller Integration Tests', () => {
         enableNotifications: true,
         expiryThresholdDays: 2,
       },
-    });
+    } as any);
     userId = user._id.toString();
     authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
 
@@ -59,20 +59,26 @@ describe('Notification Controller Integration Tests', () => {
     test('should send test notification for expiring items', async () => {
       // Create an expiring food item
       await foodItemModel.create({
-        userId: userId,
-        typeId: foodTypeId,
+        userId: new mongoose.Types.ObjectId(userId),
+        typeId: new mongoose.Types.ObjectId(foodTypeId),
         expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day from now
         percentLeft: 100,
       });
 
       // Mock successful notification send
-      (notificationService.sendExpiryNotifications as jest.Mock).mockResolvedValue(true);
+      (notificationService.sendExpiryNotifications as any).mockResolvedValue(true);
 
       const response = await request(app)
         .post('/api/notifications/test')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+        .set('Authorization', `Bearer ${authToken}`);
 
+      // Debug: log the response if it's not 200
+      if (response.status !== 200) {
+        console.log('Status:', response.status);
+        console.log('Body:', response.body);
+      }
+
+      expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('expiringItemsCount');
@@ -110,14 +116,14 @@ describe('Notification Controller Integration Tests', () => {
     test('should return 500 when notification send fails', async () => {
       // Create an expiring food item
       await foodItemModel.create({
-        userId: userId,
-        typeId: foodTypeId,
+        userId: new mongoose.Types.ObjectId(userId),
+        typeId: new mongoose.Types.ObjectId(foodTypeId),
         expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
         percentLeft: 100,
       });
 
       // Mock failed notification send
-      (notificationService.sendExpiryNotifications as jest.Mock).mockResolvedValue(false);
+      (notificationService.sendExpiryNotifications as any).mockResolvedValue(false);
 
       const response = await request(app)
         .post('/api/notifications/test')
@@ -131,13 +137,13 @@ describe('Notification Controller Integration Tests', () => {
     test('should not include non-expiring items', async () => {
       // Create a non-expiring food item (far in the future)
       await foodItemModel.create({
-        userId: userId,
-        typeId: foodTypeId,
+        userId: new mongoose.Types.ObjectId(userId),
+        typeId: new mongoose.Types.ObjectId(foodTypeId),
         expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
         percentLeft: 100,
       });
 
-      (notificationService.sendExpiryNotifications as jest.Mock).mockResolvedValue(true);
+      (notificationService.sendExpiryNotifications as any).mockResolvedValue(true);
 
       const response = await request(app)
         .post('/api/notifications/test')
@@ -157,8 +163,8 @@ describe('Notification Controller Integration Tests', () => {
     test('should handle Error exceptions during notification processing', async () => {
       // Create an expiring food item
       await foodItemModel.create({
-        userId: userId,
-        typeId: foodTypeId,
+        userId: new mongoose.Types.ObjectId(userId),
+        typeId: new mongoose.Types.ObjectId(foodTypeId),
         expirationDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
         percentLeft: 100,
       });
