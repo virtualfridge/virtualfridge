@@ -1,35 +1,12 @@
 import axios from 'axios';
-import dotenv from "dotenv";
-import path from "path";
-
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-
 import logger from '../util/logger';
+import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
+import { GeminiResponse } from '../types/ai';
 import {
   AiRecipeData,
   AiRecipeRequestBody,
   defaultAiIngredients,
 } from '../types/recipe';
-
-type GeminiContentPart = {
-  text?: string;
-};
-
-type GeminiCandidate = {
-  content?: {
-    parts?: GeminiContentPart[];
-  };
-};
-
-type GeminiResponse = {
-  candidates?: GeminiCandidate[];
-  modelVersion?: string;
-};
-
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'models/gemini-2.5-flash';
-const GEMINI_API_HOST =
-  process.env.GEMINI_API_URL ||
-  'https://generativelanguage.googleapis.com/v1beta';
 
 export class AiRecipeService {
   constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}
@@ -142,7 +119,7 @@ export class AiRecipeService {
     return cleaned
       .split(' ')
       .filter(Boolean)
-      .map(part => part[0]?.toUpperCase() + part.slice(1))
+      .map(part => part[0].toUpperCase() + part.slice(1))
       .join(' ');
   }
 }

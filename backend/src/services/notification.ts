@@ -41,7 +41,7 @@ class NotificationService {
     fcmToken: string,
     title: string,
     body: string,
-    data?: { [key: string]: string }
+    data?: Record<string, string>
   ): Promise<boolean> {
     if (!this.initialized) {
       logger.warn('Firebase not initialized. Cannot send notification.');
@@ -69,7 +69,7 @@ class NotificationService {
 
   async sendExpiryNotifications(
     fcmToken: string,
-    expiringItems: Array<{ name: string; expirationDate: Date }>
+    expiringItems: { name: string; expirationDate: Date }[]
   ): Promise<boolean> {
     if (!this.initialized) {
       logger.warn('Firebase not initialized. Cannot send notification.');

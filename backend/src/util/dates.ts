@@ -1,6 +1,6 @@
 import logger from './logger';
 
-export const parseDate = (input: string, format: string = 'yyyy-mm-dd') => {
+export const parseDate = (input: string, format = 'yyyy-mm-dd') => {
   const parts = input.match(/\d+/g);
   if (!parts) {
     throw new Error(`Invalid date input: ${input}`);

@@ -1,6 +1,6 @@
 import { HOBBIES } from '../config/constants';
 
-export type GetAllHobbiesResponse = {
+export interface GetAllHobbiesResponse {
   message: string;
   data?: {
     hobbies: typeof HOBBIES;

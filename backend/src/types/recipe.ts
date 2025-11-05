@@ -19,21 +19,21 @@ export const getRecipesQuerySchema = z.object({
 
 export type GetRecipesQuery = z.infer<typeof getRecipesQuerySchema>;
 
-export type RecipeQuery = {
+export interface RecipeQuery {
   ingredients?: string[];
 };
 
-export type RecipeSummary = {
+export interface RecipeSummary {
   idMeal: string;
   strMeal: string;
   strMealThumb?: string;
 };
 
-export type RecipeApiResponse = {
+export interface RecipeApiResponse {
   meals: RecipeSummary[] | null;
 };
 
-export type GetRecipesResponse = {
+export interface GetRecipesResponse {
   message: string;
   data: {
     ingredients: string[];
@@ -52,14 +52,14 @@ export const aiRecipeRequestSchema = z.object({
 
 export type AiRecipeRequestBody = z.infer<typeof aiRecipeRequestSchema>;
 
-export type AiRecipeData = {
+export interface AiRecipeData {
   ingredients: string[];
   prompt: string;
   recipe: string;
   model: string;
 };
 
-export type AiRecipeResponse = {
+export interface AiRecipeResponse {
   message: string;
   data: AiRecipeData;
 };
