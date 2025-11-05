@@ -71,18 +71,18 @@ _(Placeholder for Jest coverage screenshot both with and without mocking)_
   - **Log Output**
   Below is what the expected output should be, where you can see the minimum, median, and max loading time from the iterations in milliseconds.
   
-  <img width="1919" height="655" alt="image" src="https://github.com/user-attachments/assets/2ade0a42-4f4d-44e2-9c98-3b174478ce0a" />
+![](images/TTFDTest.png)
 
 - **Barcode Lookup Benchmark**
   - **Verification:** This test simulates a user logging into the app and sending a barcode API request. It is done over 10 iterations, where the minimum, median, and max time are displayed in milliseconds. The minimum, median, and max time is calculated between the moment the test barcode button is clicked to the time to receive the API call back.
   - **Log Output**
 Below is what the expected output should be, where you can see the minimum, median, and max loading time from the iterations in milliseconds.
 
-<img width="1919" height="516" alt="image" src="https://github.com/user-attachments/assets/e43521c4-1ea7-44ef-b881-f57cac4421fa" />
-
+![](images/barcodeTest.png)
 
 - **Running the Tests:** To runs the tests, open the `frontend` folder as a project in Android Studio. Running the app normally and ensure that only one Google account is logged into the phone. Then select the appropriate test (see screenshot below).
-<img width="1919" height="207" alt="image" src="https://github.com/user-attachments/assets/a0802548-aa72-4410-8b39-1e6a4610593a" />
+
+![](images/topNonFunc.png)
 
 ---
 
