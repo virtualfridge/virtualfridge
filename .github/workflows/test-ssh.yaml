@@ -9,7 +9,7 @@ jobs:
       - name: Create ssh key
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/private-key
+          echo "$SSH_PRIVATE_KEY" > $SSH_KEY_PATH
           sudo chmod 600 ~/.ssh/private-key
           ssh-keyscan -H $DEPLOYMENT_HOST > ~/.ssh/known_hosts
         shell: bash
@@ -23,4 +23,7 @@ jobs:
           'touch ~/ssh-test-file'
         shell: bash
         env:
-          DEPLOYMENT_USER: ${{vars.DEPLOYMENY_USER}}
+          DEPLOYMENT_USER: ${{vars.DEPLOYMENT_USER}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          DEPLOYMENT_HOST: ${{vars.DEPLOYMENT_HOST}}
+          SSH_KEY_PATH: ~/.ssh/private-key
