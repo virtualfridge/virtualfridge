@@ -14,7 +14,7 @@ jobs:
         shell: bash
         env:
           SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
-          DEPLOYMENT_HOST: ${{secrets.DEPLOYMENT_HOST}}
+          DEPLOYMENT_HOST: ${{env.DEPLOYMENT_HOST}}
           SSH_KEY_PATH: ~/.ssh/private-key
       - name: create a new file
         run: |
@@ -22,4 +22,4 @@ jobs:
           'touch ~/ssh-test-file'
         shell: bash
         env:
-          DEPLOYMENT_USER: ${{secrets.DEPLOYMENY_USER}}
+          DEPLOYMENT_USER: ${{env.DEPLOYMENY_USER}}
