@@ -3,6 +3,7 @@ on: push
 jobs:
   create_file:
     runs-on: ubuntu-latest
+    environment: deploy
     name: createfile
     steps:
       - name: Create ssh key
