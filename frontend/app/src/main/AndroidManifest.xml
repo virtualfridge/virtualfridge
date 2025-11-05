@@ -3,14 +3,19 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
-    <!-- usesCleartextTraffic="true" only for local testing; remove for production -->
     <application
         android:name=".UserManagementApplication"
         android:allowBackup="true"
@@ -20,6 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UserManagement"
         android:usesCleartextTraffic="true">
+        <profileable android:shell="true" />
 
         <activity
             android:name=".MainActivity"
@@ -27,6 +33,7 @@
             android:theme="@style/Theme.UserManagement">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -39,9 +46,7 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider>
-
-        <!-- Firebase Messaging Service -->
+        </provider> <!-- Firebase Messaging Service -->
         <service
             android:name=".utils.VirtualFridgeMessagingService"
             android:exported="false">
@@ -49,10 +54,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <!-- If you used Play Services Code Scanner install-time model downloads:
-        <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode" />
-        -->
     </application>
 
 </manifest>
