@@ -1,0 +1,32 @@
+name: Deploy backend
+on:
+  push:
+    branches:
+      - main
+jobs:
+  create_file:
+    runs-on: ubuntu-latest
+    environment: deploy
+    name: createfile
+    steps:
+      - name: Create ssh key
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ../private.key
+          sudo chmod 600 ../private.key
+          ssh-keyscan -H $DEPLOYMENT_HOST > ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          DEPLOYMENT_HOST: ${{vars.DEPLOYMENT_HOST}}
+          SSH_KEY_PATH: ~/.ssh/private-key
+      - name: Recreate deployment
+        run: |
+          ssh -i $SSH_KEY_PATH $DEPLOYMENT_USER@$DEPLOYMENT_HOST \
+          'cd virtualfridge/backend && sudo docker compose down && sudo docker compose up -d'
+        shell: bash
+        env:
+          DEPLOYMENT_USER: ${{vars.DEPLOYMENT_USER}}
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          DEPLOYMENT_HOST: ${{vars.DEPLOYMENT_HOST}}
+          SSH_KEY_PATH: ${{github.workspace}}/../private.key
