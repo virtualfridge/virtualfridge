@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import {
   CreateFoodTypeBody,
   DeleteFoodTypeParams,
@@ -78,7 +79,7 @@ export class FoodTypeController {
     try {
       const { _id } = req.params;
 
-      const foodType = await foodTypeModel.findById(_id);
+      const foodType = await foodTypeModel.findById(new mongoose.Types.ObjectId(_id));
 
       if (!foodType) {
         return res
@@ -112,7 +113,7 @@ export class FoodTypeController {
       req;
       const { _id } = req.params;
 
-      const foodType = await foodTypeModel.delete(_id);
+      const foodType = await foodTypeModel.delete(new mongoose.Types.ObjectId(_id));
 
       if (!foodType) {
         return res
