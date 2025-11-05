@@ -58,6 +58,7 @@ export const createUserSchema = z.object({
       notificationTime: z.uint32().optional(),
     })
     .optional(),
+  fcmToken: z.string().optional(),
 });
 
 export const updateProfileSchema = z.object({
