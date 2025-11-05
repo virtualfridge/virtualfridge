@@ -9,6 +9,7 @@ jobs:
       - name: Create ssh key
         run: |
           mkdir -p ~/.ssh/
+          touch $SSH_KEY_PATH
           echo "$SSH_PRIVATE_KEY" > $SSH_KEY_PATH
           sudo chmod 600 ~/.ssh/private-key
           ssh-keyscan -H $DEPLOYMENT_HOST > ~/.ssh/known_hosts
