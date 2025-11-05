@@ -1,0 +1,25 @@
+name: test ssh to deployment server
+on: push
+jobs:
+  create_file:
+    runs-on: ubuntu-latest
+    name: createfile
+    steps:
+      - name: Create ssh key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/private-key
+          sudo chmod 600 ~/.ssh/private-key
+          ssh-keyscan -H $DEPLOYMENT_HOST > ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+          DEPLOYMENT_HOST: ${{secrets.DEPLOYMENT_HOST}}
+          SSH_KEY_PATH: ~/.ssh/private-key
+      - name: create a new file
+        run: |
+          ssh -i $SSH_KEY_PATH $DEPLOYMENT_USER@$DEPLOYMENT_HOST \
+          'touch ~/ssh-test-file'
+        shell: bash
+        env:
+          DEPLOYMENT_USER: ${{secrets.DEPLOYMENY_USER}}
