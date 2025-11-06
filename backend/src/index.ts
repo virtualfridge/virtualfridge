@@ -5,6 +5,7 @@ import { connectDB } from './util/database';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import router from './routes/routes';
 import path from 'path';
+import logger from './util/logger';
 
 dotenv.config();
 
@@ -18,7 +19,9 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('*', notFoundHandler);
 app.use(errorHandler);
 
-void connectDB();
+connectDB().catch(error => {
+  logger.error('ConnectDB should exit on error; instead it threw: ', error);
+});
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
