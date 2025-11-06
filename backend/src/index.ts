@@ -19,7 +19,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('*', notFoundHandler);
 app.use(errorHandler);
 
-connectDB().catch(error => {
+connectDB().catch((error: unknown) => {
   logger.error('ConnectDB should exit on error; instead it threw: ', error);
 });
 app.listen(PORT, () => {
