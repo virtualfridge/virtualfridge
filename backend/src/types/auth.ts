@@ -15,7 +15,7 @@ export type AuthenticateUserRequest = z.infer<typeof authenticateUserSchema>;
 export interface AuthenticateUserResponse {
   message: string;
   data?: AuthResult;
-};
+}
 
 // Generic types
 // ------------------------------------------------------------

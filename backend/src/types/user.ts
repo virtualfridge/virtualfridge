@@ -25,7 +25,7 @@ export interface DietaryPreferences {
   vegan?: boolean;
   halal?: boolean;
   keto?: boolean;
-};
+}
 
 // TODO: expand/reduce as necessary
 export interface NotificationPreferences {

@@ -52,7 +52,7 @@ export class FoodTypeController {
 
       res.status(200).json({
         message: 'FoodType updated successfully',
-        data: { foodType: foodType },
+        data: { foodType },
       });
     } catch (error) {
       logger.error(

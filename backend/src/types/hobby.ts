@@ -5,4 +5,4 @@ export interface GetAllHobbiesResponse {
   data?: {
     hobbies: typeof HOBBIES;
   };
-};
+}

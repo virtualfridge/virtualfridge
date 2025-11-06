@@ -21,7 +21,7 @@ export type GetRecipesQuery = z.infer<typeof getRecipesQuerySchema>;
 
 export interface RecipeQuery {
   ingredients?: string[];
-};
+}
 
 export interface RecipeSummary {
   idMeal: string;

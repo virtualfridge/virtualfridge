@@ -53,7 +53,7 @@ export class FoodItemController {
 
       res.status(200).json({
         message: 'FoodItem updated successfully',
-        data: { foodItem: foodItem },
+        data: { foodItem },
       });
     } catch (error) {
       logger.error(
