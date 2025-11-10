@@ -171,6 +171,15 @@ private fun ErrorContent(
     }
 }
 
+/*
+ * Rationale for suppression:
+ * - This success view composes several presentational sections (header, product info,
+ *   nutrition, ingredients, allergens).
+ * - The length comes from Compose UI markup and string literals, not complex logic.
+ * - Extracting every visual block adds indirection without strong readability gains; the
+ *   current inline structure keeps the result cohesive and easy to scan.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun SuccessContent(
     fridgeItem: FridgeItem,
