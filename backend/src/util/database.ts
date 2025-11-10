@@ -34,10 +34,18 @@ export const connectDB = async (): Promise<void> => {
     });
 
     process.on('SIGINT', () => {
-      mongoose.connection.close().then(() => {
-        console.log('MongoDB connection closed through app termination');
-        process.exitCode = 0;
-      });
+      mongoose.connection
+        .close()
+        .then(() => {
+          console.log('MongoDB connection closed through app termination');
+          process.exitCode = 0;
+        })
+        .catch((error: any) => {
+          console.error(
+            'Failed to close MongoDB connection through app termination',
+            error
+          );
+        });
     });
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error);
