@@ -3,8 +3,11 @@ import path from 'path';
 
 import { IMAGES_DIR } from '../config/constants';
 
-export class MediaService {
-  static async saveImage(filePath: string, userId: string): Promise<string> {
+export namespace MediaService {
+  export async function saveImage(
+    filePath: string,
+    userId: string
+  ): Promise<string> {
     try {
       const fileExtension = path.extname(filePath);
       const fileName = `${userId}-${Date.now()}${fileExtension}`;
@@ -21,7 +24,7 @@ export class MediaService {
     }
   }
 
-  static async deleteImage(url: string): Promise<void> {
+  export async function deleteImage(url: string): Promise<void> {
     try {
       if (url.startsWith(IMAGES_DIR)) {
         const filePath = path.join(process.cwd(), url.substring(1));
@@ -34,7 +37,7 @@ export class MediaService {
     }
   }
 
-  static async deleteAllUserImages(userId: string): Promise<void> {
+  export async function deleteAllUserImages(userId: string): Promise<void> {
     try {
       if (!fs.existsSync(IMAGES_DIR)) {
         return;
@@ -43,7 +46,7 @@ export class MediaService {
       const files = fs.readdirSync(IMAGES_DIR);
       const userFiles = files.filter(file => file.startsWith(userId + '-'));
 
-      await Promise.all(userFiles.map(file => this.deleteImage(file)));
+      await Promise.all(userFiles.map(file => MediaService.deleteImage(file)));
     } catch (error) {
       console.error('Failed to delete user images:', error);
     }
