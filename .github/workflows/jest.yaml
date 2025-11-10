@@ -22,5 +22,7 @@ jobs:
           cache: "npm"
       - name: Install node modules
         run: npm i
+      - name: Start db
+        run: docker-compose up
       - name: Run tests
         run: npm test
