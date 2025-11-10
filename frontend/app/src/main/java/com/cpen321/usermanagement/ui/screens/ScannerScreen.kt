@@ -114,8 +114,12 @@ fun ScannerScreen(
                             analysisUseCase,
                             capture
                         )
-                    } catch (e: Exception) {
-                        Log.e("ScannerScreen", "Camera bind failed", e)
+                    } catch (e: IllegalStateException) {
+                        Log.e("ScannerScreen", "Camera bind failed: illegal state", e)
+                    } catch (e: IllegalArgumentException) {
+                        Log.e("ScannerScreen", "Camera bind failed: invalid argument", e)
+                    } catch (e: SecurityException) {
+                        Log.e("ScannerScreen", "Camera bind failed: missing permission", e)
                     }
                 }, ContextCompat.getMainExecutor(ctx))
 
