@@ -309,21 +309,36 @@ describe('FridgeService', () => {
       expect(mockedAxios.get).toHaveBeenCalledWith(
         `https://world.openfoodfacts.org/api/v2/product/${mockBarcode}.json?lc=en`
       );
-      expect(mockedFoodTypeModel.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          name: 'New Product',
-          brand: 'Test Brand',
-          quantity: '500g',
-          ingredients: 'Ingredient 1, Ingredient 2',
-          image: 'https://example.com/image.jpg',
-          allergens: ['gluten', 'milk'],
-          nutrients: expect.objectContaining({
+        expect(mockedFoodTypeModel.create).toHaveBeenCalledWith({
+          allergens: ["gluten", "milk"],
+          brand: "Test Brand",
+          image: "https://example.com/image.jpg",
+          name: "New Product",
+          nutrients: {
+            caffeine: null,
+            calcium: null,
             calories: 250,
-            protein: 10,
+            carbohydrates: 30,
+            cholesterol: null,
+            energyKj: 1046,
             fat: 15,
-          }),
-        })
-      );
+            fiber: 5,
+            iron: null,
+            magnesium: null,
+            monounsaturatedFat: null,
+            polyunsaturatedFat: null,
+            potassium: null,
+            protein: 10,
+            salt: 1,
+            saturatedFat: 5,
+            sodium: null,
+            sugars: 20,
+            transFat: null,
+            zinc: null,
+          },
+          shelfLifeDays: undefined,
+        });
+
       expect(statusMock).toHaveBeenCalledWith(200);
     });
 
@@ -524,11 +539,20 @@ describe('FridgeService', () => {
         mockNext
       );
 
-      expect(mockedFoodTypeModel.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          expiration_date: '06-2025',
-        })
-      );
+    // Compute the expected shelf life from the expiration date
+    const expiration = '06-2025'; // from your test data
+    const [month, year] = expiration.split('-').map(Number);
+    const now = new Date();
+    const expDate = new Date(year, month - 1, 1); // expiration as first day of month
+    const expectedShelfLife = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    // Updated expectation
+    expect(mockedFoodTypeModel.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shelfLifeDays: expectedShelfLife,
+      })
+    );
+
     });
 
     test('should call next for non-Error exceptions', async () => {
