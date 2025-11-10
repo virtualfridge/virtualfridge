@@ -160,35 +160,43 @@ fun MainScreen(
 
 @Composable
 private fun MainRecipeSheets(
-    showRecipeSheet: Boolean,
-    onOptionsDismiss: () -> Unit,
-    onMealDBRecipe: () -> Unit,
-    onAIRecipe: () -> Unit,
-    sheetState: SheetState,
-    showRecipeResults: Boolean,
-    resultsSheetState: SheetState,
-    mainUiState: MainUiState,
-    onResultsDismiss: () -> Unit,
+    state: RecipeSheetsState,
+    actions: RecipeSheetsActions,
 ) {
     // Recipe Options Bottom Sheet
-    if (showRecipeSheet) {
+    if (state.showRecipeSheet) {
         RecipeOptionsBottomSheet(
-            sheetState = sheetState,
-            onDismiss = onOptionsDismiss,
-            onMealDBRecipe = onMealDBRecipe,
-            onAIRecipe = onAIRecipe
+            sheetState = state.sheetState,
+            onDismiss = actions.onOptionsDismiss,
+            onMealDBRecipe = actions.onMealDBRecipe,
+            onAIRecipe = actions.onAIRecipe
         )
     }
 
     // Recipe Results Bottom Sheet
-    if (showRecipeResults) {
+    if (state.showRecipeResults) {
         RecipeResultsBottomSheet(
-            sheetState = resultsSheetState,
-            mainUiState = mainUiState,
-            onDismiss = onResultsDismiss
+            sheetState = state.resultsSheetState,
+            mainUiState = state.mainUiState,
+            onDismiss = actions.onResultsDismiss
         )
     }
 }
+
+private data class RecipeSheetsState(
+    val showRecipeSheet: Boolean,
+    val sheetState: SheetState,
+    val showRecipeResults: Boolean,
+    val resultsSheetState: SheetState,
+    val mainUiState: MainUiState,
+)
+
+private data class RecipeSheetsActions(
+    val onOptionsDismiss: () -> Unit,
+    val onMealDBRecipe: () -> Unit,
+    val onAIRecipe: () -> Unit,
+    val onResultsDismiss: () -> Unit,
+)
 
 @Composable
 private fun SortOptionsRow(
