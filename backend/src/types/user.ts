@@ -20,7 +20,7 @@ export interface IUser extends Document {
 }
 
 // TODO: expand/reduce as necessary
-export type DietaryPreferences = {
+export interface DietaryPreferences {
   vegetarian?: boolean;
   vegan?: boolean;
   halal?: boolean;
@@ -28,7 +28,7 @@ export type DietaryPreferences = {
 };
 
 // TODO: expand/reduce as necessary
-export type NotificationPreferences = {
+export interface NotificationPreferences {
   enableNotifications: boolean;
   expiryThresholdDays?: number;
   notificationTime?: number;
@@ -91,7 +91,7 @@ export const updateProfileSchema = z.object({
 
 // Request types
 // ------------------------------------------------------------
-export type GetProfileResponse = {
+export interface GetProfileResponse {
   message: string;
   data?: {
     user: IUser;
@@ -102,7 +102,7 @@ export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>;
 
 // Generic types
 // ------------------------------------------------------------
-export type GoogleUserInfo = {
+export interface GoogleUserInfo {
   googleId: string;
   email: string;
   name: string;

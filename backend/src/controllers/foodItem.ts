@@ -10,6 +10,7 @@ import { foodItemModel } from '../models/foodItem';
 import logger from '../util/logger';
 
 export class FoodItemController {
+  // TODO: use user field instead of relying on the fronted to be well-behaved and send their own userId in the foodItem
   async createFoodItem(
     req: Request<unknown, unknown, CreateFoodItemBody>,
     res: Response<FoodItemResponse>,
@@ -19,7 +20,7 @@ export class FoodItemController {
       const foodItem = await foodItemModel.create(req.body);
       res.status(200).json({
         message: 'FoodItem created successfully',
-        data: { foodItem: foodItem },
+        data: { foodItem },
       });
     } catch (error) {
       logger.error('Failed to create foodItem:', error);

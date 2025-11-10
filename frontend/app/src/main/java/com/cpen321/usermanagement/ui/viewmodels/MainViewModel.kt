@@ -1,5 +1,6 @@
 package com.cpen321.usermanagement.ui.viewmodels
 
+import android.os.Trace
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -106,19 +107,24 @@ class MainViewModel @Inject constructor(
 
         // Send barcode to backend
         viewModelScope.launch {
-            val result = barcodeRepository.sendBarcode(barcode)
-            result.fold(
-                onSuccess = { barcodeResult ->
-                    _uiState.value = _uiState.value.copy(
-                        barcodeResult = barcodeResult,
-                        scanError = null
-                    )
-                    setSuccessMessage("Product added successfully!")
-                },
-                onFailure = { error ->
-                    setScanError("Failed to scan barcode: ${error.message ?: "Unknown error"}")
-                }
-            )
+            if (Trace.isEnabled()) Trace.beginSection("ScanToApiResponse")
+            try {
+                val result = barcodeRepository.sendBarcode(barcode)
+                result.fold(
+                    onSuccess = { barcodeResult ->
+                        _uiState.value = _uiState.value.copy(
+                            barcodeResult = barcodeResult,
+                            scanError = null
+                        )
+                        setSuccessMessage("Product added successfully!")
+                    },
+                    onFailure = { error ->
+                        setScanError("Failed to scan barcode: ${error.message ?: "Unknown error"}")
+                    }
+                )
+            } finally {
+                if (Trace.isEnabled()) Trace.endSection()
+            }
         }
     }
 
@@ -135,21 +141,26 @@ class MainViewModel @Inject constructor(
                 successMessage = null
             )
 
-            val result = barcodeRepository.sendBarcode(testBarcode)
-            result.fold(
-                onSuccess = { barcodeResult ->
-                    Log.d("BarcodeTest", "Successfully sent test barcode")
-                    _uiState.value = _uiState.value.copy(
-                        testBarcodeResponse = barcodeResult,
-                        isSendingTestBarcode = false
-                    )
-                },
-                onFailure = { error ->
-                    Log.e("BarcodeTest", "Failed to send test barcode: ${error.message}", error)
-                    setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
-                    _uiState.value = _uiState.value.copy(isSendingTestBarcode = false)
-                }
-            )
+            if (Trace.isEnabled()) Trace.beginSection("ScanToApiResponse")
+            try {
+                val result = barcodeRepository.sendBarcode(testBarcode)
+                result.fold(
+                    onSuccess = { barcodeResult ->
+                        Log.d("BarcodeTest", "Successfully sent test barcode")
+                        _uiState.value = _uiState.value.copy(
+                            testBarcodeResponse = barcodeResult,
+                            isSendingTestBarcode = false
+                        )
+                    },
+                    onFailure = { error ->
+                        Log.e("BarcodeTest", "Failed to send test barcode: ${error.message}", error)
+                        setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
+                        _uiState.value = _uiState.value.copy(isSendingTestBarcode = false)
+                    }
+                )
+            } finally {
+                if (Trace.isEnabled()) Trace.endSection()
+            }
         }
     }
 

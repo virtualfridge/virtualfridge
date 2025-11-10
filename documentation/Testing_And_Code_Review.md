@@ -149,31 +149,35 @@ _(Placeholder for Jest coverage screenshot both with and without mocking)_
 
 ---
 
-## 3. Back-end Test Specification: Tests of Non-Functional Requirements
+## 3. Test Specification: Tests of Non-Functional Requirements
 
 ### 3.1. Test Locations in Git
 
 | **Non-Functional Requirement**  | **Location in Git**                              |
 | ------------------------------- | ------------------------------------------------ |
-| **Performance (Response Time)** | [`tests/nonfunctional/response_time.test.js`](#) |
-| **Chat Data Security**          | [`tests/nonfunctional/chat_security.test.js`](#) |
+| **Time to Full Display (TTFD) Benchmark**          | [`frontend/macrobenchmark/src/main/java/com/example/macrobenchmark/TtfdStartupBenchmark.kt`](../frontend/macrobenchmark/src/main/java/com/example/macrobenchmark/TtfdStartupBenchmark.kt) |
+| **Barcode Lookup Benchmark** | [`frontend/macrobenchmark/src/main/java/com/example/macrobenchmark/BarcodeLookupBenchmark.kt`](../frontend/macrobenchmark/src/main/java/com/example/macrobenchmark/BarcodeLookupBenchmark.kt) |
 
 ### 3.2. Test Verification and Logs
 
-- **Performance (Response Time)**
+- **Time to Full Display (TTFD) Benchmark**
 
-  - **Verification:** This test suite simulates multiple concurrent API calls using Jest along with a load-testing utility to mimic real-world user behavior. The focus is on key endpoints such as user login and study group search to ensure that each call completes within the target response time of 2 seconds under normal load. The test logs capture metrics such as average response time, maximum response time, and error rates. These logs are then analyzed to identify any performance bottlenecks, ensuring the system can handle expected traffic without degradation in user experience.
+  - **Verification:** This test simulates a user starting the app multiple times from a cold boot state. The test launches and quits the app repeatedly over 10 iterations, where the minimum, median, and max time is calculated between the startup intent to the time to fully display the app.
   - **Log Output**
-    ```
-    [Placeholder for response time test logs]
-    ```
+  Below is what the expected output should be, where you can see the minimum, median, and max loading time from the iterations in milliseconds.
+  
+![](images/TTFDTest.png)
 
-- **Chat Data Security**
-  - **Verification:** ...
+- **Barcode Lookup Benchmark**
+  - **Verification:** This test simulates a user logging into the app and sending a barcode API request. It is done over 10 iterations, where the minimum, median, and max time are displayed in milliseconds. The minimum, median, and max time is calculated between the moment the test barcode button is clicked to the time to receive the API call back.
   - **Log Output**
-    ```
-    [Placeholder for chat security test logs]
-    ```
+Below is what the expected output should be, where you can see the minimum, median, and max loading time from the iterations in milliseconds.
+
+![](images/barcodeTest.png)
+
+- **Running the Tests:** To runs the tests, open the `frontend` folder as a project in Android Studio. Running the app normally and ensure that only one Google account is logged into the phone. Then select the appropriate test (see screenshot below).
+
+![](images/topNonFunc.png)
 
 ---
 

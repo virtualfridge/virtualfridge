@@ -23,7 +23,10 @@ export const nutrientsSchema = z.object({
   sugars: z.string().optional(),
   calcium: z.string().optional(),
   iron: z.string().optional(),
+  magnesium: z.string().optional(),
+  zinc: z.string().optional(),
   potassium: z.string().optional(),
+  caffeine: z.string().optional(),
 });
 
 export type Nutrients = z.infer<typeof nutrientsSchema>;
@@ -68,9 +71,9 @@ export type UpdateFoodTypeBody = z.infer<typeof updateFoodTypeSchema>;
 export type FindFoodTypeParams = z.infer<typeof findFoodTypeSchema>;
 export type DeleteFoodTypeParams = z.infer<typeof deleteFoodTypeSchema>;
 
-export type FoodTypeResponse = {
+export interface FoodTypeResponse {
   message: string;
   data?: {
     foodType: FoodType;
   };
-};
+}

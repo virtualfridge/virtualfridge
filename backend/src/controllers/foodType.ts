@@ -18,7 +18,10 @@ export class FoodTypeController {
   ) {
     try {
       const foodType = await foodTypeModel.create(req.body);
-      res.status(201).json(foodType);
+      res.status(200).json({
+        message: 'FoodType created successfully',
+        data: { foodType },
+      });
     } catch (error) {
       logger.error('Failed to create foodType:', error);
 
