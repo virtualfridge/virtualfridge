@@ -711,6 +711,14 @@ private fun MainBottomBar(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/*
+ * Rationale for suppression:
+ * - This bottom sheet presents two option cards and a header.
+ * - Its length comes from Compose UI markup and strings, not complex logic.
+ * - Splitting each visual block would add indirection and hurt cohesion of this small sheet.
+ * - Keeping it inline keeps the flow easy to scan and maintain.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun RecipeOptionsBottomSheet(
     sheetState: SheetState,
