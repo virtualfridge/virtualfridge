@@ -814,6 +814,16 @@ private fun RecipeOptionsBottomSheet(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/*
+ * Rationale for suppression:
+ * - This bottom sheet composes several loading, error, and results sections.
+ * - The function reads long due to declarative UI markup (Compose) and string literals,
+ *   not complex control flow or algorithmic logic.
+ * - Extracting each visual block into separate composables would add indirection and
+ *   split tightly related UI context, reducing readability in practice.
+ * - Keeping it inline makes it easier to scan and maintain the cohesive UI state mapping.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun RecipeResultsBottomSheet(
     sheetState: SheetState,
