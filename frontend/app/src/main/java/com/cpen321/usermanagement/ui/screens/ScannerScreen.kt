@@ -159,16 +159,14 @@ fun ScannerScreen(
                     val captureUseCase = imageCapture
                     if (captureUseCase == null) {
                         Log.w("ScannerScreen", "ImageCapture not ready")
-                        return@FloatingActionButton
-                    }
+                    } else {
+                        val photoFile = createTempImageFile(context.cacheDir)
+                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-                    val photoFile = createTempImageFile(context.cacheDir)
-                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                    captureUseCase.takePicture(
-                        outputOptions,
-                        cameraExecutor,
-                        object : ImageCapture.OnImageSavedCallback {
+                        captureUseCase.takePicture(
+                            outputOptions,
+                            cameraExecutor,
+                            object : ImageCapture.OnImageSavedCallback {
                             override fun onError(exception: ImageCaptureException) {
                                 Log.e("ScannerScreen", "Photo capture failed: ${exception.message}", exception)
                                 try { photoFile.delete() } catch (_: Exception) {}
@@ -206,8 +204,9 @@ fun ScannerScreen(
                                     }
                                 }
                             }
-                        }
-                    )
+                            }
+                        )
+                    }
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
