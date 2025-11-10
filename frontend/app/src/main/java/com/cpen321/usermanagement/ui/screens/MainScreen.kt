@@ -913,9 +913,10 @@ private fun RecipeResultsBottomSheet(
             }
 
             // MealDB Results
-            if (!mainUiState.isFetchingRecipes && !mainUiState.isGeneratingAiRecipe &&
-                mainUiState.recipeSummaries.isEmpty() && mainUiState.aiRecipe == null &&
-                mainUiState.recipeError == null && mainUiState.aiError == null) {
+            val isIdle = !mainUiState.isFetchingRecipes && !mainUiState.isGeneratingAiRecipe
+            val hasNoResults = mainUiState.recipeSummaries.isEmpty() && mainUiState.aiRecipe == null
+            val hasNoErrors = mainUiState.recipeError == null && mainUiState.aiError == null
+            if (isIdle && hasNoResults && hasNoErrors) {
                 // Show "No Recipes Found" when done loading but no results
                 Card(
                     modifier = Modifier.fillMaxWidth(),
