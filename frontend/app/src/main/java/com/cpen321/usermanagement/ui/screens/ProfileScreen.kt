@@ -152,11 +152,12 @@ private fun ProfileContent(
             paddingValues = paddingValues,
             isLoading = uiState.isLoadingProfile,
             isDarkMode = isDarkMode,
-            onManageProfileClick = callbacks.onManageProfileClick,
-//            onManageHobbiesClick = callbacks.onManageHobbiesClick,
-            onDeleteAccountClick = callbacks.onDeleteAccountClick,
-            onDarkModeToggle = callbacks.onDarkModeToggle,
-            onSignOutClick = callbacks.onSignOutClick
+            actions = ProfileActions(
+                onManageProfileClick = callbacks.onManageProfileClick,
+                onDeleteAccountClick = callbacks.onDeleteAccountClick,
+                onDarkModeToggle = callbacks.onDarkModeToggle,
+                onSignOutClick = callbacks.onSignOutClick,
+            )
         )
     }
 
@@ -200,11 +201,7 @@ private fun ProfileBody(
     paddingValues: PaddingValues,
     isLoading: Boolean,
     isDarkMode: Boolean,
-    onManageProfileClick: () -> Unit,
-//    onManageHobbiesClick: () -> Unit,
-    onDeleteAccountClick: () -> Unit,
-    onDarkModeToggle: () -> Unit,
-    onSignOutClick: () -> Unit,
+    actions: ProfileActions,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -222,16 +219,24 @@ private fun ProfileBody(
             else -> {
                 ProfileMenuItems(
                     isDarkMode = isDarkMode,
-                    onManageProfileClick = onManageProfileClick,
-//                    onManageHobbiesClick = onManageHobbiesClick,
-                    onDeleteAccountClick = onDeleteAccountClick,
-                    onDarkModeToggle = onDarkModeToggle,
-                    onSignOutClick = onSignOutClick
+                    onManageProfileClick = actions.onManageProfileClick,
+//                    onManageHobbiesClick = actions.onManageHobbiesClick,
+                    onDeleteAccountClick = actions.onDeleteAccountClick,
+                    onDarkModeToggle = actions.onDarkModeToggle,
+                    onSignOutClick = actions.onSignOutClick
                 )
             }
         }
     }
 }
+
+private data class ProfileActions(
+    val onManageProfileClick: () -> Unit,
+//    val onManageHobbiesClick: () -> Unit,
+    val onDeleteAccountClick: () -> Unit,
+    val onDarkModeToggle: () -> Unit,
+    val onSignOutClick: () -> Unit,
+)
 
 @Composable
 private fun ProfileMenuItems(
