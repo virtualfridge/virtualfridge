@@ -88,6 +88,30 @@ export class AuthService {
       throw error;
     }
   }
+
+  async authenticateWithGoogle(idToken: string): Promise<AuthResult> {
+    try {
+      const googleUserInfo = await this.verifyGoogleToken(idToken);
+
+      // Find or create user
+      let user = await userModel.findByGoogleId(googleUserInfo.googleId);
+
+      if (!user) {
+        // Create new user if doesn't exist
+        user = await userModel.create(googleUserInfo);
+        logger.info('New user created:', { googleId: googleUserInfo.googleId });
+      } else {
+        logger.info('Existing user logged in:', { googleId: googleUserInfo.googleId });
+      }
+
+      const token = this.generateAccessToken(user);
+
+      return { token, user };
+    } catch (error) {
+      logger.error('Google authentication failed:', error);
+      throw error;
+    }
+  }
 }
 
 export const authService = new AuthService();

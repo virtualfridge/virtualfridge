@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import {
   CreateFoodTypeBody,
   DeleteFoodTypeParams,
@@ -12,7 +13,7 @@ import logger from '../util/logger';
 export class FoodTypeController {
   async createFoodType(
     req: Request<unknown, unknown, CreateFoodTypeBody>,
-    res: Response<FoodTypeResponse>,
+    res: Response,
     next: NextFunction
   ) {
     try {
@@ -35,28 +36,31 @@ export class FoodTypeController {
   }
 
   async updateFoodType(
-    req: Request<unknown, unknown, UpdateFoodTypeBody>,
-    res: Response<FoodTypeResponse>,
+    req: Request<{ _id?: string }>,
+    res: Response,
     next: NextFunction
   ) {
     try {
-      const newFoodType = req.body;
+      // Support both params._id (PATCH) and body._id (PUT)
+      const id = req.params._id || (req.body as any)._id;
 
-      const foodType = await foodTypeModel.update(newFoodType._id, newFoodType);
+      if (!id) {
+        return res.status(400).json({ message: 'FoodType ID is required' });
+      }
+
+      const updates = req.body;
+      const foodType = await foodTypeModel.update(id as any, updates);
 
       if (!foodType) {
         return res
           .status(404)
-          .json({ message: `FoodType with ID ${newFoodType._id} not found.` });
+          .json({ message: `FoodType with ID ${id} not found.` });
       }
 
-      res.status(200).json({
-        message: 'FoodType updated successfully',
-        data: { foodType: foodType },
-      });
+      res.status(200).json(foodType);
     } catch (error) {
       logger.error(
-        `Failed to update foodType with ID ${req.body._id || 'N/A'}:`,
+        `Failed to update foodType with ID ${req.params._id || req.body._id || 'N/A'}:`,
         error
       );
 
@@ -72,13 +76,13 @@ export class FoodTypeController {
 
   async findFoodTypeById(
     req: Request<FindFoodTypeParams>,
-    res: Response<FoodTypeResponse>,
+    res: Response,
     next: NextFunction
   ) {
     try {
       const { _id } = req.params;
 
-      const foodType = await foodTypeModel.findById(_id);
+      const foodType = await foodTypeModel.findById(new mongoose.Types.ObjectId(_id));
 
       if (!foodType) {
         return res
@@ -86,10 +90,7 @@ export class FoodTypeController {
           .json({ message: `FoodType with ID ${_id} not found.` });
       }
 
-      res.status(200).json({
-        message: 'FoodType fetched successfully',
-        data: { foodType: foodType },
-      });
+      res.status(200).json(foodType);
     } catch (error) {
       logger.error(
         `Failed to get foodType with ID ${req.params._id || 'N/A'}:`,
@@ -108,14 +109,14 @@ export class FoodTypeController {
 
   async deleteFoodType(
     req: Request<DeleteFoodTypeParams>,
-    res: Response<FoodTypeResponse>,
+    res: Response,
     next: NextFunction
   ) {
     try {
       req;
       const { _id } = req.params;
 
-      const foodType = await foodTypeModel.delete(_id);
+      const foodType = await foodTypeModel.delete(new mongoose.Types.ObjectId(_id));
 
       if (!foodType) {
         return res
@@ -123,10 +124,7 @@ export class FoodTypeController {
           .json({ message: `FoodType with ID ${_id} not found.` });
       }
 
-      res.status(200).json({
-        message: 'FoodType deleted successfully',
-        data: { foodType: foodType },
-      });
+      res.status(200).json(foodType);
     } catch (error) {
       logger.error(
         `Failed to delete foodType with ID ${req.params._id || 'N/A'}:`,
@@ -136,6 +134,39 @@ export class FoodTypeController {
       if (error instanceof Error) {
         return res.status(500).json({
           message: error.message || 'Failed to delete foodType',
+        });
+      }
+
+      next(error);
+    }
+  }
+
+  async findFoodTypeByBarcode(
+    req: Request<{ barcodeId: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { barcodeId } = req.params;
+
+      const foodType = await foodTypeModel.findByBarcode(barcodeId);
+
+      if (!foodType) {
+        return res
+          .status(404)
+          .json({ message: `FoodType with barcode ${barcodeId} not found.` });
+      }
+
+      res.status(200).json(foodType);
+    } catch (error) {
+      logger.error(
+        `Failed to get foodType with barcode ${req.params.barcodeId || 'N/A'}:`,
+        error
+      );
+
+      if (error instanceof Error) {
+        return res.status(500).json({
+          message: error.message || 'Failed to get foodType by barcode',
         });
       }
 
