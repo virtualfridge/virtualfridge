@@ -100,6 +100,15 @@ private fun handleNavigationEvent(
     navigationStateManager.clearNavigationEvent()
 }
 
+/*
+ * Rationale for suppression:
+ * - This function declares the app's navigation graph using Compose's DSL.
+ * - The length comes from multiple route blocks and inline lambdas, not complex logic.
+ * - Splitting each destination into separate functions would add indirection and
+ *   scatter closely related navigation wiring, reducing cohesion.
+ * - Keeping it inline makes the graph easy to scan and update as a whole.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun AppNavHost(
     navController: NavHostController,
