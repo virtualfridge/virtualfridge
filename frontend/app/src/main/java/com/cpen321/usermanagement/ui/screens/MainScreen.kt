@@ -1,7 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
 import Icon
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -158,6 +157,7 @@ fun MainScreen(
     )
 }
 
+@ExperimentalMaterial3Api
 @Composable
 private fun MainRecipeSheets(
     state: RecipeSheetsState,
@@ -183,7 +183,7 @@ private fun MainRecipeSheets(
     }
 }
 
-private data class RecipeSheetsState(
+private data class RecipeSheetsState @OptIn(ExperimentalMaterial3Api::class) constructor(
     val showRecipeSheet: Boolean,
     val sheetState: SheetState,
     val showRecipeResults: Boolean,
