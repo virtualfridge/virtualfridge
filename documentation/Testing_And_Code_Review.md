@@ -90,43 +90,88 @@ Below is what the expected output should be, where you can see the minimum, medi
 
 ### 4.1. Location in Git of Front-end Test Suite:
 
-`frontend/src/androidTest/java/com/studygroupfinder/`
+`frontend/app/src/androidTest/java/com/cpen321/usermanagement/e2e/`
 
 ### 4.2. Tests
 
-- **Use Case: Login**
-
-  - **Expected Behaviors:**
-    | **Scenario Steps** | **Test Case Steps** |
-    | ------------------ | ------------------- |
-    | 1. The user opens "Add Todo Items" screen. | Open "Add Todo Items" screen. |
-    | 2. The app shows an input text field and an "Add" button. The add button is disabled. | Check that the text field is present on screen.<br>Check that the button labelled "Add" is present on screen.<br>Check that the "Add" button is disabled. |
-    | 3a. The user inputs an ill-formatted string. | Input "_^_^^OQ#$" in the text field. |
-    | 3a1. The app displays an error message prompting the user for the expected format. | Check that a dialog is opened with the text: "Please use only alphanumeric characters ". |
-    | 3. The user inputs a new item for the list and the add button becomes enabled. | Input "buy milk" in the text field.<br>Check that the button labelled "add" is enabled. |
-    | 4. The user presses the "Add" button. | Click the button labelled "add ". |
-    | 5. The screen refreshes and the new item is at the bottom of the todo list. | Check that a text box with the text "buy milk" is present on screen.<br>Input "buy chocolate" in the text field.<br>Click the button labelled "add".<br>Check that two text boxes are present on the screen with "buy milk" on top and "buy chocolate" at the bottom. |
-    | 5a. The list exceeds the maximum todo-list size. | Repeat steps 3 to 5 ten times.<br>Check that a dialog is opened with the text: "You have too many items, try completing one first". |
-
-  - **Test Logs:**
-    ```
-    [Placeholder for Espresso test execution logs]
-    ```
-
-- **Use Case: ...**
+- **Use Case: Log Food via Barcode**
 
   - **Expected Behaviors:**
 
     | **Scenario Steps** | **Test Case Steps** |
     | ------------------ | ------------------- |
-    | ...                | ...                 |
+    | 1. The user chooses the barcode scan option from “Add Food.”<br>2. The app opens the scanner interface.<br>3–5. The barcode is captured, decoded, and product data is pulled from Open Food Facts.<br>6–9. The confirmation UI appears, the user confirms, the item is added, and the fridge refreshes. | `SimpleE2ETest#test02_navigateToTestBarcodeScreen` waits for the Virtual Fridge home screen and taps the 🧪 Test bottom-bar action to open the Test Barcode screen (standing in for the scan entry point).<br>`LogFoodViaBarcodeE2ETest#testLogFoodViaBarcode_screenElementsExist` asserts that the Test Barcode title, instructional copy, and “Send Test Barcode” action render.<br>`LogFoodViaBarcodeE2ETest#testLogFoodViaBarcode_successScenario` taps “Send Test Barcode,” waits for “Product Details,” and asserts the “Name” field to verify the data fetch.<br>`LogFoodViaBarcodeE2ETest#testLogFoodViaBarcode_buttonStatesDuringLoading` confirms the button is enabled before sending and shows “Sending…” while awaiting the backend.<br>(Steps 6–9 are currently validated manually; the canned Nutella flow does not expose the confirm-and-insert UI.) |
+    | 2a. The user cancels scanning via the back button. | `LogFoodViaBarcodeE2ETest#testLogFoodViaBarcode_cancelNavigation` presses the device back key on the Test Barcode screen and asserts “Virtual Fridge” is visible while “Test Barcode” disappears. |
+    | 4a. Barcode unreadable/damaged → prompt to re-scan. | Not yet automated (requires scanner error injection). |
+    | 5a. Product not found → notify user and offer alternate methods. | Not yet automated (requires backend error mock). |
 
   - **Test Logs:**
     ```
-    [Placeholder for Espresso test execution logs]
+    Finished 22 tests on Pixel_7(AVD) - 13
+    [XmlResultReporter]: XML test result file generated at /Users/danielding/Desktop/CPEN321/virtualfridge/frontend/app/build/outputs/androidTest-results/connected/debug/TEST-Pixel_7(AVD) - 13-_app-.xml. Total tests 22, passed 22, 
+    信息: Execute com.cpen321.usermanagement.e2e.LogFoodViaBarcodeE2ETest.testLogFoodViaBarcode_cancelNavigation: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.LogFoodViaBarcodeE2ETest.testLogFoodViaBarcode_successScenario: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.LogFoodViaBarcodeE2ETest.testLogFoodViaBarcode_buttonStatesDuringLoading: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.LogFoodViaBarcodeE2ETest.testLogFoodViaBarcode_screenElementsExist: PASSED
     ```
 
-- **...**
+- **Use Case: View Fridge**
+
+  - **Expected Behaviors:**
+
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. The user navigates to the home page (Virtual Fridge).<br>2. The system shows the fridge inventory. | `SimpleE2ETest#test01_appLaunchesSuccessfully` waits for “Virtual Fridge” after the LOADING/AUTH flow to ensure the main screen is visible.<br>`ViewFridgeE2ETest#testViewFridge_mainScreenSuccess` asserts either the stocked fridge list or the empty-state copy renders once the title is present. |
+    | 1a. Inventory is empty → show “No food logged. Add items to view inventory.” | `ViewFridgeE2ETest#testViewFridge_emptyState` checks for the empty-state message (“Your Virtual Fridge is waiting to be filled! … Scan button”) displayed by `MainScreen.EmptyFridgeContent`. |
+    | 2a. A network error prevents loading → show “Could not connect to VirtualFridge service. Try again later.” | Not yet automated (requires forcing `FridgeViewModel` into its error branch). |
+
+  - **Supplementary Sorting & UI Behaviors:**
+
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | Sort options cycle through Expiration Date / Added Date / Name / Nutritional Value. | `ViewFridgeE2ETest#testViewFridge_sortByExpirationDate`, `…_sortByAddedDate`, `…_sortByName`, and `…_sortByNutritionalValue` tap the sort button and assert that each label remains selected after the dropdown closes. |
+    | Bottom navigation stays visible (Scan/Test/Recipe/Notify). | `ViewFridgeE2ETest#testViewFridge_bottomBarButtons` asserts all four bottom-bar buttons exist after the UI idles. |
+
+  - **Test Logs:**
+    ```
+    Finished 22 tests on Pixel_7(AVD) - 13
+    [XmlResultReporter]: XML test result file generated at /Users/danielding/Desktop/CPEN321/virtualfridge/frontend/app/build/outputs/androidTest-results/connected/debug/TEST-Pixel_7(AVD) - 13-_app-.xml. Total tests 22, passed 22, 
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_mainScreenSuccess: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_sortByExpirationDate: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_sortByName: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_emptyState: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_bottomBarButtons: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_sortByNutritionalValue: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.ViewFridgeE2ETest.testViewFridge_sortByAddedDate: PASSED
+    ```
+
+- **Use Case: Find Recipe Suggestions**
+
+  - **Expected Behaviors:**
+
+    | **Scenario Steps** | **Test Case Steps** |
+    | ------------------ | ------------------- |
+    | 1. User selects ingredient(s) from the fridge inventory.<br>2. User taps the Recipe button. | `FindRecipeSuggestionsE2ETest#testFindRecipeSuggestions_recipeButtonDisabledWithoutSelection` waits for the main screen and verifies the Recipe button is disabled until items are selected.<br>`…recipeOptionsSheetOpens` adds a Nutella test item, selects it, taps Recipe, and asserts the “Choose Your Recipe Style” bottom sheet with “Recipe Database” and “AI Chef” choices appears. |
+    | 3–5. The system requests recipes via TheMealDB and shows results (or a “No Recipes Found” fallback). | `…mealDBGeneration` selects a fridge item, chooses “Recipe Database,” and waits for either the “Fetching recipes from MealDB…,” “Recipes from MealDB,” or “No Recipes Found” text displayed inside `RecipeResultsBottomSheet`. |
+    | 6. User opens a recipe link. | Not yet automated (current tests only verify the cards render; they don’t tap through to external content). |
+    | Failure 3a. No recipes match → notify user. | Covered by `…mealDBGeneration` when the UI shows the “No Recipes Found” card. |
+    | Failure 3b/3c. API unreachable or no internet → show the corresponding error messages. | Not yet automated (requires API/network fault injection). |
+    | Gemini AI alternative success path. | `…aiGeneration` selects “AI Chef,” waits for “Generating AI recipe with Gemini…” and asserts the “AI Chef Recipe” section renders. |
+    | Recipe sheet can be dismissed without side effects. | `…dismissRecipeSheet` opens the sheet, presses back, and confirms the sheet text disappears while “Virtual Fridge” remains visible. |
+
+  - **Test Logs:**
+    ```
+    Finished 22 tests on Pixel_7(AVD) - 13
+    [XmlResultReporter]: XML test result file generated at /Users/danielding/Desktop/CPEN321/virtualfridge/frontend/app/build/outputs/androidTest-results/connected/debug/TEST-Pixel_7(AVD) - 13-_app-.xml. Total tests 22, passed 22, 
+    信息: Execute com.cpen321.usermanagement.e2e.FindRecipeSuggestionsE2ETest.testFindRecipeSuggestions_mealDBGeneration: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.FindRecipeSuggestionsE2ETest.testFindRecipeSuggestions_dismissRecipeSheet: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.FindRecipeSuggestionsE2ETest.testFindRecipeSuggestions_recipeOptionsSheetOpens: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.FindRecipeSuggestionsE2ETest.testFindRecipeSuggestions_recipeButtonDisabledWithoutSelection: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.FindRecipeSuggestionsE2ETest.testFindRecipeSuggestions_bottomBarButtonsExist: PASSED
+    信息: Execute com.cpen321.usermanagement.e2e.FindRecipeSuggestionsE2ETest.testFindRecipeSuggestions_aiGeneration: PASSED
+    ```
+
+
 
 ---
 
