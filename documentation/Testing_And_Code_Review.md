@@ -137,15 +137,18 @@
 
 ### 2.3. Jest Coverage Report Screenshots for Tests Without Mocking
 
-_(Placeholder for Jest coverage screenshot without mocking)_
+![](images/unmocked_1.png)
+![](images/unmocked_2.png)
 
 ### 2.4. Jest Coverage Report Screenshots for Tests With Mocking
 
-_(Placeholder for Jest coverage screenshot with mocking)_
+![](images/mocked_1.png)
+![](images/mocked_2.png)
 
 ### 2.5. Jest Coverage Report Screenshots for Both Tests With and Without Mocking
 
-_(Placeholder for Jest coverage screenshot both with and without mocking)_
+![](images/both_test_1.png)
+![](images/both_test_2.png)
 
 ---
 
