@@ -93,7 +93,7 @@ export class FridgeService {
         let shelfLifeDays;
         const expirationDate =
           product.expiration_date || product.expiry_date || null;
-        if (expirationDate) {
+        if (expirationDate && typeof expirationDate === 'string') {
           shelfLifeDays = dateDiffInDays(
             new Date(),
             parseDate(expirationDate, 'mm-yyyy')
