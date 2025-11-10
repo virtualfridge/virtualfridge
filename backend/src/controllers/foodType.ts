@@ -11,11 +11,11 @@ import { foodTypeModel } from '../models/foodType';
 import logger from '../util/logger';
 
 export class FoodTypeController {
-  async createFoodType(
+  createFoodType = async (
     req: Request<unknown, unknown, CreateFoodTypeBody>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const foodType = await foodTypeModel.create(req.body);
       res.status(200).json({
@@ -33,13 +33,13 @@ export class FoodTypeController {
 
       next(error);
     }
-  }
+  };
 
-  async updateFoodType(
-    req: Request<{ _id?: string }>,
-    res: Response,
+  updateFoodType = async (
+    req: Request<unknown, unknown, UpdateFoodTypeBody>,
+    res: Response<FoodTypeResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       // Support both params._id (PATCH) and body._id (PUT)
       const id = req.params._id || (req.body as any)._id;
@@ -57,7 +57,10 @@ export class FoodTypeController {
           .json({ message: `FoodType with ID ${id} not found.` });
       }
 
-      res.status(200).json(foodType);
+      res.status(200).json({
+        message: 'FoodType updated successfully',
+        data: { foodType },
+      });
     } catch (error) {
       logger.error(
         `Failed to update foodType with ID ${req.params._id || req.body._id || 'N/A'}:`,
@@ -72,13 +75,13 @@ export class FoodTypeController {
 
       next(error);
     }
-  }
+  };
 
-  async findFoodTypeById(
+  findFoodTypeById = async (
     req: Request<FindFoodTypeParams>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const { _id } = req.params;
 
@@ -105,13 +108,13 @@ export class FoodTypeController {
 
       next(error);
     }
-  }
+  };
 
-  async deleteFoodType(
+  deleteFoodType = async (
     req: Request<DeleteFoodTypeParams>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     try {
       req;
       const { _id } = req.params;

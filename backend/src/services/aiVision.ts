@@ -6,7 +6,7 @@ import {
   GeminiInlineDataPart,
   GeminiResponse,
   GeminiTextPart,
-  ProduceAnalysis,
+  IProduceAnalysis,
   produceAnalysisSchema,
 } from '../types/ai';
 import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
@@ -14,7 +14,7 @@ import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
 export class AiVisionService {
   constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}
 
-  async analyzeProduce(imagePath: string): Promise<ProduceAnalysis> {
+  async analyzeProduce(imagePath: string): Promise<IProduceAnalysis> {
     if (!this.apiKey) {
       throw new Error('GEMINI_API_KEY is not set.');
     }
@@ -83,7 +83,7 @@ export class AiVisionService {
     }
   }
 
-  private parseJsonFromResponse(resp: GeminiResponse): ProduceAnalysis | null {
+  private parseJsonFromResponse(resp: GeminiResponse): IProduceAnalysis | null {
     const text = resp.candidates?.[0]?.content?.parts
       ?.map(p => p.text?.trim())
       .filter(Boolean)

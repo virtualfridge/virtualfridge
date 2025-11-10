@@ -2,9 +2,18 @@ import mongoose from 'mongoose';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const uri = process.env.MONGODB_URI!;
-    const user = process.env.MONGODB_USER!;
-    const pass = process.env.MONGODB_PASS!;
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+      throw new Error('MONGODB_URI not set');
+    }
+    const user = process.env.MONGODB_USER;
+    if (!user) {
+      throw new Error('MONGODB_USER not set');
+    }
+    const pass = process.env.MONGODB_PASS;
+    if (!pass) {
+      throw new Error('MONGODB_PASS not set');
+    }
 
     await mongoose.connect(uri, {
       auth: {
@@ -24,10 +33,19 @@ export const connectDB = async (): Promise<void> => {
       console.log('⚠️ MongoDB disconnected');
     });
 
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      console.log('MongoDB connection closed through app termination');
-      process.exitCode = 0;
+    process.on('SIGINT', () => {
+      mongoose.connection
+        .close()
+        .then(() => {
+          console.log('MongoDB connection closed through app termination');
+          process.exitCode = 0;
+        })
+        .catch((error: unknown) => {
+          console.error(
+            'Failed to close MongoDB connection through app termination',
+            error
+          );
+        });
     });
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error);

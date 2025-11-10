@@ -1,5 +1,5 @@
 import z from 'zod';
-import { nutrientsSchema } from './foodType';
+import { INutrients, nutrientsSchema } from './foodType';
 
 export interface GeminiInlineDataPart {
   inlineData: {
@@ -33,4 +33,9 @@ export const produceAnalysisSchema = z.object({
   nutrients: nutrientsSchema.optional(),
 });
 
-export type ProduceAnalysis = z.infer<typeof produceAnalysisSchema>;
+export interface IProduceAnalysis {
+  isProduce: boolean;
+  category?: string;
+  name?: string;
+  nutrients?: INutrients;
+}

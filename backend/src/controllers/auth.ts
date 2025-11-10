@@ -8,11 +8,11 @@ import {
 import logger from '../util/logger';
 
 export class AuthController {
-  async signUp(
+  signUp = async (
     req: Request<unknown, unknown, AuthenticateUserRequest>,
     res: Response<AuthenticateUserResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const { idToken } = req.body;
 
@@ -47,13 +47,13 @@ export class AuthController {
 
       next(error);
     }
-  }
+  };
 
-  async signIn(
+  signIn = async (
     req: Request<unknown, unknown, AuthenticateUserRequest>,
     res: Response<AuthenticateUserResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const { idToken } = req.body;
 

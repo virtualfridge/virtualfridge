@@ -1,11 +1,16 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import logger from '../util/logger';
 import { notificationService } from '../services/notification';
 import { foodItemModel } from '../models/foodItem';
 import { foodTypeModel } from '../models/foodType';
+import { ExpiringItem, ExpiringItemResponse } from '../types/notifications';
 
 export class NotificationController {
-  async sendTestNotification(req: Request, res: Response, next: NextFunction) {
+  sendTestNotification: RequestHandler = async (
+    req: Request,
+    res: Response<ExpiringItemResponse>,
+    next: NextFunction
+  ) => {
     try {
       if (!req.user) {
         logger.error(
@@ -32,8 +37,8 @@ export class NotificationController {
       // Get all food items for the user
       const foodItems = await foodItemModel.findAllByUserId(user._id);
 
-      if (!foodItems || foodItems.length === 0) {
-        return res.status(200).json({
+      if (foodItems.length === 0) {
+        return res.status(404).json({
           message: 'No food items found in your fridge',
         });
       }
@@ -44,7 +49,7 @@ export class NotificationController {
       thresholdDate.setDate(now.getDate() + expiryThresholdDays);
 
       // Find expiring items
-      const expiringItems = [];
+      const expiringItems: ExpiringItem[] = [];
 
       for (const item of foodItems) {
         if (
@@ -95,5 +100,5 @@ export class NotificationController {
 
       next(error);
     }
-  }
+  };
 }

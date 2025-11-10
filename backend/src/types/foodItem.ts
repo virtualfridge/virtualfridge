@@ -12,7 +12,13 @@ export const foodItemSchema = z.object({
   percentLeft: z.number().min(0).max(100),
 });
 
-export type FoodItem = z.infer<typeof foodItemSchema>;
+export interface IFoodItem {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  typeId: mongoose.Types.ObjectId;
+  expirationDate?: Date;
+  percentLeft: number;
+}
 
 export const createFoodItemSchema = foodItemSchema.omit({
   _id: true,
@@ -39,6 +45,6 @@ export type DeleteFoodItemParams = z.infer<typeof deleteFoodItemSchema>;
 export interface FoodItemResponse {
   message: string;
   data?: {
-    foodItem: FoodItem;
+    foodItem: IFoodItem;
   };
-};
+}

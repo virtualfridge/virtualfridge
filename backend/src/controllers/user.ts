@@ -6,7 +6,7 @@ import { MediaService } from '../services/media';
 import { userModel } from '../models/user';
 
 export class UserController {
-  getProfile(req: Request, res: Response<GetProfileResponse>) {
+  getProfile = (req: Request, res: Response<GetProfileResponse>) => {
     if (!req.user) {
       logger.error('User controller must always be used with auth middleware!');
       return res.status(500).json({
@@ -19,13 +19,13 @@ export class UserController {
       message: 'Profile fetched successfully',
       data: { user },
     });
-  }
+  };
 
-  async updateProfile(
+  updateProfile = async (
     req: Request<unknown, unknown, UpdateProfileRequest>,
     res: Response<GetProfileResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (!req.user) {
         logger.error(
@@ -60,9 +60,9 @@ export class UserController {
 
       next(error);
     }
-  }
+  };
 
-  async deleteProfile(req: Request, res: Response, next: NextFunction) {
+  deleteProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
         logger.error(
@@ -92,5 +92,5 @@ export class UserController {
 
       next(error);
     }
-  }
+  };
 }

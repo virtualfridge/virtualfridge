@@ -11,11 +11,11 @@ import { foodItemModel } from '../models/foodItem';
 import { FridgeItemResponse } from '../types/fridge';
 
 export class MediaController {
-  async uploadImage(
+  uploadImage = async (
     req: Request<unknown, unknown, UploadImageRequest>,
     res: Response<UploadImageResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -32,6 +32,10 @@ export class MediaController {
         });
       }
       const user = req.user;
+      // ESLint doesn't know about library types
+      if (typeof req.file.path !== 'string') {
+        throw new Error('Wrong type for request file.path');
+      }
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const image = await MediaService.saveImage(
         sanitizedFilePath,
@@ -55,13 +59,13 @@ export class MediaController {
 
       next(error);
     }
-  }
+  };
 
-  async visionScan(
+  visionScan = async (
     req: Request<unknown, unknown, UploadImageRequest>,
     res: Response<FridgeItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
@@ -156,7 +160,7 @@ export class MediaController {
       }
       next(error);
     }
-  }
+  };
 }
 
 function toTitleCase(input: string): string {

@@ -7,7 +7,7 @@ export const getRecipesQuerySchema = z.object({
     .string()
     .trim()
     .optional()
-    .transform(value =>
+    .transform((value: string | undefined) =>
       value
         ? value
             .split(recipeIngredientSeparator)
@@ -21,17 +21,17 @@ export type GetRecipesQuery = z.infer<typeof getRecipesQuerySchema>;
 
 export interface RecipeQuery {
   ingredients?: string[];
-};
+}
 
 export interface RecipeSummary {
   idMeal: string;
   strMeal: string;
   strMealThumb?: string;
-};
+}
 
 export interface RecipeApiResponse {
   meals: RecipeSummary[] | null;
-};
+}
 
 export interface GetRecipesResponse {
   message: string;
@@ -40,7 +40,7 @@ export interface GetRecipesResponse {
     meals: RecipeSummary[];
     externalSource: string;
   };
-};
+}
 
 export const defaultRecipeIngredients = ['chicken_breast'];
 
@@ -57,9 +57,9 @@ export interface AiRecipeData {
   prompt: string;
   recipe: string;
   model: string;
-};
+}
 
 export interface AiRecipeResponse {
   message: string;
   data: AiRecipeData;
-};
+}
