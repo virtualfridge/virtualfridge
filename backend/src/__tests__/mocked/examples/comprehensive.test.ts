@@ -312,10 +312,10 @@ describe('Example 4: Controller Integration Testing', () => {
         shelfLifeDays: 14,
         barcodeId: '123456789',
       })
-      .expect(201);
+      .expect(200);
+      expect(response.body.data.foodType).toHaveProperty('_id');
+      expect(response.body.data.foodType.name).toBe('Test Apple');
 
-    expect(response.body).toHaveProperty('_id');
-    expect(response.body.name).toBe('Test Apple');
   });
 
   test('should reject request without auth token', async () => {

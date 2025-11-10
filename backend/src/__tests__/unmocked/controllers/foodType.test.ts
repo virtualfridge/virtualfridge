@@ -39,12 +39,13 @@ describe('FoodType Controller Integration Tests', () => {
         .post('/api/food-type')
         .set('Authorization', `Bearer ${authToken}`)
         .send(mockFoodType)
-        .expect(201);
+        .expect(200);
 
-      expect(response.body).toHaveProperty('_id');
-      expect(response.body.name).toBe(mockFoodType.name);
-      expect(response.body.barcodeId).toBe(mockFoodType.barcodeId);
-      expect(response.body.shelfLifeDays).toBe(mockFoodType.shelfLifeDays);
+    expect(response.body).toHaveProperty('data.foodType._id');
+    expect(response.body.data.foodType.name).toBe(mockFoodType.name);
+    expect(response.body.data.foodType.barcodeId).toBe(mockFoodType.barcodeId);
+    expect(response.body.data.foodType.shelfLifeDays).toBe(mockFoodType.shelfLifeDays);
+
     });
 
     test('should return 401 without authentication token', async () => {

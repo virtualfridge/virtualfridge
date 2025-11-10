@@ -417,7 +417,7 @@ describe('MediaController', () => {
         expect.objectContaining({
           nutrients: expect.objectContaining({
             calories: 95,
-            carbohydrates: 25,
+            carbs: 25,
           }),
         })
       );
@@ -776,23 +776,25 @@ describe('MediaController', () => {
         expect.objectContaining({
           nutrients: expect.objectContaining({
             calories: 100,
-            energyKj: 420,
-            protein: 2,
+            carbs: 20,
             fat: 5,
-            saturatedFat: 1,
-            monounsaturatedFat: 2,
-            polyunsaturatedFat: 1.5,
-            carbohydrates: 20,
-            sugars: 10,
             fiber: 3,
-            salt: 0.5,
-            sodium: 200,
+            protein: 2,
             calcium: 50,
             iron: 1.5,
             potassium: 300,
+            sodium: 200,
+            sugars: 10,
+            energy_kj: 420,
+            monounsaturated_fat: 2,
+            polyunsaturated_fat: 1.5,
+            saturated_fat: 1,
+            cholesterol: 0,
+            trans_fat: 0,
           }),
         })
       );
+
       // transFat is 0, so it won't be included (falsy values are omitted)
       expect(statusMock).toHaveBeenCalledWith(200);
     });
