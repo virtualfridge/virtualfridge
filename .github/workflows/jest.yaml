@@ -1,0 +1,28 @@
+name: jest
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  JWT_SECRET: "fake-secret"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache-dependency-path: ./backend/package-lock.json
+          cache: "npm"
+      - name: Install node modules
+        run: npm i
+      - name: Start db
+        run: docker compose up
+      - name: Run tests
+        run: npm test

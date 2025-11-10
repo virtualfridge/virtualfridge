@@ -39,7 +39,7 @@ export const foodTypeSchema = z.object({
   barcodeId: z.string().optional(),
   brand: z.string().optional(),
   image: z.url().optional(),
-  allergens: z.array(z.string()),
+  allergens: z.array(z.string()).optional(),
 });
 
 export type FoodType = z.infer<typeof foodTypeSchema>;
@@ -52,9 +52,18 @@ export const updateFoodTypeSchema = foodTypeSchema
   .partial()
   .required({ _id: true });
 
-export const findFoodTypeSchema = foodTypeSchema.pick({ _id: true });
+// Schemas for route params (params are always strings in Express)
+export const findFoodTypeSchema = z.object({
+  _id: z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
+    message: 'Invalid ObjectId',
+  }),
+});
 
-export const deleteFoodTypeSchema = foodTypeSchema.pick({ _id: true });
+export const deleteFoodTypeSchema = z.object({
+  _id: z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
+    message: 'Invalid ObjectId',
+  }),
+});
 
 // Request types
 export type CreateFoodTypeBody = z.infer<typeof createFoodTypeSchema>;

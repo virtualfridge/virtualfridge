@@ -89,4 +89,39 @@ export class AuthController {
       next(error);
     }
   }
+
+  async googleAuth(
+    req: Request<unknown, unknown, AuthenticateUserRequest>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { idToken } = req.body;
+
+      if (!idToken) {
+        return res.status(400).json({
+          error: 'idToken is required',
+        });
+      }
+
+      const data = await authService.authenticateWithGoogle(idToken);
+
+      return res.status(200).json({
+        token: data.token,
+        user: data.user,
+      });
+    } catch (error) {
+      logger.error('Google authentication error:', error);
+
+      if (error instanceof Error) {
+        if (error.message === 'Invalid Google token') {
+          return res.status(401).json({
+            error: 'Invalid Google token',
+          });
+        }
+      }
+
+      next(error);
+    }
+  }
 }

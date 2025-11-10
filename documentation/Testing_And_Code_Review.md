@@ -14,27 +14,122 @@
 
 #### 2.1.1. Tests
 
-| **Interface**                 | **Describe Group Location, No Mocks**                | **Describe Group Location, With Mocks**            | **Mocked Components**              |
-| ----------------------------- | ---------------------------------------------------- | -------------------------------------------------- | ---------------------------------- |
-| **POST /user/login**          | [`tests/unmocked/authenticationLogin.test.js#L1`](#) | [`tests/mocked/authenticationLogin.test.js#L1`](#) | Google Authentication API, User DB |
-| **POST /study-groups/create** | ...                                                  | ...                                                | Study Group DB                     |
-| ...                           | ...                                                  | ...                                                | ...                                |
-| ...                           | ...                                                  | ...                                                | ...                                |
+| **Interface**                        | **Describe Group Location, No Mocks**                                          | **Describe Group Location, With Mocks**                                          | **Mocked Components**                    |
+| ------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ---------------------------------------- |
+| **POST /api/auth/google**            | N/A                                                                            | [`backend/src/__tests__/controllers/auth.test.ts#L38`](../backend/src/__tests__/controllers/auth.test.ts#L38) | Google OAuth2Client                      |
+| **POST /api/auth/signup**            | N/A                                                                            | [`backend/src/__tests__/controllers/auth.test.ts#L135`](../backend/src/__tests__/controllers/auth.test.ts#L135) | Google OAuth2Client                      |
+| **POST /api/auth/signin**            | N/A                                                                            | [`backend/src/__tests__/controllers/auth.test.ts#L238`](../backend/src/__tests__/controllers/auth.test.ts#L238) | Google OAuth2Client                      |
+| **GET /api/user/profile**            | N/A                                                                            | [`backend/src/__tests__/controllers/user.test.ts#L43`](../backend/src/__tests__/controllers/user.test.ts#L43) | Google OAuth2Client                      |
+| **POST /api/user/profile**           | N/A                                                                            | [`backend/src/__tests__/controllers/user.test.ts#L72`](../backend/src/__tests__/controllers/user.test.ts#L72) | Google OAuth2Client                      |
+| **DELETE /api/user/profile**         | N/A                                                                            | [`backend/src/__tests__/controllers/user.test.ts#L152`](../backend/src/__tests__/controllers/user.test.ts#L152) | Google OAuth2Client                      |
+| **POST /api/food-item**              | [`backend/src/__tests__/controllers/foodItem.test.ts#L40`](../backend/src/__tests__/controllers/foodItem.test.ts#L40) | N/A                                                                              | None                                     |
+| **PUT /api/food-item**               | [`backend/src/__tests__/controllers/foodItem.test.ts#L101`](../backend/src/__tests__/controllers/foodItem.test.ts#L101) | N/A                                                                              | None                                     |
+| **GET /api/food-item/:_id**          | [`backend/src/__tests__/controllers/foodItem.test.ts#L177`](../backend/src/__tests__/controllers/foodItem.test.ts#L177) | N/A                                                                              | None                                     |
+| **DELETE /api/food-item/:_id**       | [`backend/src/__tests__/controllers/foodItem.test.ts#L235`](../backend/src/__tests__/controllers/foodItem.test.ts#L235) | N/A                                                                              | None                                     |
+| **POST /api/food-type**              | [`backend/src/__tests__/controllers/foodType.test.ts#L36`](../backend/src/__tests__/controllers/foodType.test.ts#L36) | N/A                                                                              | None                                     |
+| **GET /api/food-type/:id**           | [`backend/src/__tests__/controllers/foodType.test.ts#L89`](../backend/src/__tests__/controllers/foodType.test.ts#L89) | N/A                                                                              | None                                     |
+| **GET /api/food-type/barcode/:id**   | [`backend/src/__tests__/controllers/foodType.test.ts#L133`](../backend/src/__tests__/controllers/foodType.test.ts#L133) | N/A                                                                              | None                                     |
+| **PATCH /api/food-type/:id**         | [`backend/src/__tests__/controllers/foodType.test.ts#L175`](../backend/src/__tests__/controllers/foodType.test.ts#L175) | N/A                                                                              | None                                     |
+| **DELETE /api/food-type/:id**        | [`backend/src/__tests__/controllers/foodType.test.ts#L236`](../backend/src/__tests__/controllers/foodType.test.ts#L236) | N/A                                                                              | None                                     |
+| **GET /api/hobbies**                 | [`backend/src/__tests__/controllers/hobby.test.ts#L26`](../backend/src/__tests__/controllers/hobby.test.ts#L26) | N/A                                                                              | None                                     |
+| **POST /api/notifications/test**     | N/A                                                                            | [`backend/src/__tests__/controllers/notification.test.ts#L58`](../backend/src/__tests__/controllers/notification.test.ts#L58) | Firebase Admin SDK                       |
+| **POST /api/media/upload**           | N/A                                                                            | [`backend/src/__tests__/controllers/media.test.ts#L55`](../backend/src/__tests__/controllers/media.test.ts#L55) | File system (multer), Storage service    |
+| **POST /api/media/analyze-produce**  | N/A                                                                            | [`backend/src/__tests__/controllers/media.test.ts#L160`](../backend/src/__tests__/controllers/media.test.ts#L160) | Gemini AI Vision API                     |
+| **GET /api/recipes**                 | N/A                                                                            | [`backend/src/__tests__/controllers/recipe.test.ts#L34`](../backend/src/__tests__/controllers/recipe.test.ts#L34) | Gemini AI API                            |
+| **POST /api/recipes/ai**             | N/A                                                                            | [`backend/src/__tests__/controllers/recipe.test.ts#L111`](../backend/src/__tests__/controllers/recipe.test.ts#L111) | Gemini AI API                            |
 
 #### 2.1.2. Commit Hash Where Tests Run
 
-`[Insert Commit SHA here]`
+`f31e08b869aac335ab459518474b78d0b8ac69b3`
 
 #### 2.1.3. Explanation on How to Run the Tests
 
 1. **Clone the Repository**:
 
    - Open your terminal and run:
-     ```
-     git clone https://github.com/example/your-project.git
+     ```bash
+     git clone https://github.com/virtualfridge/virtualfridge.git
+     cd virtualfridge/backend
      ```
 
-2. **...**
+2. **Install Dependencies**:
+
+   - Run the following command to install all required packages:
+     ```bash
+     npm install
+     ```
+
+3. **Set Up Environment Variables**:
+
+   - Create a `.env` file in the `backend` directory with the required environment variables:
+     ```
+     PORT=3000
+     JWT_SECRET=your-jwt-secret
+     GOOGLE_CLIENT_ID=your-google-client-id
+     MONGODB_URI=your-mongodb-uri
+     MONGODB_USER=your-mongodb-user
+     MONGODB_PASS=your-mongodb-password
+     GEMINI_API_KEY=your-gemini-api-key
+     FIREBASE_SERVICE_ACCOUNT=your-firebase-service-account-json
+     ```
+   - **Note**: Tests use an in-memory MongoDB database, so MongoDB connection variables are not required for testing.
+
+4. **Run All Tests**:
+
+   - To run all tests (both mocked and unmocked):
+     ```bash
+     npm test
+     ```
+
+5. **Run Only Mocked Tests**:
+
+   - To run only tests that use mocks (tests with external API/service mocking):
+     ```bash
+     npm run test:mocked
+     ```
+
+6. **Run Only Unmocked Tests**:
+
+   - To run only tests without mocks (pure integration tests):
+     ```bash
+     npm run test:unmocked
+     ```
+
+7. **Run Tests with Coverage**:
+
+   - To run all tests with coverage report:
+     ```bash
+     npm run test:coverage
+     ```
+   - For mocked tests only:
+     ```bash
+     npm run test:coverage:mocked
+     ```
+   - For unmocked tests only:
+     ```bash
+     npm run test:coverage:unmocked
+     ```
+
+8. **Run Tests in Watch Mode**:
+
+   - To run tests in watch mode (automatically re-runs on file changes):
+     ```bash
+     npm run test:watch
+     ```
+   - For mocked tests in watch mode:
+     ```bash
+     npm run test:watch:mocked
+     ```
+   - For unmocked tests in watch mode:
+     ```bash
+     npm run test:watch:unmocked
+     ```
+
+9. **View Test Results**:
+   - Test results will be displayed in the terminal
+   - Coverage reports are generated in the `backend/coverage` directory
+   - Mocked test coverage: `backend/coverage/mocked`
+   - Unmocked test coverage: `backend/coverage/unmocked`
 
 ### 2.2. GitHub Actions Configuration Location
 
