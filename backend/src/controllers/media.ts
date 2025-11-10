@@ -32,6 +32,10 @@ export class MediaController {
         });
       }
       const user = req.user;
+      // ESLint doesn't know about library types
+      if (typeof req.file.path !== 'string') {
+        throw new Error('Wrong type for request file.path');
+      }
       const sanitizedFilePath = sanitizeInput(req.file.path);
       const image = await MediaService.saveImage(
         sanitizedFilePath,

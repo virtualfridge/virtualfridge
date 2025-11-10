@@ -8,9 +8,15 @@ import { userModel } from '../models/user';
 
 export class AuthService {
   private googleClient: OAuth2Client;
+  private jwtSecret: string;
 
   constructor() {
     this.googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    if (process.env.JWT_SECRET) {
+      this.jwtSecret = process.env.JWT_SECRET;
+    } else {
+      throw new Error('JWT_SECRET not set');
+    }
   }
 
   private async verifyGoogleToken(idToken: string): Promise<GoogleUserInfo> {
@@ -42,7 +48,7 @@ export class AuthService {
   }
 
   private generateAccessToken(user: IUser): string {
-    return jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
+    return jwt.sign({ id: user._id }, this.jwtSecret, {
       expiresIn: '19h',
     });
   }
