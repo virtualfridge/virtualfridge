@@ -30,6 +30,7 @@ import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -136,92 +137,104 @@ private fun TestBarcodeContent(
         }
 
         fridgeItem?.let { data ->
-            val foodItem = data.foodItem
-            val foodType = data.foodType
-            
+            TestBarcodeDetails(data)
+        }
+    }
+}
+
+/*
+ * Rationale for suppression:
+ * - This block lays out static product details with Compose UI markup.
+ * - The length comes from repeated presentational rows, not complex logic.
+ * - Splitting further would add indirection with little readability gain here.
+ */
+@Suppress("LongMethod", "ComplexMethod")
+@Composable
+private fun TestBarcodeDetails(data: FridgeItem, modifier: Modifier = Modifier) {
+    val foodItem = data.foodItem
+    val foodType = data.foodType
+
+    Text(
+        text = "Product Details",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold
+    )
+
+    ProductDetailRow(label = "Name", value = foodType.name)
+    ProductDetailRow(label = "Brand", value = foodType.brand)
+    ProductDetailRow(label = "Quantity", value = foodType.quantity)
+    ProductDetailRow(label = "Quantity Left", value = "${foodItem.percentLeft}%")
+
+    foodType.shelfLifeDays?.let { days ->
+        ProductDetailRow(label = "Shelf Life", value = "$days days")
+    }
+
+    foodItem.expirationDate?.let { date ->
+        ProductDetailRow(
+            label = "Your Item Expiration Date",
+            value = formatDate(date)
+        )
+    }
+
+    foodType.expiration_date?.let { date ->
+        ProductDetailRow(
+            label = "Product Expiration Date",
+            value = date
+        )
+    }
+
+    foodType.nutrients?.let { nutrients ->
+        Text(
+            text = "Nutrients (per 100g)",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Medium
+        )
+
+        ProductDetailRow(label = "Calories (kcal)", value = nutrients.calories)
+        ProductDetailRow(label = "Energy (kJ)", value = nutrients.energy_kj)
+        ProductDetailRow(label = "Protein (g)", value = nutrients.protein)
+        ProductDetailRow(label = "Fat (g)", value = nutrients.fat)
+        ProductDetailRow(label = "Saturated Fat (g)", value = nutrients.saturated_fat)
+        ProductDetailRow(label = "Trans Fat (g)", value = nutrients.trans_fat)
+        ProductDetailRow(label = "Carbohydrates (g)", value = nutrients.carbs)
+        ProductDetailRow(label = "Sugars (g)", value = nutrients.sugars)
+        ProductDetailRow(label = "Fiber (g)", value = nutrients.fiber)
+        ProductDetailRow(label = "Salt (g)", value = nutrients.salt)
+        ProductDetailRow(label = "Sodium (mg)", value = nutrients.sodium)
+        ProductDetailRow(label = "Calcium (mg)", value = nutrients.calcium)
+        ProductDetailRow(label = "Iron (mg)", value = nutrients.iron)
+        ProductDetailRow(label = "Magnesium (mg)", value = nutrients.magnesium)
+        ProductDetailRow(label = "Potassium (mg)", value = nutrients.potassium)
+        ProductDetailRow(label = "Zinc (mg)", value = nutrients.zinc)
+        ProductDetailRow(label = "Caffeine (mg)", value = nutrients.caffeine)
+    }
+
+    foodType.ingredients?.let { ingredients ->
+        Text(
+            text = "Ingredients",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Medium
+        )
+        SelectionContainer {
             Text(
-                text = "Product Details",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                text = ingredients,
+                style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
 
-            ProductDetailRow(label = "Name", value = foodType.name)
-            ProductDetailRow(label = "Brand", value = foodType.brand)
-            ProductDetailRow(label = "Quantity", value = foodType.quantity)
-            ProductDetailRow(label = "Quantity Left", value = "${foodItem.percentLeft}%")
-            
-            foodType.shelfLifeDays?.let { days ->
-                ProductDetailRow(label = "Shelf Life", value = "$days days")
-            }
-            
-            foodItem.expirationDate?.let { date ->
-                ProductDetailRow(
-                    label = "Your Item Expiration Date", 
-                    value = formatDate(date)
-                )
-            }
-            
-            foodType.expiration_date?.let { date ->
-                ProductDetailRow(
-                    label = "Product Expiration Date", 
-                    value = date
-                )
-            }
-
-            foodType.nutrients?.let { nutrients ->
+    foodType.allergens?.let { allergens ->
+        if (allergens.isNotEmpty()) {
+            Text(
+                text = "Allergens",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium
+            )
+            SelectionContainer {
                 Text(
-                    text = "Nutrients (per 100g)",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
+                    text = allergens.joinToString(", "),
+                    style = MaterialTheme.typography.bodyMedium
                 )
-
-                ProductDetailRow(label = "Calories (kcal)", value = nutrients.calories)
-                ProductDetailRow(label = "Energy (kJ)", value = nutrients.energy_kj)
-                ProductDetailRow(label = "Protein (g)", value = nutrients.protein)
-                ProductDetailRow(label = "Fat (g)", value = nutrients.fat)
-                ProductDetailRow(label = "Saturated Fat (g)", value = nutrients.saturated_fat)
-                ProductDetailRow(label = "Trans Fat (g)", value = nutrients.trans_fat)
-                ProductDetailRow(label = "Carbohydrates (g)", value = nutrients.carbs)
-                ProductDetailRow(label = "Sugars (g)", value = nutrients.sugars)
-                ProductDetailRow(label = "Fiber (g)", value = nutrients.fiber)
-                ProductDetailRow(label = "Salt (g)", value = nutrients.salt)
-                ProductDetailRow(label = "Sodium (mg)", value = nutrients.sodium)
-                ProductDetailRow(label = "Calcium (mg)", value = nutrients.calcium)
-                ProductDetailRow(label = "Iron (mg)", value = nutrients.iron)
-                ProductDetailRow(label = "Magnesium (mg)", value = nutrients.magnesium)
-                ProductDetailRow(label = "Potassium (mg)", value = nutrients.potassium)
-                ProductDetailRow(label = "Zinc (mg)", value = nutrients.zinc)
-                ProductDetailRow(label = "Caffeine (mg)", value = nutrients.caffeine)
-            }
-
-            foodType.ingredients?.let { ingredients ->
-                Text(
-                    text = "Ingredients",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium
-                )
-                SelectionContainer {
-                    Text(
-                        text = ingredients,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            foodType.allergens?.let { allergens ->
-                if (allergens.isNotEmpty()) {
-                    Text(
-                        text = "Allergens",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                    SelectionContainer {
-                        Text(
-                            text = allergens.joinToString(", "),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
             }
         }
     }
@@ -252,7 +265,9 @@ private fun formatDate(dateString: String): String {
         val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
-    } catch (e: Exception) {
+    } catch (e: ParseException) {
+        dateString
+    } catch (e: IllegalArgumentException) {
         dateString // Return original string if parsing fails
     }
 }

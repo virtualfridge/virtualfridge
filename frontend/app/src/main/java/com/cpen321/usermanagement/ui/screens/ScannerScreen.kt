@@ -53,6 +53,14 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 
+/*
+ * Rationale for suppression:
+ * - This composable wires CameraX setup, image analysis, and UI overlays.
+ * - Length comes from Compose markup and camera wiring, not complex logic.
+ * - Extracting pieces would add indirection/state plumbing with little gain.
+ * - Keeping it inline preserves cohesion and readability.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 fun ScannerScreen(
     onBarcodeDetected: (String) -> Unit,
@@ -114,8 +122,12 @@ fun ScannerScreen(
                             analysisUseCase,
                             capture
                         )
-                    } catch (e: Exception) {
-                        Log.e("ScannerScreen", "Camera bind failed", e)
+                    } catch (e: IllegalStateException) {
+                        Log.e("ScannerScreen", "Camera bind failed: illegal state", e)
+                    } catch (e: IllegalArgumentException) {
+                        Log.e("ScannerScreen", "Camera bind failed: invalid argument", e)
+                    } catch (e: SecurityException) {
+                        Log.e("ScannerScreen", "Camera bind failed: missing permission", e)
                     }
                 }, ContextCompat.getMainExecutor(ctx))
 
@@ -159,16 +171,14 @@ fun ScannerScreen(
                     val captureUseCase = imageCapture
                     if (captureUseCase == null) {
                         Log.w("ScannerScreen", "ImageCapture not ready")
-                        return@FloatingActionButton
-                    }
+                    } else {
+                        val photoFile = createTempImageFile(context.cacheDir)
+                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-                    val photoFile = createTempImageFile(context.cacheDir)
-                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-                    captureUseCase.takePicture(
-                        outputOptions,
-                        cameraExecutor,
-                        object : ImageCapture.OnImageSavedCallback {
+                        captureUseCase.takePicture(
+                            outputOptions,
+                            cameraExecutor,
+                            object : ImageCapture.OnImageSavedCallback {
                             override fun onError(exception: ImageCaptureException) {
                                 Log.e("ScannerScreen", "Photo capture failed: ${exception.message}", exception)
                                 try { photoFile.delete() } catch (_: Exception) {}
@@ -206,8 +216,9 @@ fun ScannerScreen(
                                     }
                                 }
                             }
-                        }
-                    )
+                            }
+                        )
+                    }
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

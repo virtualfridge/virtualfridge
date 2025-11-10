@@ -1,7 +1,6 @@
 package com.cpen321.usermanagement.ui.screens
 
 import Icon
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +33,14 @@ import com.cpen321.usermanagement.ui.viewmodels.MainUiState
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
+/*
+ * Rationale for suppression:
+ * - This composable wires UI state to multiple UI regions (content, sheets).
+ * - The length comes from Compose DSL and event wiring, not complex logic.
+ * - Extracting every block would add indirection and reduce cohesion/readability.
+ * - Keeping it inline preserves a clear, single place to understand screen behavior.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 fun MainScreen(
     mainViewModel: MainViewModel,
@@ -70,153 +77,255 @@ fun MainScreen(
     }
 
     MainContent(
-        mainUiState = mainUiState,
-        fridgeUiState = fridgeUiState,
-        snackBarHostState = snackBarHostState,
-        onProfileClick = onProfileClick,
-        showScanner = showScanner,
-        onScanRequested = { showScanner = true },
-        onBarcodeDetected = { barcode ->
-            showScanner = false
-            mainViewModel.handleScannedBarcode(barcode)
-        },
-        onScannerClose = { showScanner = false },
-        onSuccessMessageShown = {
-            mainViewModel.clearSuccessMessage()
-            fridgeViewModel.clearSuccessMessage()
-        },
-        onErrorMessageShown = {
-            mainViewModel.clearScanError()
-            fridgeViewModel.clearError()
-        },
-        onItemSelected = fridgeViewModel::toggleItemSelection,
-        onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
-        onItemRemove = fridgeViewModel::removeFoodItem,
-        onSortOptionChanged = fridgeViewModel::setSortOption,
-        onTestBarcodeClick = onTestBarcodeClick,
-        onRecipeButtonClick = {
-            if (fridgeUiState.selectedItems.isNotEmpty()) {
-                showRecipeSheet = true
-            }
-        },
-        onNotificationClick = {
-            mainViewModel.sendTestNotification()
-        }
+        state = MainContentState(
+            mainUiState = mainUiState,
+            fridgeUiState = fridgeUiState,
+            snackBarHostState = snackBarHostState,
+            showScanner = showScanner,
+        ),
+        actions = MainContentActions(
+            onProfileClick = onProfileClick,
+            onScanRequested = { showScanner = true },
+            onBarcodeDetected = { barcode ->
+                showScanner = false
+                mainViewModel.handleScannedBarcode(barcode)
+            },
+            onScannerClose = { showScanner = false },
+            onSuccessMessageShown = {
+                mainViewModel.clearSuccessMessage()
+                fridgeViewModel.clearSuccessMessage()
+            },
+            onErrorMessageShown = {
+                mainViewModel.clearScanError()
+                fridgeViewModel.clearError()
+            },
+            onItemSelected = fridgeViewModel::toggleItemSelection,
+            onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
+            onItemRemove = fridgeViewModel::removeFoodItem,
+            onSortOptionChanged = fridgeViewModel::setSortOption,
+            onTestBarcodeClick = onTestBarcodeClick,
+            onRecipeButtonClick = {
+                if (fridgeUiState.selectedItems.isNotEmpty()) {
+                    showRecipeSheet = true
+                }
+            },
+            onNotificationClick = { mainViewModel.sendTestNotification() },
+        )
     )
 
-    // Recipe Options Bottom Sheet
-    if (showRecipeSheet) {
-        RecipeOptionsBottomSheet(
+    MainRecipeSheets(
+        state = RecipeSheetsState(
+            showRecipeSheet = showRecipeSheet,
             sheetState = sheetState,
-            onDismiss = {
+            showRecipeResults = showRecipeResults,
+            resultsSheetState = resultsSheetState,
+            mainUiState = mainUiState,
+        ),
+        actions = RecipeSheetsActions(
+            onOptionsDismiss = {
                 showRecipeSheet = false
                 fridgeViewModel.hideRecipeOptions()
             },
             onMealDBRecipe = {
                 showRecipeSheet = false
                 fridgeViewModel.hideRecipeOptions()
-                // Get selected items and convert to ingredient names
                 val selectedItems = fridgeViewModel.getSelectedItemsData()
                 val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
                     fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
                 }
-                // Show results sheet immediately (will show loading state)
                 showRecipeResults = true
-                // Trigger MealDB recipe generation directly
                 mainViewModel.fetchRecipes(ingredientNames)
-                // Clear selection after generating
                 fridgeViewModel.clearSelection()
             },
             onAIRecipe = {
                 showRecipeSheet = false
                 fridgeViewModel.hideRecipeOptions()
-                // Get selected items and convert to ingredient names
                 val selectedItems = fridgeViewModel.getSelectedItemsData()
                 val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
                     fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
                 }
-                // Show results sheet immediately (will show loading state)
                 showRecipeResults = true
-                // Trigger AI recipe generation directly
                 mainViewModel.generateAiRecipe(ingredientNames)
-                // Clear selection after generating
                 fridgeViewModel.clearSelection()
-            }
-        )
-    }
-
-    // Recipe Results Bottom Sheet
-    if (showRecipeResults) {
-        RecipeResultsBottomSheet(
-            sheetState = resultsSheetState,
-            mainUiState = mainUiState,
-            onDismiss = {
+            },
+            onResultsDismiss = {
                 showRecipeResults = false
-                // Clear recipe data when dismissed
                 mainViewModel.clearRecipeError()
                 mainViewModel.clearAiError()
             }
         )
+    )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun MainRecipeSheets(
+    state: RecipeSheetsState,
+    actions: RecipeSheetsActions,
+) {
+    // Recipe Options Bottom Sheet
+    if (state.showRecipeSheet) {
+        RecipeOptionsBottomSheet(
+            sheetState = state.sheetState,
+            onDismiss = actions.onOptionsDismiss,
+            onMealDBRecipe = actions.onMealDBRecipe,
+            onAIRecipe = actions.onAIRecipe
+        )
+    }
+
+    // Recipe Results Bottom Sheet
+    if (state.showRecipeResults) {
+        RecipeResultsBottomSheet(
+            sheetState = state.resultsSheetState,
+            mainUiState = state.mainUiState,
+            onDismiss = actions.onResultsDismiss
+        )
+    }
+}
+
+private data class RecipeSheetsState @OptIn(ExperimentalMaterial3Api::class) constructor(
+    val showRecipeSheet: Boolean,
+    val sheetState: SheetState,
+    val showRecipeResults: Boolean,
+    val resultsSheetState: SheetState,
+    val mainUiState: MainUiState,
+)
+
+private data class RecipeSheetsActions(
+    val onOptionsDismiss: () -> Unit,
+    val onMealDBRecipe: () -> Unit,
+    val onAIRecipe: () -> Unit,
+    val onResultsDismiss: () -> Unit,
+)
+
+@Composable
+private fun SortOptionsRow(
+    sortOption: com.cpen321.usermanagement.ui.viewmodels.SortOption,
+    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val spacing = LocalSpacing.current
+    var showSortMenu by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = spacing.medium),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Sort by:",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium
+        )
+
+        Box {
+            Button(onClick = { showSortMenu = !showSortMenu }) {
+                Text(
+                    text = when (sortOption) {
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                    }
+                )
+            }
+
+            DropdownMenu(
+                expanded = showSortMenu,
+                onDismissRequest = { showSortMenu = false }
+            ) {
+                com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = when (option) {
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                                }
+                            )
+                        },
+                        onClick = {
+                            onSortOptionChanged(option)
+                            showSortMenu = false
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainContent(
-    mainUiState: MainUiState,
-    fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
-    snackBarHostState: SnackbarHostState,
-    onProfileClick: () -> Unit,
-    showScanner: Boolean,
-    onScanRequested: () -> Unit,
-    onBarcodeDetected: (String) -> Unit,
-    onScannerClose: () -> Unit,
-    onSuccessMessageShown: () -> Unit,
-    onErrorMessageShown: () -> Unit,
-    onItemSelected: (String) -> Unit,
-    onItemPercentChanged: (String, Int) -> Unit,
-    onItemRemove: (String) -> Unit,
-    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
-    onTestBarcodeClick: () -> Unit,
-    onRecipeButtonClick: () -> Unit,
-    onNotificationClick: () -> Unit,
+    state: MainContentState,
+    actions: MainContentActions,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { MainTopBar(onProfileClick = onProfileClick) },
+        topBar = { MainTopBar(onProfileClick = actions.onProfileClick) },
         snackbarHost = {
             MainSnackbarHost(
-                hostState = snackBarHostState,
-                successMessage = mainUiState.successMessage ?: fridgeUiState.successMessage,
-                errorMessage = mainUiState.scanError ?: fridgeUiState.errorMessage,
-                onSuccessMessageShown = onSuccessMessageShown,
-                onErrorMessageShown = onErrorMessageShown
+                hostState = state.snackBarHostState,
+                successMessage = state.mainUiState.successMessage ?: state.fridgeUiState.successMessage,
+                errorMessage = state.mainUiState.scanError ?: state.fridgeUiState.errorMessage,
+                onSuccessMessageShown = actions.onSuccessMessageShown,
+                onErrorMessageShown = actions.onErrorMessageShown
             )
         },
         bottomBar = {
             MainBottomBar(
-                hasSelectedItems = fridgeUiState.selectedItems.isNotEmpty(),
-                onScanClick = onScanRequested,
-                onTestBarcodeClick = onTestBarcodeClick,
-                onRecipeClick = onRecipeButtonClick,
-                onNotificationClick = onNotificationClick
+                hasSelectedItems = state.fridgeUiState.selectedItems.isNotEmpty(),
+                onScanClick = actions.onScanRequested,
+                onTestBarcodeClick = actions.onTestBarcodeClick,
+                onRecipeClick = actions.onRecipeButtonClick,
+                onNotificationClick = actions.onNotificationClick
             )
         }
     ) { paddingValues ->
         FridgeListBody(
             paddingValues = paddingValues,
-            showScanner = showScanner,
-            onBarcodeDetected = onBarcodeDetected,
-            onScannerClose = onScannerClose,
-            fridgeUiState = fridgeUiState,
-            onItemSelected = onItemSelected,
-            onItemPercentChanged = onItemPercentChanged,
-            onItemRemove = onItemRemove,
-            onSortOptionChanged = onSortOptionChanged
+            showScanner = state.showScanner,
+            fridgeUiState = state.fridgeUiState,
+            actions = FridgeListActions(
+                onBarcodeDetected = actions.onBarcodeDetected,
+                onScannerClose = actions.onScannerClose,
+                onItemSelected = actions.onItemSelected,
+                onItemPercentChanged = actions.onItemPercentChanged,
+                onItemRemove = actions.onItemRemove,
+                onSortOptionChanged = actions.onSortOptionChanged,
+            )
         )
     }
 }
+
+private data class MainContentState(
+    val mainUiState: MainUiState,
+    val fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    val snackBarHostState: SnackbarHostState,
+    val showScanner: Boolean,
+)
+
+private data class MainContentActions(
+    val onProfileClick: () -> Unit,
+    val onScanRequested: () -> Unit,
+    val onBarcodeDetected: (String) -> Unit,
+    val onScannerClose: () -> Unit,
+    val onSuccessMessageShown: () -> Unit,
+    val onErrorMessageShown: () -> Unit,
+    val onItemSelected: (String) -> Unit,
+    val onItemPercentChanged: (String, Int) -> Unit,
+    val onItemRemove: (String) -> Unit,
+    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    val onTestBarcodeClick: () -> Unit,
+    val onRecipeButtonClick: () -> Unit,
+    val onNotificationClick: () -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -287,17 +396,11 @@ private fun MainSnackbarHost(
 private fun FridgeListBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
-    onBarcodeDetected: (String) -> Unit,
-    onScannerClose: () -> Unit,
     fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
-    onItemSelected: (String) -> Unit,
-    onItemPercentChanged: (String, Int) -> Unit,
-    onItemRemove: (String) -> Unit,
-    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    actions: FridgeListActions,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    var showSortMenu by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -306,8 +409,8 @@ private fun FridgeListBody(
     ) {
         if (showScanner) {
             ScannerScreen(
-                onBarcodeDetected = onBarcodeDetected,
-                onClose = onScannerClose
+                onBarcodeDetected = actions.onBarcodeDetected,
+                onClose = actions.onScannerClose
             )
         } else {
             when {
@@ -323,68 +426,19 @@ private fun FridgeListBody(
                             .fillMaxSize()
                             .padding(horizontal = spacing.large)
                     ) {
-                        // Sort options row
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = spacing.medium),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Sort by:",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            Box {
-                                Button(
-                                    onClick = { showSortMenu = !showSortMenu }
-                                ) {
-                                    Text(
-                                        text = when (fridgeUiState.sortOption) {
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
-                                        }
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = showSortMenu,
-                                    onDismissRequest = { showSortMenu = false }
-                                ) {
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = when (option) {
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
-                                                    }
-                                                )
-                                            },
-                                            onClick = {
-                                                onSortOptionChanged(option)
-                                                showSortMenu = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        SortOptionsRow(
+                            sortOption = fridgeUiState.sortOption,
+                            onSortOptionChanged = actions.onSortOptionChanged,
+                        )
 
                         // Fridge items list
                         FridgeItemsList(
                             items = fridgeUiState.fridgeItems,
                             selectedItems = fridgeUiState.selectedItems,
                             isUpdating = fridgeUiState.isUpdating,
-                            onItemSelected = onItemSelected,
-                            onItemPercentChanged = onItemPercentChanged,
-                            onItemRemove = onItemRemove
+                            onItemSelected = actions.onItemSelected,
+                            onItemPercentChanged = actions.onItemPercentChanged,
+                            onItemRemove = actions.onItemRemove
                         )
                     }
                 }
@@ -392,6 +446,15 @@ private fun FridgeListBody(
         }
     }
 }
+
+private data class FridgeListActions(
+    val onBarcodeDetected: (String) -> Unit,
+    val onScannerClose: () -> Unit,
+    val onItemSelected: (String) -> Unit,
+    val onItemPercentChanged: (String, Int) -> Unit,
+    val onItemRemove: (String) -> Unit,
+    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+)
 
 @Composable
 private fun LoadingContent(
@@ -540,6 +603,16 @@ private fun SelectableFridgeItemCard(
     }
 }
 
+/*
+ * Rationale for suppression:
+ * - This composable renders a simple bottom action bar with four buttons.
+ * - The apparent length/complexity comes from verbose Compose DSL (markup-like UI code),
+ *   not from branching logic or algorithmic complexity.
+ * - Extracting each button into separate composables adds indirection and scatters tightly
+ *   related styling/enablement logic, making the code harder to scan as a cohesive unit.
+ * - Keeping it inline preserves readability and keeps all UI decisions in one place.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun MainBottomBar(
     hasSelectedItems: Boolean,
@@ -656,6 +729,14 @@ private fun MainBottomBar(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/*
+ * Rationale for suppression:
+ * - This bottom sheet presents two option cards and a header.
+ * - Its length comes from Compose UI markup and strings, not complex logic.
+ * - Splitting each visual block would add indirection and hurt cohesion of this small sheet.
+ * - Keeping it inline keeps the flow easy to scan and maintain.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun RecipeOptionsBottomSheet(
     sheetState: SheetState,
@@ -804,6 +885,16 @@ private fun RecipeOptionsBottomSheet(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+/*
+ * Rationale for suppression:
+ * - This bottom sheet composes several loading, error, and results sections.
+ * - The function reads long due to declarative UI markup (Compose) and string literals,
+ *   not complex control flow or algorithmic logic.
+ * - Extracting each visual block into separate composables would add indirection and
+ *   split tightly related UI context, reducing readability in practice.
+ * - Keeping it inline makes it easier to scan and maintain the cohesive UI state mapping.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun RecipeResultsBottomSheet(
     sheetState: SheetState,
@@ -869,9 +960,10 @@ private fun RecipeResultsBottomSheet(
             }
 
             // MealDB Results
-            if (!mainUiState.isFetchingRecipes && !mainUiState.isGeneratingAiRecipe &&
-                mainUiState.recipeSummaries.isEmpty() && mainUiState.aiRecipe == null &&
-                mainUiState.recipeError == null && mainUiState.aiError == null) {
+            val isIdle = !mainUiState.isFetchingRecipes && !mainUiState.isGeneratingAiRecipe
+            val hasNoResults = mainUiState.recipeSummaries.isEmpty() && mainUiState.aiRecipe == null
+            val hasNoErrors = mainUiState.recipeError == null && mainUiState.aiError == null
+            if (isIdle && hasNoResults && hasNoErrors) {
                 // Show "No Recipes Found" when done loading but no results
                 Card(
                     modifier = Modifier.fillMaxWidth(),

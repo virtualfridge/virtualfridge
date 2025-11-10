@@ -47,10 +47,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.data.remote.dto.Nutrients
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/*
+ * Rationale for suppression:
+ * - This card composes multiple presentational sections (header, slider, dialogs)
+ *   and uses Compose UI DSL extensively.
+ * - The length/complexity stems from markup and state wiring, not intricate logic.
+ * - Extracting every block would add indirection and split cohesive UI context.
+ * - Keeping it inline preserves readability for this component.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 fun FridgeItemCard(
     fridgeItem: FridgeItem,
@@ -456,11 +466,17 @@ private fun formatDate(dateString: String): String {
         val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
-    } catch (e: Exception) {
+    } catch (e: ParseException) {
+        // Return original string if parsing fails
+        dateString
+    } catch (e: IllegalArgumentException) {
         dateString // Return original string if parsing fails
     }
 }
 
+// refactoring into smaller helpers would be noisier and risks mangling emoji literals
+// supressed for that reason
+@Suppress("LongMethod", "ComplexMethod")
 private fun getFoodEmoji(foodName: String): String {
     val name = foodName.lowercase()
 
@@ -574,6 +590,14 @@ private fun getFoodEmoji(foodName: String): String {
     }
 }
 
+/*
+ * Rationale for suppression:
+ * - This dialog lays out static UI for a list of nutrient fields.
+ * - Its length comes from Compose UI markup and string literals, not complex logic.
+ * - Splitting the content further would add indirection without real readability gains.
+ * - Keeping it inline keeps the dialog cohesive and easy to scan.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun NutritionalFactsDialog(
     foodName: String,

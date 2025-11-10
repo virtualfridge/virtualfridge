@@ -292,13 +292,14 @@ class MainViewModel @Inject constructor(
 
     private fun formatIngredients(rawIngredients: List<String>): List<String> {
         return rawIngredients.mapNotNull { ingredient ->
-            val cleaned = ingredient.replace('_', ' ').trim()
-            if (cleaned.isEmpty()) return@mapNotNull null
-            cleaned
-                .lowercase()
-                .split(" ")
-                .filter { it.isNotBlank() }
-                .joinToString(" ") { part ->
+            ingredient
+                .replace('_', ' ')
+                .trim()
+                .takeIf { it.isNotEmpty() }
+                ?.lowercase()
+                ?.split(" ")
+                ?.filter { it.isNotBlank() }
+                ?.joinToString(" ") { part ->
                     part.replaceFirstChar { char ->
                         if (char.isLowerCase()) char.titlecase(Locale.getDefault())
                         else char.toString()

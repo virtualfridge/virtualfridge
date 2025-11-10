@@ -54,8 +54,8 @@ class FridgeRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while fetching fridge items", e)
             Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected error while fetching fridge items", e)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unexpected runtime error while fetching fridge items", e)
             Result.failure(e)
         }
     }
@@ -91,8 +91,8 @@ class FridgeRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while updating food item", e)
             Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected error while updating food item", e)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unexpected runtime error while updating food item", e)
             Result.failure(e)
         }
     }
@@ -124,8 +124,8 @@ class FridgeRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while deleting food item", e)
             Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Unexpected error while deleting food item", e)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unexpected runtime error while deleting food item", e)
             Result.failure(e)
         }
     }
@@ -149,7 +149,20 @@ class FridgeRepositoryImpl @Inject constructor(
                 val errorMessage = parseErrorMessage(errorBodyString, "Failed to send barcode.")
                 Result.failure(Exception(errorMessage))
             }
-        } catch (e: Exception) {
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Network timeout while sending barcode", e)
+            Result.failure(e)
+        } catch (e: UnknownHostException) {
+            Log.e(TAG, "Network connection failed while sending barcode", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Log.e(TAG, "IO error while sending barcode", e)
+            Result.failure(e)
+        } catch (e: HttpException) {
+            Log.e(TAG, "HTTP error while sending barcode", e)
+            Result.failure(e)
+        } catch (e: RuntimeException) {
+            Log.e(TAG, "Unexpected runtime error while sending barcode", e)
             Result.failure(e)
         }
     }
