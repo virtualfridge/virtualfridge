@@ -279,13 +279,15 @@ private fun MainContent(
         FridgeListBody(
             paddingValues = paddingValues,
             showScanner = state.showScanner,
-            onBarcodeDetected = actions.onBarcodeDetected,
-            onScannerClose = actions.onScannerClose,
             fridgeUiState = state.fridgeUiState,
-            onItemSelected = actions.onItemSelected,
-            onItemPercentChanged = actions.onItemPercentChanged,
-            onItemRemove = actions.onItemRemove,
-            onSortOptionChanged = actions.onSortOptionChanged
+            actions = FridgeListActions(
+                onBarcodeDetected = actions.onBarcodeDetected,
+                onScannerClose = actions.onScannerClose,
+                onItemSelected = actions.onItemSelected,
+                onItemPercentChanged = actions.onItemPercentChanged,
+                onItemRemove = actions.onItemRemove,
+                onSortOptionChanged = actions.onSortOptionChanged,
+            )
         )
     }
 }
@@ -382,13 +384,8 @@ private fun MainSnackbarHost(
 private fun FridgeListBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
-    onBarcodeDetected: (String) -> Unit,
-    onScannerClose: () -> Unit,
     fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
-    onItemSelected: (String) -> Unit,
-    onItemPercentChanged: (String, Int) -> Unit,
-    onItemRemove: (String) -> Unit,
-    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    actions: FridgeListActions,
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
@@ -400,8 +397,8 @@ private fun FridgeListBody(
     ) {
         if (showScanner) {
             ScannerScreen(
-                onBarcodeDetected = onBarcodeDetected,
-                onClose = onScannerClose
+                onBarcodeDetected = actions.onBarcodeDetected,
+                onClose = actions.onScannerClose
             )
         } else {
             when {
@@ -419,7 +416,7 @@ private fun FridgeListBody(
                     ) {
                         SortOptionsRow(
                             sortOption = fridgeUiState.sortOption,
-                            onSortOptionChanged = onSortOptionChanged,
+                            onSortOptionChanged = actions.onSortOptionChanged,
                         )
 
                         // Fridge items list
@@ -427,9 +424,9 @@ private fun FridgeListBody(
                             items = fridgeUiState.fridgeItems,
                             selectedItems = fridgeUiState.selectedItems,
                             isUpdating = fridgeUiState.isUpdating,
-                            onItemSelected = onItemSelected,
-                            onItemPercentChanged = onItemPercentChanged,
-                            onItemRemove = onItemRemove
+                            onItemSelected = actions.onItemSelected,
+                            onItemPercentChanged = actions.onItemPercentChanged,
+                            onItemRemove = actions.onItemRemove
                         )
                     }
                 }
@@ -437,6 +434,15 @@ private fun FridgeListBody(
         }
     }
 }
+
+private data class FridgeListActions(
+    val onBarcodeDetected: (String) -> Unit,
+    val onScannerClose: () -> Unit,
+    val onItemSelected: (String) -> Unit,
+    val onItemPercentChanged: (String, Int) -> Unit,
+    val onItemRemove: (String) -> Unit,
+    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+)
 
 @Composable
 private fun LoadingContent(
