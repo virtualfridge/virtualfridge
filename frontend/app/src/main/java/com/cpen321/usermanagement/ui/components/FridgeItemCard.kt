@@ -461,6 +461,9 @@ private fun formatDate(dateString: String): String {
     }
 }
 
+// refactoring into smaller helpers would be noisier and risks mangling emoji literals
+// supressed for that reason
+@Suppress("LongMethod", "ComplexMethod")
 private fun getFoodEmoji(foodName: String): String {
     val name = foodName.lowercase()
 
