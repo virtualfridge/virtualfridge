@@ -115,42 +115,46 @@ fun MainScreen(
     )
 
     MainRecipeSheets(
-        showRecipeSheet = showRecipeSheet,
-        onOptionsDismiss = {
-            showRecipeSheet = false
-            fridgeViewModel.hideRecipeOptions()
-        },
-        onMealDBRecipe = {
-            showRecipeSheet = false
-            fridgeViewModel.hideRecipeOptions()
-            val selectedItems = fridgeViewModel.getSelectedItemsData()
-            val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
-                fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
+        state = RecipeSheetsState(
+            showRecipeSheet = showRecipeSheet,
+            sheetState = sheetState,
+            showRecipeResults = showRecipeResults,
+            resultsSheetState = resultsSheetState,
+            mainUiState = mainUiState,
+        ),
+        actions = RecipeSheetsActions(
+            onOptionsDismiss = {
+                showRecipeSheet = false
+                fridgeViewModel.hideRecipeOptions()
+            },
+            onMealDBRecipe = {
+                showRecipeSheet = false
+                fridgeViewModel.hideRecipeOptions()
+                val selectedItems = fridgeViewModel.getSelectedItemsData()
+                val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
+                    fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
+                }
+                showRecipeResults = true
+                mainViewModel.fetchRecipes(ingredientNames)
+                fridgeViewModel.clearSelection()
+            },
+            onAIRecipe = {
+                showRecipeSheet = false
+                fridgeViewModel.hideRecipeOptions()
+                val selectedItems = fridgeViewModel.getSelectedItemsData()
+                val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
+                    fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
+                }
+                showRecipeResults = true
+                mainViewModel.generateAiRecipe(ingredientNames)
+                fridgeViewModel.clearSelection()
+            },
+            onResultsDismiss = {
+                showRecipeResults = false
+                mainViewModel.clearRecipeError()
+                mainViewModel.clearAiError()
             }
-            showRecipeResults = true
-            mainViewModel.fetchRecipes(ingredientNames)
-            fridgeViewModel.clearSelection()
-        },
-        onAIRecipe = {
-            showRecipeSheet = false
-            fridgeViewModel.hideRecipeOptions()
-            val selectedItems = fridgeViewModel.getSelectedItemsData()
-            val ingredientNames = selectedItems.mapNotNull { fridgeItem ->
-                fridgeItem.foodType.name?.lowercase()?.replace(" ", "_")
-            }
-            showRecipeResults = true
-            mainViewModel.generateAiRecipe(ingredientNames)
-            fridgeViewModel.clearSelection()
-        },
-        sheetState = sheetState,
-        showRecipeResults = showRecipeResults,
-        resultsSheetState = resultsSheetState,
-        mainUiState = mainUiState,
-        onResultsDismiss = {
-            showRecipeResults = false
-            mainViewModel.clearRecipeError()
-            mainViewModel.clearAiError()
-        }
+        )
     )
 }
 

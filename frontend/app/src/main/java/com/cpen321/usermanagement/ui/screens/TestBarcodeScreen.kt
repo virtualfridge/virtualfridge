@@ -142,6 +142,13 @@ private fun TestBarcodeContent(
     }
 }
 
+/*
+ * Rationale for suppression:
+ * - This block lays out static product details with Compose UI markup.
+ * - The length comes from repeated presentational rows, not complex logic.
+ * - Splitting further would add indirection with little readability gain here.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun TestBarcodeDetails(data: FridgeItem, modifier: Modifier = Modifier) {
     val foodItem = data.foodItem
