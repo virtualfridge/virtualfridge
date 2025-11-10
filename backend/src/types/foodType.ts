@@ -64,8 +64,6 @@ export const foodTypeSchema = z.object({
   allergens: z.array(z.string()),
 });
 
-export type FoodType = z.infer<typeof foodTypeSchema>;
-
 export interface IFoodType {
   _id: mongoose.Types.ObjectId;
   name: string;
@@ -98,6 +96,6 @@ export type DeleteFoodTypeParams = z.infer<typeof deleteFoodTypeSchema>;
 export interface FoodTypeResponse {
   message: string;
   data?: {
-    foodType: FoodType;
+    foodType: IFoodType;
   };
 }

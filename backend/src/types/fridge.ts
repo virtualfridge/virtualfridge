@@ -1,6 +1,6 @@
 import z from 'zod';
-import { FoodItem } from './foodItem';
-import { FoodType } from './foodType';
+import { IFoodItem } from './foodItem';
+import { IFoodType } from './foodType';
 
 export const barcodeRequestSchema = z.object({
   barcode: z.string().min(1, 'Barcode cannot be empty'),
@@ -9,8 +9,8 @@ export const barcodeRequestSchema = z.object({
 export type barcodeRequestBody = z.infer<typeof barcodeRequestSchema>;
 
 export interface FridgeItem {
-  foodItem: FoodItem;
-  foodType: FoodType;
+  foodItem: IFoodItem;
+  foodType: IFoodType;
 }
 
 export interface FridgeItemsResponse {

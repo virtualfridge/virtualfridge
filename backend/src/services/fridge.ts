@@ -9,7 +9,7 @@ import logger from '../util/logger';
 import { foodTypeModel } from '../models/foodType';
 import axios from 'axios';
 import { dateDiffInDays, parseDate } from '../util/dates';
-import { FoodType } from '../types/foodType';
+import { IFoodType } from '../types/foodType';
 export class FridgeService {
   async findAllFridgeItemsByUserId(
     req: Request,
@@ -111,7 +111,7 @@ export class FridgeService {
           calories = Math.round(nutriments.energy_100g / 4.184);
         }
 
-        let productData: Partial<FoodType> = {
+        let productData: Partial<IFoodType> = {
           name: product.product_name_en || product.product_name || null,
           brand: product.brands || null,
           image: product.image_url || null,
