@@ -8,6 +8,7 @@ env:
   JWT_SECRET: "fake-secret"
 jobs:
   test:
+    environment: test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,5 +25,13 @@ jobs:
         run: npm i
       - name: Start db
         run: docker compose up
+        env:
+          PORT: ${{vars.PORT}}
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
+          GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+          MONGODB_URI: ${{vars.MONGODB_URI}}
+          MONGODB_USER: ${{vars.MONGODB_USER}}
+          MONGODB_PASS: ${{secrets.MONGODB_PASS}}
+          GEMINI_API_KEY: ${{secrets.GEMINI_API_KEY}}
       - name: Run tests
         run: npm test
