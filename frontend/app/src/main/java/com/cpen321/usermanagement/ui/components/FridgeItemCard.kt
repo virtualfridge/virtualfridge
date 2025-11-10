@@ -581,6 +581,14 @@ private fun getFoodEmoji(foodName: String): String {
     }
 }
 
+/*
+ * Rationale for suppression:
+ * - This dialog lays out static UI for a list of nutrient fields.
+ * - Its length comes from Compose UI markup and string literals, not complex logic.
+ * - Splitting the content further would add indirection without real readability gains.
+ * - Keeping it inline keeps the dialog cohesive and easy to scan.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun NutritionalFactsDialog(
     foodName: String,
