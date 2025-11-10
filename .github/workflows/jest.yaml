@@ -24,7 +24,7 @@ jobs:
       - name: Install node modules
         run: npm i
       - name: Start db
-        run: docker compose up
+        run: docker compose up -d
         env:
           PORT: ${{vars.PORT}}
           JWT_SECRET: ${{secrets.JWT_SECRET}}
