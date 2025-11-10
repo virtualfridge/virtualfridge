@@ -540,6 +540,16 @@ private fun SelectableFridgeItemCard(
     }
 }
 
+/*
+ * Rationale for suppression:
+ * - This composable renders a simple bottom action bar with four buttons.
+ * - The apparent length/complexity comes from verbose Compose DSL (markup-like UI code),
+ *   not from branching logic or algorithmic complexity.
+ * - Extracting each button into separate composables adds indirection and scatters tightly
+ *   related styling/enablement logic, making the code harder to scan as a cohesive unit.
+ * - Keeping it inline preserves readability and keeps all UI decisions in one place.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 private fun MainBottomBar(
     hasSelectedItems: Boolean,
