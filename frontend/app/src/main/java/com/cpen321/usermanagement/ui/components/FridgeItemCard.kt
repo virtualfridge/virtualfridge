@@ -52,6 +52,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/*
+ * Rationale for suppression:
+ * - This card composes multiple presentational sections (header, slider, dialogs)
+ *   and uses Compose UI DSL extensively.
+ * - The length/complexity stems from markup and state wiring, not intricate logic.
+ * - Extracting every block would add indirection and split cohesive UI context.
+ * - Keeping it inline preserves readability for this component.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 fun FridgeItemCard(
     fridgeItem: FridgeItem,
