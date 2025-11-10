@@ -78,38 +78,40 @@ fun MainScreen(
     }
 
     MainContent(
-        mainUiState = mainUiState,
-        fridgeUiState = fridgeUiState,
-        snackBarHostState = snackBarHostState,
-        onProfileClick = onProfileClick,
-        showScanner = showScanner,
-        onScanRequested = { showScanner = true },
-        onBarcodeDetected = { barcode ->
-            showScanner = false
-            mainViewModel.handleScannedBarcode(barcode)
-        },
-        onScannerClose = { showScanner = false },
-        onSuccessMessageShown = {
-            mainViewModel.clearSuccessMessage()
-            fridgeViewModel.clearSuccessMessage()
-        },
-        onErrorMessageShown = {
-            mainViewModel.clearScanError()
-            fridgeViewModel.clearError()
-        },
-        onItemSelected = fridgeViewModel::toggleItemSelection,
-        onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
-        onItemRemove = fridgeViewModel::removeFoodItem,
-        onSortOptionChanged = fridgeViewModel::setSortOption,
-        onTestBarcodeClick = onTestBarcodeClick,
-        onRecipeButtonClick = {
-            if (fridgeUiState.selectedItems.isNotEmpty()) {
-                showRecipeSheet = true
-            }
-        },
-        onNotificationClick = {
-            mainViewModel.sendTestNotification()
-        }
+        state = MainContentState(
+            mainUiState = mainUiState,
+            fridgeUiState = fridgeUiState,
+            snackBarHostState = snackBarHostState,
+            showScanner = showScanner,
+        ),
+        actions = MainContentActions(
+            onProfileClick = onProfileClick,
+            onScanRequested = { showScanner = true },
+            onBarcodeDetected = { barcode ->
+                showScanner = false
+                mainViewModel.handleScannedBarcode(barcode)
+            },
+            onScannerClose = { showScanner = false },
+            onSuccessMessageShown = {
+                mainViewModel.clearSuccessMessage()
+                fridgeViewModel.clearSuccessMessage()
+            },
+            onErrorMessageShown = {
+                mainViewModel.clearScanError()
+                fridgeViewModel.clearError()
+            },
+            onItemSelected = fridgeViewModel::toggleItemSelection,
+            onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
+            onItemRemove = fridgeViewModel::removeFoodItem,
+            onSortOptionChanged = fridgeViewModel::setSortOption,
+            onTestBarcodeClick = onTestBarcodeClick,
+            onRecipeButtonClick = {
+                if (fridgeUiState.selectedItems.isNotEmpty()) {
+                    showRecipeSheet = true
+                }
+            },
+            onNotificationClick = { mainViewModel.sendTestNotification() },
+        )
     )
 
     MainRecipeSheets(
@@ -248,60 +250,68 @@ private fun SortOptionsRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainContent(
-    mainUiState: MainUiState,
-    fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
-    snackBarHostState: SnackbarHostState,
-    onProfileClick: () -> Unit,
-    showScanner: Boolean,
-    onScanRequested: () -> Unit,
-    onBarcodeDetected: (String) -> Unit,
-    onScannerClose: () -> Unit,
-    onSuccessMessageShown: () -> Unit,
-    onErrorMessageShown: () -> Unit,
-    onItemSelected: (String) -> Unit,
-    onItemPercentChanged: (String, Int) -> Unit,
-    onItemRemove: (String) -> Unit,
-    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
-    onTestBarcodeClick: () -> Unit,
-    onRecipeButtonClick: () -> Unit,
-    onNotificationClick: () -> Unit,
+    state: MainContentState,
+    actions: MainContentActions,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { MainTopBar(onProfileClick = onProfileClick) },
+        topBar = { MainTopBar(onProfileClick = actions.onProfileClick) },
         snackbarHost = {
             MainSnackbarHost(
-                hostState = snackBarHostState,
-                successMessage = mainUiState.successMessage ?: fridgeUiState.successMessage,
-                errorMessage = mainUiState.scanError ?: fridgeUiState.errorMessage,
-                onSuccessMessageShown = onSuccessMessageShown,
-                onErrorMessageShown = onErrorMessageShown
+                hostState = state.snackBarHostState,
+                successMessage = state.mainUiState.successMessage ?: state.fridgeUiState.successMessage,
+                errorMessage = state.mainUiState.scanError ?: state.fridgeUiState.errorMessage,
+                onSuccessMessageShown = actions.onSuccessMessageShown,
+                onErrorMessageShown = actions.onErrorMessageShown
             )
         },
         bottomBar = {
             MainBottomBar(
-                hasSelectedItems = fridgeUiState.selectedItems.isNotEmpty(),
-                onScanClick = onScanRequested,
-                onTestBarcodeClick = onTestBarcodeClick,
-                onRecipeClick = onRecipeButtonClick,
-                onNotificationClick = onNotificationClick
+                hasSelectedItems = state.fridgeUiState.selectedItems.isNotEmpty(),
+                onScanClick = actions.onScanRequested,
+                onTestBarcodeClick = actions.onTestBarcodeClick,
+                onRecipeClick = actions.onRecipeButtonClick,
+                onNotificationClick = actions.onNotificationClick
             )
         }
     ) { paddingValues ->
         FridgeListBody(
             paddingValues = paddingValues,
-            showScanner = showScanner,
-            onBarcodeDetected = onBarcodeDetected,
-            onScannerClose = onScannerClose,
-            fridgeUiState = fridgeUiState,
-            onItemSelected = onItemSelected,
-            onItemPercentChanged = onItemPercentChanged,
-            onItemRemove = onItemRemove,
-            onSortOptionChanged = onSortOptionChanged
+            showScanner = state.showScanner,
+            onBarcodeDetected = actions.onBarcodeDetected,
+            onScannerClose = actions.onScannerClose,
+            fridgeUiState = state.fridgeUiState,
+            onItemSelected = actions.onItemSelected,
+            onItemPercentChanged = actions.onItemPercentChanged,
+            onItemRemove = actions.onItemRemove,
+            onSortOptionChanged = actions.onSortOptionChanged
         )
     }
 }
+
+private data class MainContentState(
+    val mainUiState: MainUiState,
+    val fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    val snackBarHostState: SnackbarHostState,
+    val showScanner: Boolean,
+)
+
+private data class MainContentActions(
+    val onProfileClick: () -> Unit,
+    val onScanRequested: () -> Unit,
+    val onBarcodeDetected: (String) -> Unit,
+    val onScannerClose: () -> Unit,
+    val onSuccessMessageShown: () -> Unit,
+    val onErrorMessageShown: () -> Unit,
+    val onItemSelected: (String) -> Unit,
+    val onItemPercentChanged: (String, Int) -> Unit,
+    val onItemRemove: (String) -> Unit,
+    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    val onTestBarcodeClick: () -> Unit,
+    val onRecipeButtonClick: () -> Unit,
+    val onNotificationClick: () -> Unit,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
