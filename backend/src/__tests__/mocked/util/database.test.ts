@@ -169,8 +169,9 @@ describe('database utility', () => {
 
       await connectDB();
 
-      // Should still attempt to connect with undefined values
-      expect(mockedMongoose.connect).toHaveBeenCalled();
+      // Should throw error and not attempt to connect with undefined values
+      expect(mockedMongoose.connect).not.toHaveBeenCalled();
+      expect(process.exitCode).toBe(1);
     });
 
     test('should handle network timeout errors', async () => {

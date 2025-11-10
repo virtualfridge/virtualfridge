@@ -187,8 +187,8 @@ describe('FoodType Controller Integration Tests', () => {
         .send(updates)
         .expect(200);
 
-      expect(response.body.name).toBe(updates.name);
-      expect(response.body.shelfLifeDays).toBe(updates.shelfLifeDays);
+      expect(response.body.data.foodType.name).toBe(updates.name);
+      expect(response.body.data.foodType.shelfLifeDays).toBe(updates.shelfLifeDays);
     });
 
     test('should return 404 for non-existent food type', async () => {

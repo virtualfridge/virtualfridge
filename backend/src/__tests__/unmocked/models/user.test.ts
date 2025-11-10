@@ -9,6 +9,8 @@ describe('UserModel', () => {
   beforeAll(async () => {
     await dbHandler.connect();
     userModel = new UserModel();
+    // Ensure indexes are created before tests run
+    await userModel.user.createIndexes();
   });
 
   afterEach(async () => {

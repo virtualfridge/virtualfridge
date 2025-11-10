@@ -10,7 +10,16 @@ export const authenticateToken: RequestHandler = async (
 ) => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authHeader?.split(' ')[1];
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({
+        error: 'Access denied',
+        message: 'No token provided',
+      });
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
 
     if (!token) {
       res.status(401).json({
