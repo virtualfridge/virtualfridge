@@ -71,8 +71,10 @@ fun RecipeScreen(
             onIngredientSelectionChanged = { key, selected ->
                 mainViewModel.setIngredientSelection(key, selected)
             },
-            onGenerateMealDb = { mainViewModel.fetchRecipes() },
-            onGenerateAi = { mainViewModel.generateAiRecipe() },
+            generateActions = GenerateActions(
+                onMealDb = { mainViewModel.fetchRecipes() },
+                onAi = { mainViewModel.generateAiRecipe() }
+            ),
             onShowRawJsonChange = { showRawJson = it },
             showRawJson = showRawJson,
         )
@@ -106,14 +108,18 @@ private fun RecipeTopBar(
     )
 }
 
+private data class GenerateActions(
+    val onMealDb: () -> Unit,
+    val onAi: () -> Unit,
+)
+
 @Composable
 private fun RecipeScreenContent(
     paddingValues: PaddingValues,
     uiState: MainUiState,
     ingredientOptions: List<IngredientOption>,
     onIngredientSelectionChanged: (String, Boolean) -> Unit,
-    onGenerateMealDb: () -> Unit,
-    onGenerateAi: () -> Unit,
+    generateActions: GenerateActions,
     onShowRawJsonChange: (Boolean) -> Unit,
     showRawJson: Boolean,
     modifier: Modifier = Modifier
@@ -141,8 +147,8 @@ private fun RecipeScreenContent(
 
         ActionButtonsSection(
             uiState = uiState,
-            onGenerateMealDb = onGenerateMealDb,
-            onGenerateAi = onGenerateAi
+            onGenerateMealDb = generateActions.onMealDb,
+            onGenerateAi = generateActions.onAi
         )
 
         uiState.recipeError?.let { error ->
