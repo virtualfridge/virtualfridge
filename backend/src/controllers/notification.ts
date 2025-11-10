@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import logger from '../util/logger';
 import { notificationService } from '../services/notification';
 import { foodItemModel } from '../models/foodItem';
@@ -6,7 +6,7 @@ import { foodTypeModel } from '../models/foodType';
 import { ExpiringItem, ExpiringItemResponse } from '../types/notifications';
 
 export class NotificationController {
-  sendTestNotification = async (
+  sendTestNotification: RequestHandler = async (
     req: Request,
     res: Response<ExpiringItemResponse>,
     next: NextFunction
