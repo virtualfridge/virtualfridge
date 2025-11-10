@@ -277,25 +277,23 @@ Below is what the expected output should be, where you can see the minimum, medi
 
 ### 5.1. Commit Hash Where Codacy Ran
 
-`[Insert Commit SHA here]`
+`65ed7f775bd9e57ad305cfe426c20ae9ea81bfb8`
 
 ### 5.2. Unfixed Issues per Codacy Category
 
-_(Placeholder for screenshots of Codacy's Category Breakdown table in Overview)_
+https://app.codacy.com/gh/virtualfridge/virtualfridge/dashboard
 
 ### 5.3. Unfixed Issues per Codacy Code Pattern
 
-_(Placeholder for screenshots of Codacy's Issues page)_
+https://app.codacy.com/gh/virtualfridge/virtualfridge/issues/current
 
 ### 5.4. Justifications for Unfixed Issues
 
-- **Code Pattern: [Usage of Deprecated Modules](#)**
+- **Code Pattern: [Disallow Unsafe Argument Usage](#)**
 
-  1. **Issue**
+  - **Location in Git:** [`backend/src`](#) (throughout)
+  - **Justification:** Eslint, with the current configuration, does not detect types provided by libraries. So every instance of a type provided/inferred by zod (and occasionally other libraries) is considered `any` when really it should be a strongly typed value. Furthermore, in any of the indicated cases it is easy to verify in vscode or another editor that the specified type is correct.
 
-     - **Location in Git:** [`src/services/chatService.js#L31`](#)
-     - **Justification:** ...
-
-  2. ...
-
-- ...
+- Code Pattern: **[Enforce Unbound Methods Are Called With Their Expected Scope](#)**
+  - **Location in Git**: [`backend/src/routes`](#)
+  - **Justification:** These issues are still appearing in codacy. However, the functions are all arrow functions so it should not be an issue (as per the recommended resolution steps that codacy provides).
