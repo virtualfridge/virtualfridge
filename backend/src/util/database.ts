@@ -2,9 +2,18 @@ import mongoose from 'mongoose';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const uri = process.env.MONGODB_URI!;
-    const user = process.env.MONGODB_USER!;
-    const pass = process.env.MONGODB_PASS!;
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+      throw new Error('MONGODB_URI not set');
+    }
+    const user = process.env.MONGODB_USER;
+    if (!user) {
+      throw new Error('MONGODB_USER not set');
+    }
+    const pass = process.env.MONGODB_PASS;
+    if (!pass) {
+      throw new Error('MONGODB_PASS not set');
+    }
 
     await mongoose.connect(uri, {
       auth: {
