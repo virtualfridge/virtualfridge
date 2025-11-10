@@ -11,11 +11,11 @@ import logger from '../util/logger';
 
 export class FoodItemController {
   // TODO: use user field instead of relying on the fronted to be well-behaved and send their own userId in the foodItem
-  async createFoodItem(
+  createFoodItem = async (
     req: Request<unknown, unknown, CreateFoodItemBody>,
     res: Response<FoodItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const foodItem = await foodItemModel.create(req.body);
       res.status(200).json({
@@ -33,13 +33,13 @@ export class FoodItemController {
 
       next(error);
     }
-  }
+  };
 
-  async updateFoodItem(
+  updateFoodItem = async (
     req: Request<unknown, unknown, UpdateFoodItemBody>,
     res: Response<FoodItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const newFoodItem = req.body;
 
@@ -69,13 +69,13 @@ export class FoodItemController {
 
       next(error);
     }
-  }
+  };
 
-  async findFoodItemById(
+  findFoodItemById = async (
     req: Request<FindFoodItemByIdParams>,
     res: Response<FoodItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       const { _id } = req.params;
 
@@ -105,13 +105,13 @@ export class FoodItemController {
 
       next(error);
     }
-  }
+  };
 
-  async deleteFoodItem(
+  deleteFoodItem = async (
     req: Request<DeleteFoodItemParams>,
     res: Response<FoodItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       req;
       const { _id } = req.params;
@@ -142,5 +142,5 @@ export class FoodItemController {
 
       next(error);
     }
-  }
+  };
 }

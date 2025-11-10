@@ -5,11 +5,11 @@ import logger from '../util/logger';
 import { GetAllHobbiesResponse } from '../types/hobby';
 
 export class HobbyController {
-  getAllHobbies(
+  getAllHobbies = (
     req: Request,
     res: Response<GetAllHobbiesResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       res.status(200).json({
         message: 'All hobbies fetched successfully',
@@ -26,5 +26,5 @@ export class HobbyController {
 
       next(error);
     }
-  }
+  };
 }

@@ -70,7 +70,7 @@ export interface IFoodType {
   _id: mongoose.Types.ObjectId;
   name: string;
   nutrients?: INutrients;
-  shelfLifeDays?: string;
+  shelfLifeDays?: number;
   barcodeId?: string;
   brand?: string;
   image?: string;

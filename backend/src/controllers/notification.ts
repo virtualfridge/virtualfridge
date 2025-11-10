@@ -6,11 +6,11 @@ import { foodTypeModel } from '../models/foodType';
 import { ExpiringItem, ExpiringItemResponse } from '../types/notifications';
 
 export class NotificationController {
-  async sendTestNotification(
+  sendTestNotification = async (
     req: Request,
     res: Response<ExpiringItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (!req.user) {
         logger.error(
@@ -100,5 +100,5 @@ export class NotificationController {
 
       next(error);
     }
-  }
+  };
 }
