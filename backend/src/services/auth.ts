@@ -48,9 +48,11 @@ export class AuthService {
   }
 
   private generateAccessToken(user: IUser): string {
-    return jwt.sign({ id: user._id }, this.jwtSecret, {
+    const token: string = jwt.sign({ id: user._id }, this.jwtSecret, {
       expiresIn: '19h',
     });
+
+    return token;
   }
 
   async signUpWithGoogle(idToken: string): Promise<AuthResult> {
