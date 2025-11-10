@@ -1,0 +1,37 @@
+name: jest
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  JWT_SECRET: "fake-secret"
+jobs:
+  test:
+    environment: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache-dependency-path: ./backend/package-lock.json
+          cache: "npm"
+      - name: Install node modules
+        run: npm i
+      - name: Start db
+        run: docker compose up -d
+        env:
+          PORT: ${{vars.PORT}}
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
+          GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+          MONGODB_URI: ${{vars.MONGODB_URI}}
+          MONGODB_USER: ${{vars.MONGODB_USER}}
+          MONGODB_PASS: ${{secrets.MONGODB_PASS}}
+          GEMINI_API_KEY: ${{secrets.GEMINI_API_KEY}}
+      - name: Run tests
+        run: npm test

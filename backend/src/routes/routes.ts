@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { authenticateToken } from '../middleware/auth';
 import authRoutes from './auth';
+import testAuthRoutes from './test-auth';
 import hobbiesRoutes from './hobbies';
 import mediaRoutes from './media';
 import usersRoutes from './user';
@@ -14,6 +15,7 @@ import fridgeRoutes from './fridge';
 const router = Router();
 
 router.use('/auth', authRoutes);
+router.use('/test-auth', testAuthRoutes); // Test-only endpoint for E2E tests
 
 router.use('/hobbies', authenticateToken, hobbiesRoutes);
 

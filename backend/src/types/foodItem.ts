@@ -8,7 +8,7 @@ export const foodItemSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
   userId: z.custom<mongoose.Types.ObjectId>(),
   typeId: z.custom<mongoose.Types.ObjectId>(),
-  expirationDate: z.date().optional(),
+  expirationDate: z.coerce.date().optional(),
   percentLeft: z.number().min(0).max(100),
 });
 
@@ -22,7 +22,6 @@ export interface IFoodItem {
 
 export const createFoodItemSchema = foodItemSchema.omit({
   _id: true,
-  typeId: true,
 });
 
 export const updateFoodItemSchema = foodItemSchema

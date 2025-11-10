@@ -8,6 +8,11 @@ const router = Router();
 const authController = new AuthController();
 
 router.post(
+  '/google',
+  authController.googleAuth.bind(authController)
+);
+
+router.post(
   '/signup',
   validateBody<AuthenticateUserRequest>(authenticateUserSchema),
   authController.signUp
