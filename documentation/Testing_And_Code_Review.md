@@ -40,7 +40,7 @@
 
 #### 2.1.2. Commit Hash Where Tests Run
 
-`f31e08b869aac335ab459518474b78d0b8ac69b3`
+`65ed7f775bd9e57ad305cfe426c20ae9ea81bfb8`
 
 #### 2.1.3. Explanation on How to Run the Tests
 
