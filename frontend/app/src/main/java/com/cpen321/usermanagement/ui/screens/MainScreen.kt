@@ -184,6 +184,67 @@ private fun MainRecipeSheets(
     }
 }
 
+@Composable
+private fun SortOptionsRow(
+    sortOption: com.cpen321.usermanagement.ui.viewmodels.SortOption,
+    onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val spacing = LocalSpacing.current
+    var showSortMenu by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = spacing.medium),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Sort by:",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium
+        )
+
+        Box {
+            Button(onClick = { showSortMenu = !showSortMenu }) {
+                Text(
+                    text = when (sortOption) {
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                    }
+                )
+            }
+
+            DropdownMenu(
+                expanded = showSortMenu,
+                onDismissRequest = { showSortMenu = false }
+            ) {
+                com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = when (option) {
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                                }
+                            )
+                        },
+                        onClick = {
+                            onSortOptionChanged(option)
+                            showSortMenu = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainContent(
@@ -321,7 +382,6 @@ private fun FridgeListBody(
     modifier: Modifier = Modifier
 ) {
     val spacing = LocalSpacing.current
-    var showSortMenu by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -347,59 +407,10 @@ private fun FridgeListBody(
                             .fillMaxSize()
                             .padding(horizontal = spacing.large)
                     ) {
-                        // Sort options row
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = spacing.medium),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "Sort by:",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            Box {
-                                Button(
-                                    onClick = { showSortMenu = !showSortMenu }
-                                ) {
-                                    Text(
-                                        text = when (fridgeUiState.sortOption) {
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                            com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
-                                        }
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = showSortMenu,
-                                    onDismissRequest = { showSortMenu = false }
-                                ) {
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = when (option) {
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
-                                                    }
-                                                )
-                                            },
-                                            onClick = {
-                                                onSortOptionChanged(option)
-                                                showSortMenu = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        SortOptionsRow(
+                            sortOption = fridgeUiState.sortOption,
+                            onSortOptionChanged = onSortOptionChanged,
+                        )
 
                         // Fridge items list
                         FridgeItemsList(
