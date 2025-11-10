@@ -30,6 +30,7 @@ import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -257,7 +258,9 @@ private fun formatDate(dateString: String): String {
         val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         val date = inputFormat.parse(dateString)
         outputFormat.format(date ?: Date())
-    } catch (e: Exception) {
+    } catch (e: ParseException) {
+        dateString
+    } catch (e: IllegalArgumentException) {
         dateString // Return original string if parsing fails
     }
 }
