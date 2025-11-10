@@ -53,6 +53,14 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 
+/*
+ * Rationale for suppression:
+ * - This composable wires CameraX setup, image analysis, and UI overlays.
+ * - Length comes from Compose markup and camera wiring, not complex logic.
+ * - Extracting pieces would add indirection/state plumbing with little gain.
+ * - Keeping it inline preserves cohesion and readability.
+ */
+@Suppress("LongMethod", "ComplexMethod")
 @Composable
 fun ScannerScreen(
     onBarcodeDetected: (String) -> Unit,
