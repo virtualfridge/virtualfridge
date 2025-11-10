@@ -30,6 +30,28 @@ export const nutrientsSchema = z.object({
 });
 
 export type Nutrients = z.infer<typeof nutrientsSchema>;
+export interface INutrients {
+  calories?: string;
+  energyKj?: string;
+  protein?: string;
+  fat?: string;
+  saturatedFat?: string;
+  transFat?: string;
+  monounsaturatedFat?: string;
+  polyunsaturatedFat?: string;
+  cholesterol?: string;
+  salt?: string;
+  sodium?: string;
+  carbohydrates?: string;
+  fiber?: string;
+  sugars?: string;
+  calcium?: string;
+  iron?: string;
+  magnesium?: string;
+  zinc?: string;
+  potassium?: string;
+  caffeine?: string;
+}
 
 export const foodTypeSchema = z.object({
   _id: z.custom<mongoose.Types.ObjectId>(),
@@ -43,6 +65,17 @@ export const foodTypeSchema = z.object({
 });
 
 export type FoodType = z.infer<typeof foodTypeSchema>;
+
+export interface IFoodType {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  nutrients?: INutrients;
+  shelfLifeDays?: string;
+  barcodeId?: string;
+  brand?: string;
+  image?: string;
+  allergens: string[];
+}
 
 export const createFoodTypeSchema = foodTypeSchema.omit({
   _id: true,

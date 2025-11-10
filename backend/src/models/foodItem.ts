@@ -1,11 +1,11 @@
 import mongoose, { Schema } from 'mongoose';
-import { FoodItem } from '../types/foodItem';
+import { IFoodItem } from '../types/foodItem';
 import logger from '../util/logger';
 import { foodTypeModel } from './foodType';
-import { FoodType } from '../types/foodType';
+import { IFoodType } from '../types/foodType';
 
 // TODO: move nutritional info to the food type definition only and as SSOT
-const foodItemSchema = new Schema<FoodItem>({
+const foodItemSchema = new Schema<IFoodItem>({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   typeId: { type: mongoose.Schema.Types.ObjectId, required: true },
   expirationDate: { type: Date, required: false },
@@ -13,13 +13,13 @@ const foodItemSchema = new Schema<FoodItem>({
 });
 
 export class FoodItemModel {
-  private foodItem: mongoose.Model<FoodItem>;
+  private foodItem: mongoose.Model<IFoodItem>;
 
   constructor() {
-    this.foodItem = mongoose.model<FoodItem>('FoodItem', foodItemSchema);
+    this.foodItem = mongoose.model<IFoodItem>('FoodItem', foodItemSchema);
   }
 
-  async create(foodItem: Partial<FoodItem>): Promise<FoodItem> {
+  async create(foodItem: Partial<IFoodItem>): Promise<IFoodItem> {
     try {
       return await this.foodItem.create(foodItem);
     } catch (error) {
@@ -29,8 +29,8 @@ export class FoodItemModel {
   }
   async update(
     foodItemId: mongoose.Types.ObjectId,
-    foodItem: Partial<FoodItem>
-  ): Promise<FoodItem | null> {
+    foodItem: Partial<IFoodItem>
+  ): Promise<IFoodItem | null> {
     try {
       const updatedFoodItem = await this.foodItem.findByIdAndUpdate(
         foodItemId,
@@ -45,7 +45,7 @@ export class FoodItemModel {
       throw new Error('Failed to update foodItem');
     }
   }
-  async delete(foodItemId: mongoose.Types.ObjectId): Promise<FoodItem | null> {
+  async delete(foodItemId: mongoose.Types.ObjectId): Promise<IFoodItem | null> {
     try {
       const foodItem = await this.foodItem.findByIdAndDelete(foodItemId);
       return foodItem;
@@ -56,7 +56,7 @@ export class FoodItemModel {
   }
   async findById(
     foodItemId: mongoose.Types.ObjectId
-  ): Promise<FoodItem | null> {
+  ): Promise<IFoodItem | null> {
     try {
       const foodItem = await this.foodItem.findById(foodItemId);
       return foodItem;
@@ -68,7 +68,7 @@ export class FoodItemModel {
 
   async findByUserId(
     userId: mongoose.Types.ObjectId
-  ): Promise<FoodItem | null> {
+  ): Promise<IFoodItem | null> {
     try {
       const foodItem = await this.foodItem.findOne({ userId });
       return foodItem;
@@ -78,7 +78,7 @@ export class FoodItemModel {
     }
   }
 
-  async findAllByUserId(userId: mongoose.Types.ObjectId): Promise<FoodItem[]> {
+  async findAllByUserId(userId: mongoose.Types.ObjectId): Promise<IFoodItem[]> {
     try {
       const foodItems = await this.foodItem.find({ userId });
       return foodItems;
@@ -88,7 +88,7 @@ export class FoodItemModel {
     }
   }
 
-  async getAssociatedFoodType(foodItem: FoodItem): Promise<FoodType> {
+  async getAssociatedFoodType(foodItem: IFoodItem): Promise<IFoodType> {
     try {
       const foodType = await foodTypeModel.findById(foodItem.typeId);
       if (foodType) {

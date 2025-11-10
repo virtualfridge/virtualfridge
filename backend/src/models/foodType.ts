@@ -1,9 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
-import { FoodType, Nutrients } from '../types/foodType';
+import { IFoodType, INutrients } from '../types/foodType';
 import logger from '../util/logger';
 
 // Always per 100g of source item
-const nutrientsOpts = new Schema<Nutrients>({
+const nutrientsOpts = new Schema<INutrients>({
   calories: { type: String, required: false },
   energyKj: { type: String, required: false },
   protein: { type: String, required: false },
@@ -23,7 +23,7 @@ const nutrientsOpts = new Schema<Nutrients>({
   potassium: { type: String, required: false },
 });
 
-const foodTypeSchema = new Schema<FoodType>({
+const foodTypeSchema = new Schema<IFoodType>({
   name: { type: String, required: true },
   nutrients: { type: nutrientsOpts, required: false },
   shelfLifeDays: { type: Number, required: false },
@@ -31,13 +31,13 @@ const foodTypeSchema = new Schema<FoodType>({
 });
 
 export class FoodTypeModel {
-  private foodType: mongoose.Model<FoodType>;
+  private foodType: mongoose.Model<IFoodType>;
 
   constructor() {
-    this.foodType = mongoose.model<FoodType>('FoodType', foodTypeSchema);
+    this.foodType = mongoose.model<IFoodType>('FoodType', foodTypeSchema);
   }
 
-  async create(foodType: Partial<FoodType>): Promise<FoodType> {
+  async create(foodType: Partial<IFoodType>): Promise<IFoodType> {
     try {
       return await this.foodType.create(foodType);
     } catch (error) {
@@ -47,8 +47,8 @@ export class FoodTypeModel {
   }
   async update(
     foodTypeId: mongoose.Types.ObjectId,
-    foodType: Partial<FoodType>
-  ): Promise<FoodType | null> {
+    foodType: Partial<IFoodType>
+  ): Promise<IFoodType | null> {
     try {
       const updatedFoodType = await this.foodType.findByIdAndUpdate(
         foodTypeId,
@@ -63,7 +63,7 @@ export class FoodTypeModel {
       throw new Error('Failed to update foodType');
     }
   }
-  async delete(foodTypeId: mongoose.Types.ObjectId): Promise<FoodType | null> {
+  async delete(foodTypeId: mongoose.Types.ObjectId): Promise<IFoodType | null> {
     try {
       const foodType = await this.foodType.findByIdAndDelete(foodTypeId);
       return foodType;
@@ -74,7 +74,7 @@ export class FoodTypeModel {
   }
   async findById(
     foodTypeId: mongoose.Types.ObjectId
-  ): Promise<FoodType | null> {
+  ): Promise<IFoodType | null> {
     try {
       const foodType = await this.foodType.findById(foodTypeId);
       return foodType;
@@ -84,7 +84,7 @@ export class FoodTypeModel {
     }
   }
 
-  async findByBarcode(barcodeId: string): Promise<FoodType | null> {
+  async findByBarcode(barcodeId: string): Promise<IFoodType | null> {
     try {
       const foodType = await this.foodType.findOne({ barcodeId });
       return foodType;
@@ -94,7 +94,7 @@ export class FoodTypeModel {
     }
   }
 
-  async findByName(name: string): Promise<FoodType | null> {
+  async findByName(name: string): Promise<IFoodType | null> {
     try {
       const foodType = await this.foodType.findOne({ name });
       return foodType;
