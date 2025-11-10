@@ -205,8 +205,8 @@ class AuthViewModel @Inject constructor(
                     .onFailure { error ->
                         Log.e(TAG, "Failed to register FCM token", error)
                     }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error registering FCM token", e)
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Unexpected runtime error while registering FCM token", e)
             }
         }
     }
