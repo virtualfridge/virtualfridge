@@ -3,58 +3,87 @@ title Use Case 4: Generate Recipe Suggestions
 
 actor User
 participant "Frontend\n(Android)" as Frontend
-participant "Backend\n(Express)" as Backend
+participant "RecipeController" as Controller
+participant "RecipeService" as RecipeService
 participant "TheMealDB API" as MealDB
+participant "AiRecipeService" as AiRecipe
 participant "Gemini API" as Gemini
-database "MongoDB" as DB
 
-User -> Frontend: Selects items from fridge
-Frontend --> User: Show selected items
+User -> Frontend: Selects items from fridge\n(e.g., apple, chicken, rice)
+activate Frontend
+Frontend --> User: Show selected items highlighted
 User -> Frontend: Clicks "Find Recipes"\nin bottom corner
 
 == Recipe Via API (Default) ==
-Frontend -> Backend: GET /api/recipes?ingredients=apple,chicken,rice
+Frontend -> Controller: GET /api/recipes?ingredients=apple,chicken,rice\n(Authorization: Bearer <JWT>)
+activate Controller
 
-Backend -> DB: FoodItem.findAllByUserId(userId)
-DB --> Backend: User's fridge items
+Controller -> Controller: Parse query params\ningredients = ["apple", "chicken", "rice"]
 
-loop For each ingredient
-    Backend -> MealDB: GET /api/json/v1/1/filter.php?i={ingredient}
-    MealDB --> Backend: Array of meals with ingredient
+Controller -> RecipeService: fetchRecipesFromMealDB(ingredients)
+activate RecipeService
+
+loop For each selected ingredient
+    RecipeService -> MealDB: GET /api/json/v1/1/filter.php?i={ingredient}
+    activate MealDB
+    MealDB --> RecipeService: JSON response\n{meals: [{idMeal, strMeal, strMealThumb}]}
+    deactivate MealDB
 end
 
-Backend -> Backend: Aggregate and filter recipes\nby matching ingredients
+RecipeService -> RecipeService: Aggregate recipes\nFilter by matching ≥2 ingredients\nLimit to top 3 recipes
 
-alt Recipes found
-    Backend --> Frontend: 200 OK\nRecipeResult\n(list of 3 recipe summaries with links)
-    Frontend --> User: Display recipe dropdown
-    User -> Frontend: Clicks on recipe
-    Frontend --> User: Open external link\nto recipe details
+alt Recipes found (≥1 recipe matches)
+    RecipeService --> Controller: RecipeResult[]\n{id, title, thumbnail, sourceUrl}
+    deactivate RecipeService
+    Controller --> Frontend: 200 OK\n{recipes: [3 recipe summaries with links]}
+    deactivate Controller
+    Frontend --> User: Display recipe dropdown\nwith 3 recipe cards
+    User -> Frontend: Clicks on recipe card
+    Frontend --> User: Open external link in browser\n(TheMealDB recipe details)
 else No recipes found
-    Backend --> Frontend: 404 Not Found\n"No matching recipes"
-    Frontend --> User: "No recipes found,\ntry different ingredients"
+    RecipeService --> Controller: Empty array []
+    deactivate RecipeService
+    Controller --> Frontend: 404 Not Found\n{error: "No matching recipes"}
+    deactivate Controller
+    Frontend --> User: Display message:\n"No recipes found,\ntry different ingredients"
 end
+deactivate Frontend
 
 == Recipe Via AI (User toggles AI) ==
-User -> Frontend: Toggles "AI" option ON
+User -> Frontend: Toggles "AI Recipe" option ON
+activate Frontend
 User -> Frontend: Clicks "Find Recipes"
-Frontend -> Backend: POST /api/recipes/ai\n{ingredients: ["apple", "chicken", "rice"]}
+Frontend -> Controller: POST /api/recipes/generate\n{ingredients: ["apple", "chicken", "rice"],\nAuthorization: Bearer <JWT>}
+activate Controller
 
-Backend -> Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent\n(prompt: "Create recipe with: apple, chicken, rice")
-Gemini --> Backend: AI-generated recipe\n(markdown format with\ninstructions and ingredients)
+Controller -> AiRecipe: generateRecipe(ingredients)
+activate AiRecipe
+AiRecipe -> AiRecipe: Format ingredients as TOML:\ningredients = ["apple", "chicken", "rice"]
+AiRecipe -> Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent\n{contents: [{parts: [{text: prompt}]}]}\nprompt includes TOML ingredient list
+activate Gemini
+Gemini --> AiRecipe: JSON response\n{candidates: [{content: {parts: [{text: markdown_recipe}]}}]}
+deactivate Gemini
+AiRecipe -> AiRecipe: Extract markdown recipe from response
+AiRecipe --> Controller: Markdown recipe string\n(title, ingredients, steps, serving)
+deactivate AiRecipe
 
-Backend --> Frontend: 200 OK\nAiRecipeData\n(formatted markdown recipe)
-Frontend --> User: Display recipe in dropdown
+Controller --> Frontend: 200 OK\n{recipe: "# Recipe Title\n## Ingredients\n...",\nformat: "markdown"}
+deactivate Controller
+Frontend --> User: Display AI recipe\nin markdown preview
 User -> Frontend: Clicks on AI recipe
-Frontend --> User: Show markdown preview\nwith full recipe
+Frontend --> User: Show full recipe with\nformatted instructions
+deactivate Frontend
 
 note right of Gemini
   Gemini generates creative,
   personalized recipes with:
-  - Ingredient list
+  - Recipe title
+  - Complete ingredient list
   - Step-by-step instructions
-  - Cooking time
+  - Cooking time estimate
   - Serving suggestions
+  Uses TOML format for
+  structured ingredient input
 end note
 
 @enduml

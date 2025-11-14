@@ -267,17 +267,14 @@ Failure scenario(s):
         - **Parameters**: `userId` - Authenticated user's ID from JWT token
         - **Returns**: `void`
         - **Purpose**: Permanently removes user account and all associated data from the system.
-    6. **signOut** (Frontend - Internal)
-        - **Signature**: `handleSignOut()`
-        - **Purpose**: Clears the token stored on the frontend, signing the user out from the current device.
 
 2. **Food Logging Component**
    - **Purpose**: Allows users to add food items to their virtual fridge via barcode scan, image recognition, or manual list selection.
    - **Interfaces**:
 
-     1. **sendBarcode** (Frontend → Backend)
+     1. **logFoodItemByBarcode** (Frontend → Backend)
         - **REST Route**: `POST /api/fridge/barcode`
-        - **Signature**: `FridgeItem sendBarcode(String barcode, String userId)`
+        - **Signature**: `FridgeItem logFoodItemByBarcode(String barcode, String userId)`
         - **Parameters**: `barcode` - Scanned barcode number, `userId` - Authenticated user ID
         - **Returns**: `FridgeItem` - Created food item with details and nutritional info
         - **Purpose**: Processes barcode scan by querying Open Food Facts API and creating a food item in the user's fridge.
@@ -335,12 +332,6 @@ Failure scenario(s):
         - **Returns**: `void`
         - **Purpose**: Removes a food item from the fridge when it's consumed or expired.
 
-     4. **sortFridgeItems** (Frontend - Client-side)
-        - **Signature**: `List<FridgeItem> sortFridgeItems(List<FridgeItem> items, SortOption sortBy)`
-        - **Parameters**: `items` - List of fridge items, `sortBy` - Sorting criteria (expiration, added date, nutrition, name)
-        - **Returns**: `List<FridgeItem>` - Sorted list of items
-        - **Purpose**: Organizes food items according to user-selected criteria for better inventory visualization.
-
 4. **Recipe Suggestion Component**
    - **Purpose**: Generates recipe suggestions based on selected ingredients and provides detailed recipe instructions.
    - **Interfaces**:
@@ -391,19 +382,13 @@ Failure scenario(s):
         - **Returns**: `NutritionData` - Complete nutritional breakdown per 100g/serving
         - **Purpose**: Queries external database to get accurate nutritional information for food products.
 
-     3. **displayNutritionFacts** (Frontend - UI Component)
-        - **Signature**: `void displayNutritionFacts(NutritionInfo nutrition)`
-        - **Parameters**: `nutrition` - Nutritional data to display
-        - **Returns**: `void`
-        - **Purpose**: Renders nutritional information in a user-friendly format with charts and comparisons.
-
 6. **Expiry Notification Component**
    - **Purpose**: Monitors expiry dates of logged food items and sends timely notifications to users based on their configured preferences.
    - **Interfaces**:
 
-     1. **sendTestNotification** (Frontend → Backend)
+     1. **triggerExpiryNotificationCheck** (Frontend → Backend)
         - **REST Route**: `POST /api/notifications/test`
-        - **Signature**: `NotificationResponse sendTestNotification(String userId)`
+        - **Signature**: `NotificationResponse triggerExpiryNotificationCheck(String userId)`
         - **Parameters**: `userId` - Authenticated user ID
         - **Returns**: `NotificationResponse` - Status and count of expiring items
         - **Purpose**: Manually triggers a notification check to test the expiry alert system.
@@ -785,17 +770,95 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 ![](images/viewNutritionDiagram.svg)
 
 ### **4.7. Design and Ways to Test Non-Functional Requirements**
+
 1. [**Barcode Scanning Response Time**](#nfr1)
-  - **Idea**: Measure the time from when a user initiates the scan to when the food data is displayed.
-  - **Method**: Use a stopwatch or logging timestamps in the app during multiple tests with different devices and lighting conditions.
-  - **Goal**: Ensure the average scan time is ≤ 5 seconds.
+   - **Test Objective**: Verify that barcode scanning completes within 5 seconds from scan initiation to data display.
+
+   - **Test Setup**:
+     - Test devices: Minimum 3 Android devices (low-end: 4GB RAM, mid-range: 6GB RAM, high-end: 8GB+ RAM)
+     - Test barcodes: 20 different food products with varying barcode types (UPC-A, EAN-13, QR codes)
+     - Lighting conditions: Normal indoor lighting (300-500 lux), bright lighting (>1000 lux), dim lighting (<100 lux)
+
+   - **Test Procedure**:
+     1. Instrument the app code with performance logging:
+        - Log timestamp when "Scan Barcode" button is clicked (`startTime`)
+        - Log timestamp when product data is rendered on confirmation screen (`endTime`)
+        - Calculate: `scanDuration = endTime - startTime`
+     2. For each device and lighting condition combination:
+        - Perform 10 barcode scans per product type
+        - Record all scan durations in a CSV file
+        - Note any failures or timeouts (>10 seconds)
+     3. Aggregate results and calculate:
+        - Mean scan time across all tests
+        - 95th percentile scan time
+        - Failure rate (% of scans >5 seconds)
+
+   - **Success Criteria**:
+     - Mean scan time ≤ 4 seconds
+     - 95th percentile ≤ 5 seconds
+     - Failure rate < 5%
 
 2. [**Image Recognition Accuracy**](#nfr2)
-  - **Idea**: Prepare a test set of food images (with and without barcodes).
-  - **Method**: Log the number of correctly identified items versus total items.
-  - **Goal**: Confirm accuracy is ≥ 95%, accounting for lighting, angle, and occlusion variations.
+   - **Test Objective**: Validate that Gemini API achieves ≥95% accuracy in identifying food items from images.
+
+   - **Test Setup**:
+     - Create standardized test dataset: 100 food images (50 fruits, 50 vegetables)
+     - Image variations:
+       - 40 images: Optimal conditions (good lighting, centered, clear background)
+       - 30 images: Suboptimal lighting (dim or harsh shadows)
+       - 20 images: Angled perspective (30-45° rotation)
+       - 10 images: Partial occlusion (10-30% of food item hidden)
+     - Ground truth labels: Manual annotation of correct food name for each image
+
+   - **Test Procedure**:
+     1. Submit each test image to the backend `/api/fridge/image` endpoint
+     2. Record the identified food name returned by Gemini API
+     3. Compare API response with ground truth label:
+        - **Correct**: Exact match or acceptable synonym (e.g., "apple" vs "red apple")
+        - **Incorrect**: Wrong food type (e.g., "apple" identified as "orange")
+        - **Failed**: API returns "not food" or low confidence error
+     4. Calculate metrics:
+        - Accuracy = (Correct identifications / Total images) × 100%
+        - Per-category accuracy (fruits vs vegetables)
+        - Accuracy by image condition (optimal, suboptimal, angled, occluded)
+
+   - **Success Criteria**:
+     - Overall accuracy ≥ 95%
+     - Optimal conditions accuracy ≥ 98%
+     - Suboptimal conditions accuracy ≥ 90%
 
 3. [**Mobile App Load Time**](#nfr3)
-  - **Idea**: Track the time from app launch to full interactivity on Android devices.
-  - **Method**: Perform multiple launches on different devices and network conditions.
-  - **Goal**: Confirm that the app consistently loads in ≤ 2.5 seconds.
+   - **Test Objective**: Ensure the app becomes interactive within 3 seconds of launch.
+
+   - **Test Setup**:
+     - Test devices: Same 3 devices from NFR1 (low-end, mid-range, high-end)
+     - Network conditions:
+       - WiFi (>10 Mbps)
+       - 4G/LTE (5-10 Mbps)
+       - 3G (1-3 Mbps)
+       - Offline mode (airplane mode enabled)
+     - App states: Cold start (app not in memory), warm start (app in background)
+
+   - **Test Procedure**:
+     1. Instrument the app with Android performance metrics:
+        - Use `ActivityLifecycleCallbacks` to log `onCreate()` timestamp
+        - Log timestamp when UI becomes interactive (first frame rendered and user can tap)
+        - Calculate: `loadTime = interactiveTime - createTime`
+     2. For each device and network condition:
+        - Perform 15 cold starts (force-stop app between launches)
+        - Perform 10 warm starts (background app then restore)
+        - Clear app cache before each cold start test
+        - Record load times in milliseconds
+     3. Use Android Profiler to identify bottlenecks:
+        - Measure time spent in: Initialization, Network calls, Database queries, UI rendering
+     4. Calculate metrics:
+        - Mean cold start time
+        - Mean warm start time
+        - 90th percentile load time
+        - Percentage of loads ≤ 3 seconds
+
+   - **Success Criteria**:
+     - Mean cold start time ≤ 2.5 seconds on mid-range device with WiFi
+     - 90th percentile cold start ≤ 3 seconds across all devices and network conditions
+     - Warm start ≤ 1 second
+     - ≥95% of launches meet the 3-second threshold
