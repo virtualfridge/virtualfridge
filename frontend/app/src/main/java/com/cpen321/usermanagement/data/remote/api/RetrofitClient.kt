@@ -39,7 +39,6 @@ object RetrofitClient {
     val authInterface: AuthInterface = retrofit.create(AuthInterface::class.java)
     val imageInterface: ImageInterface = retrofit.create(ImageInterface::class.java)
     val userInterface: UserInterface = retrofit.create(UserInterface::class.java)
-    val hobbyInterface: HobbyInterface = retrofit.create(HobbyInterface::class.java)
     val recipeInterface: RecipeInterface = retrofit.create(RecipeInterface::class.java)
     val fridgeInterface: FridgeInterface = retrofit.create(FridgeInterface::class.java)
     val notificationInterface: NotificationInterface = retrofit.create(NotificationInterface::class.java)

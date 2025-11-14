@@ -31,12 +31,6 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHobbyService(): HobbyInterface {
-        return RetrofitClient.hobbyInterface
-    }
-
-    @Provides
-    @Singleton
     fun provideFridgeService(): FridgeInterface {
         return RetrofitClient.fridgeInterface
     }

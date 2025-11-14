@@ -133,7 +133,6 @@ describe('UserModel', () => {
       const updates = {
         name: 'Updated Name',
         bio: 'Updated bio without special chars',
-        hobbies: ['Reading', 'Cooking'], // Use valid hobbies from HOBBIES constant
       };
 
       const updatedUser = await userModel.update(createdUser._id, updates);
@@ -141,7 +140,6 @@ describe('UserModel', () => {
       expect(updatedUser).toBeDefined();
       expect(updatedUser?.name).toBe(updates.name);
       expect(updatedUser?.bio).toBe(updates.bio);
-      expect(updatedUser?.hobbies).toEqual(updates.hobbies);
       expect(updatedUser?.email).toBe(mockGoogleUserInfo.email); // Unchanged
     });
 

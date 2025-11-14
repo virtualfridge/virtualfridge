@@ -44,7 +44,6 @@ router.post('/test-user', async (req: Request, res: Response) => {
           name: user.name,
           bio: user.bio || '',
           profilePicture: user.profilePicture,
-          hobbies: user.hobbies || [],
         },
       },
     });
