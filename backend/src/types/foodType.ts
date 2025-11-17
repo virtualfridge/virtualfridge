@@ -96,9 +96,16 @@ export const deleteFoodTypeSchema = z.object({
   }),
 });
 
+export const updateFoodTypeParamsSchema = z.object({
+  _id: z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
+    message: 'Invalid ObjectId',
+  }).optional(),
+});
+
 // Request types
 export type CreateFoodTypeBody = z.infer<typeof createFoodTypeSchema>;
 export type UpdateFoodTypeBody = z.infer<typeof updateFoodTypeSchema>;
+export type UpdateFoodTypeParams = z.infer<typeof updateFoodTypeParamsSchema>;
 export type FindFoodTypeParams = z.infer<typeof findFoodTypeSchema>;
 export type DeleteFoodTypeParams = z.infer<typeof deleteFoodTypeSchema>;
 

@@ -18,7 +18,6 @@ object NavRoutes {
     const val MAIN = "main"
     const val PROFILE = "profile"
     const val MANAGE_PROFILE = "manage_profile"
-//    const val MANAGE_HOBBIES = "manage_hobbies"
     const val PROFILE_COMPLETION = "profile_completion"
     const val SCANNER = "scanner"
     const val RECIPE = "recipe"
@@ -87,7 +86,6 @@ private fun handleNavigationEvent(
 //        }
         is NavigationEvent.NavigateToProfile -> navController.navigate(NavRoutes.PROFILE)
         is NavigationEvent.NavigateToManageProfile -> navController.navigate(NavRoutes.MANAGE_PROFILE)
-//        is NavigationEvent.NavigateToManageHobbies -> navController.navigate(NavRoutes.MANAGE_HOBBIES)
         is NavigationEvent.NavigateToScanner -> navController.navigate(NavRoutes.SCANNER)
         is NavigationEvent.NavigateToTestBarcode -> navController.navigate(NavRoutes.TEST_BARCODE)
         is NavigationEvent.NavigateToRecipe -> navController.navigate(NavRoutes.RECIPE)
@@ -156,7 +154,6 @@ private fun AppNavHost(
                 actions = ProfileScreenActions(
                     onBackClick = { navigationStateManager.navigateBack() },
                     onManageProfileClick = { navigationStateManager.navigateToManageProfile() },
-//                    onManageHobbiesClick = { navigationStateManager.navigateToManageHobbies() },
                     onAccountDeleted = { navigationStateManager.handleAccountDeletion() },
                     onSignOut = { navigationStateManager.handleSignOut()},
                 )
@@ -169,13 +166,6 @@ private fun AppNavHost(
                 onBackClick = { navigationStateManager.navigateBack() }
             )
         }
-
-//        composable(NavRoutes.MANAGE_HOBBIES) {
-//            ManageHobbiesScreen(
-//                profileViewModel = profileViewModel,
-//                onBackClick = { navigationStateManager.navigateBack() }
-//            )
-//        }
 
         // Placeholder for scanner screen; implement separately
         composable(NavRoutes.SCANNER) {

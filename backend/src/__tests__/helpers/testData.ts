@@ -9,7 +9,6 @@ export const mockUser: Partial<IUser> = {
   name: 'Test User',
   profilePicture: 'https://example.com/profile.jpg',
   bio: 'Test bio',
-  hobbies: ['reading', 'cooking'],
 };
 
 export const mockFoodType: Partial<FoodType> = {

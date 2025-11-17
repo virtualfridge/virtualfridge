@@ -6,6 +6,7 @@ import {
   FoodTypeResponse,
   FindFoodTypeParams,
   UpdateFoodTypeBody,
+  UpdateFoodTypeParams,
 } from '../types/foodType';
 import { foodTypeModel } from '../models/foodType';
 import logger from '../util/logger';
@@ -36,7 +37,7 @@ export class FoodTypeController {
   };
 
   updateFoodType = async (
-    req: Request<unknown, unknown, UpdateFoodTypeBody>,
+    req: Request<UpdateFoodTypeParams, unknown, UpdateFoodTypeBody>,
     res: Response<FoodTypeResponse>,
     next: NextFunction
   ) => {

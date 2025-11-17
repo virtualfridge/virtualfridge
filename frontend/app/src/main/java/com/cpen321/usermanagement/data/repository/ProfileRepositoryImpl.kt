@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.cpen321.usermanagement.data.local.preferences.TokenManager
-import com.cpen321.usermanagement.data.remote.api.HobbyInterface
 import com.cpen321.usermanagement.data.remote.api.ImageInterface
 import com.cpen321.usermanagement.data.remote.api.RetrofitClient
 import com.cpen321.usermanagement.data.remote.api.UserInterface
@@ -26,7 +25,6 @@ class ProfileRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val imageInterface: ImageInterface,
     private val userInterface: UserInterface,
-    private val hobbyInterface: HobbyInterface,
     private val tokenManager: TokenManager
 ) : ProfileRepository {
 
@@ -104,70 +102,16 @@ class ProfileRepositoryImpl @Inject constructor(
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: java.net.SocketTimeoutException) {
-            Log.e(TAG, "Network timeout while updating hobbies", e)
+            Log.e(TAG, "Network timeout while deleting profile", e)
             Result.failure(e)
         } catch (e: java.net.UnknownHostException) {
-            Log.e(TAG, "Network connection failed while updating hobbies", e)
+            Log.e(TAG, "Network connection failed while deleting profile", e)
             Result.failure(e)
         } catch (e: java.io.IOException) {
-            Log.e(TAG, "IO error while updating hobbies", e)
+            Log.e(TAG, "IO error while deleting profile", e)
             Result.failure(e)
         } catch (e: retrofit2.HttpException) {
-            Log.e(TAG, "HTTP error while updating hobbies: ${e.code()}", e)
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun updateUserHobbies(hobbies: List<String>): Result<User> {
-        return try {
-            val updateRequest = UpdateProfileRequest(hobbies = hobbies)
-            val response = userInterface.updateProfile("", updateRequest) // Auth header is handled by interceptor
-            if (response.isSuccessful && response.body()?.data != null) {
-                Result.success(response.body()!!.data!!.user)
-            } else {
-                val errorBodyString = response.errorBody()?.string()
-                val errorMessage = parseErrorMessage(errorBodyString, "Failed to update hobbies.")
-
-                Log.e(TAG, "Failed to update hobbies: $errorMessage")
-                Result.failure(Exception(errorMessage))
-            }
-        } catch (e: java.net.SocketTimeoutException) {
-            Log.e(TAG, "Network timeout while updating hobbies", e)
-            Result.failure(e)
-        } catch (e: java.net.UnknownHostException) {
-            Log.e(TAG, "Network connection failed while updating hobbies", e)
-            Result.failure(e)
-        } catch (e: java.io.IOException) {
-            Log.e(TAG, "IO error while updating hobbies", e)
-            Result.failure(e)
-        } catch (e: retrofit2.HttpException) {
-            Log.e(TAG, "HTTP error while updating hobbies: ${e.code()}", e)
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun getAvailableHobbies(): Result<List<String>> {
-        return try {
-            val response = hobbyInterface.getAvailableHobbies("") // Auth header is handled by interceptor
-            if (response.isSuccessful && response.body()?.data != null) {
-                Result.success(response.body()!!.data!!.hobbies)
-            } else {
-                val errorBodyString = response.errorBody()?.string()
-                val errorMessage = parseErrorMessage(errorBodyString, "Failed to fetch hobbies.")
-                Log.e(TAG, "Failed to get available hobbies: $errorMessage")
-                Result.failure(Exception(errorMessage))
-            }
-        } catch (e: java.net.SocketTimeoutException) {
-            Log.e(TAG, "Network timeout while getting available hobbies", e)
-            Result.failure(e)
-        } catch (e: java.net.UnknownHostException) {
-            Log.e(TAG, "Network connection failed while getting available hobbies", e)
-            Result.failure(e)
-        } catch (e: java.io.IOException) {
-            Log.e(TAG, "IO error while getting available hobbies", e)
-            Result.failure(e)
-        } catch (e: retrofit2.HttpException) {
-            Log.e(TAG, "HTTP error while getting available hobbies: ${e.code()}", e)
+            Log.e(TAG, "HTTP error while deleting profile: ${e.code()}", e)
             Result.failure(e)
         }
     }
@@ -211,21 +155,21 @@ class ProfileRepositoryImpl @Inject constructor(
                 Result.success(response.body()!!.data!!.image)
             } else {
                 val errorBodyString = response.errorBody()?.string()
-                val errorMessage = parseErrorMessage(errorBodyString, "Failed to fetch hobbies.")
-                Log.e(TAG, "Failed to get available hobbies: $errorMessage")
+                val errorMessage = parseErrorMessage(errorBodyString, "Failed to upload image.")
+                Log.e(TAG, "Failed to upload image: $errorMessage")
                 Result.failure(Exception(errorMessage))
             }
         } catch (e: java.net.SocketTimeoutException) {
-            Log.e(TAG, "Network timeout while getting available hobbies", e)
+            Log.e(TAG, "Network timeout while uploading image", e)
             Result.failure(e)
         } catch (e: java.net.UnknownHostException) {
-            Log.e(TAG, "Network connection failed while getting available hobbies", e)
+            Log.e(TAG, "Network connection failed while uploading image", e)
             Result.failure(e)
         } catch (e: java.io.IOException) {
-            Log.e(TAG, "IO error while getting available hobbies", e)
+            Log.e(TAG, "IO error while uploading image", e)
             Result.failure(e)
         } catch (e: retrofit2.HttpException) {
-            Log.e(TAG, "HTTP error while getting available hobbies: ${e.code()}", e)
+            Log.e(TAG, "HTTP error while uploading image: ${e.code()}", e)
             Result.failure(e)
         }
     }

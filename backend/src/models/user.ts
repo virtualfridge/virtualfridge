@@ -1,7 +1,6 @@
 import mongoose, { Schema } from 'mongoose';
 import { z } from 'zod';
 
-import { HOBBIES } from '../config/constants';
 import {
   createUserSchema,
   GoogleUserInfo,
@@ -40,20 +39,6 @@ const userSchema = new Schema<IUser>(
       required: false,
       trim: true,
       maxlength: 500,
-    },
-    hobbies: {
-      type: [String],
-      default: [],
-      validate: {
-        validator: function (hobbies: string[]) {
-          return (
-            hobbies.length === 0 ||
-            hobbies.every(hobby => HOBBIES.includes(hobby))
-          );
-        },
-        message:
-          'Hobbies must be non-empty strings and must be in the available hobbies list',
-      },
     },
     dietaryPreferences: {
       type: Object,

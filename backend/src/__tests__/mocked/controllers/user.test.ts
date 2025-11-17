@@ -197,7 +197,7 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    * - HTTP Method: POST
    * - Endpoint: /api/user/profile
    * - Headers: Authorization: Bearer <valid JWT token>
-   * - Body: { name: 'Updated Name', bio: 'Updated bio', hobbies: ['Reading', 'Cooking'] }
+   * - Body: { name: 'Updated Name', bio: 'Updated bio' }
    *
    * Expected Status Code: 200
    *
@@ -206,7 +206,6 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    * - Response body contains 'data.user' object
    * - user.name matches 'Updated Name'
    * - user.bio matches 'Updated bio'
-   * - user.hobbies array matches ['Reading', 'Cooking']
    *
    * Expected Behavior:
    * - JWT token is validated successfully
@@ -223,7 +222,6 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
     const updates = {
       name: 'Updated Name',
       bio: 'Updated bio',
-      hobbies: ['Reading', 'Cooking'],
     };
 
     const response = await request(app)
@@ -236,8 +234,6 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
     expect(response.body).toHaveProperty('data');
     expect(response.body.data.user).toHaveProperty('name', updates.name);
     expect(response.body.data.user).toHaveProperty('bio', updates.bio);
-    expect(response.body.data.user).toHaveProperty('hobbies');
-    expect(response.body.data.user.hobbies).toEqual(updates.hobbies);
   });
 
   /**
@@ -278,7 +274,7 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    * - HTTP Method: POST
    * - Endpoint: /api/user/profile
    * - Headers: Authorization: Bearer <valid JWT token>
-   * - Body: { hobbies: ['InvalidHobby'] }
+   * - Body: { bio: 'x'.repeat(501) } // Bio exceeds 500 character limit
    *
    * Expected Status Code: 400
    *
@@ -287,7 +283,7 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    *
    * Expected Behavior:
    * - Request body is validated against updateProfileSchema
-   * - Validation fails because 'InvalidHobby' is not in allowed hobbies list
+   * - Validation fails because bio exceeds maximum length of 500 characters
    * - Returns 400 Bad Request before database update
    * - Error message indicates validation failure
    *
@@ -297,11 +293,11 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    * - Mock Purpose: MediaService is always mocked to prevent file system interactions
    */
   test('should handle validation errors', async () => {
-    // Send invalid hobbies to trigger validation error
+    // Send bio that's too long to trigger validation error
     const response = await request(app)
       .post('/api/user/profile')
       .set('Authorization', `Bearer ${authToken}`)
-      .send({ hobbies: ['InvalidHobby'] })
+      .send({ bio: 'x'.repeat(501) })
       .expect(400);
 
     expect(response.body).toHaveProperty('error');

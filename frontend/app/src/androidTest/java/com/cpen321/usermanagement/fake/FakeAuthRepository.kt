@@ -76,7 +76,6 @@ class FakeAuthRepository @Inject constructor(
                     name = userJson.getString("name"),
                     bio = userJson.optString("bio", "Test user bio"),
                     profilePicture = userJson.optString("profilePicture", ""),
-                    hobbies = emptyList(),
                     createdAt = null,
                     updatedAt = null
                 )

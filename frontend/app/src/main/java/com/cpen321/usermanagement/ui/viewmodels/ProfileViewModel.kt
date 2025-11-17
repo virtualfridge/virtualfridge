@@ -22,8 +22,6 @@ data class ProfileUiState(
 
     // Data states
     val user: User? = null,
-    val allHobbies: List<String> = emptyList(),
-    val selectedHobbies: Set<String> = emptySet(),
 
     // Message states
     val errorMessage: String? = null,
@@ -65,38 +63,18 @@ class ProfileViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(isLoadingProfile = true, errorMessage = null)
 
             val profileResult = profileRepository.getProfile()
-            val hobbiesResult = profileRepository.getAvailableHobbies()
 
-            if (profileResult.isSuccess && hobbiesResult.isSuccess) {
+            if (profileResult.isSuccess) {
                 val user = profileResult.getOrNull()!!
-                val availableHobbies = hobbiesResult.getOrNull()!!
-                val selectedHobbies = user.hobbies.toSet()
 
                 _uiState.value = _uiState.value.copy(
                     isLoadingProfile = false,
-                    user = user,
-                    allHobbies = availableHobbies,
-                    selectedHobbies = selectedHobbies
+                    user = user
                 )
             } else {
-                val errorMessage = when {
-                    profileResult.isFailure -> {
-                        val error = profileResult.exceptionOrNull()
-                        Log.e(TAG, "Failed to load profile", error)
-                        error?.message ?: "Failed to load profile"
-                    }
-
-                    hobbiesResult.isFailure -> {
-                        val error = hobbiesResult.exceptionOrNull()
-                        Log.e(TAG, "Failed to load hobbies", error)
-                        error?.message ?: "Failed to load hobbies"
-                    }
-
-                    else -> {
-                        Log.e(TAG, "Failed to load data")
-                        "Failed to load data"
-                    }
-                }
+                val error = profileResult.exceptionOrNull()
+                Log.e(TAG, "Failed to load profile", error)
+                val errorMessage = error?.message ?: "Failed to load profile"
 
                 _uiState.value = _uiState.value.copy(
                     isLoadingProfile = false,
@@ -114,53 +92,6 @@ class ProfileViewModel @Inject constructor(
                 return@launch
             }
             profileRepository.deleteProfile(user)
-        }
-    }
-
-    fun toggleHobby(hobby: String) {
-        val currentSelected = _uiState.value.selectedHobbies.toMutableSet()
-        if (currentSelected.contains(hobby)) {
-            currentSelected.remove(hobby)
-        } else {
-            currentSelected.add(hobby)
-        }
-        _uiState.value = _uiState.value.copy(selectedHobbies = currentSelected)
-    }
-
-    fun saveHobbies() {
-        viewModelScope.launch {
-            val originalHobbies = _uiState.value.user?.hobbies?.toSet() ?: emptySet()
-
-            _uiState.value =
-                _uiState.value.copy(
-                    isSavingProfile = true,
-                    errorMessage = null,
-                    successMessage = null
-                )
-
-            val selectedHobbiesList = _uiState.value.selectedHobbies.toList()
-            val result = profileRepository.updateUserHobbies(selectedHobbiesList)
-
-            if (result.isSuccess) {
-                val updatedUser = result.getOrNull()!!
-                _uiState.value = _uiState.value.copy(
-                    isSavingProfile = false,
-                    user = updatedUser,
-                    successMessage = "Hobbies updated successfully!"
-                )
-            } else {
-                // Revert to original hobbies on failure
-                val error = result.exceptionOrNull()
-                Log.d(TAG, "error: $error")
-                Log.e(TAG, "Failed to update hobbies", error)
-                val errorMessage = error?.message ?: "Failed to update hobbies"
-
-                _uiState.value = _uiState.value.copy(
-                    isSavingProfile = false,
-                    selectedHobbies = originalHobbies, // Revert the selected hobbies
-                    errorMessage = errorMessage
-                )
-            }
         }
     }
 
