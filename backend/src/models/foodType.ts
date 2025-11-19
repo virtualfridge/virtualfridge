@@ -103,6 +103,16 @@ export class FoodTypeModel {
       throw new Error('Failed to find foodType by name');
     }
   }
+
+  async findByIds(foodTypeIds: mongoose.Types.ObjectId[]): Promise<IFoodType[]> {
+    try {
+      const foodTypes = await this.foodType.find({ _id: { $in: foodTypeIds } });
+      return foodTypes;
+    } catch (error) {
+      logger.error('Error finding foodTypes by ids:', error);
+      throw new Error('Failed to find foodTypes by ids');
+    }
+  }
 }
 
 export const foodTypeModel = new FoodTypeModel();

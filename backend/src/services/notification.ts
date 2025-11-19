@@ -8,6 +8,10 @@ class NotificationService {
     this.initializeFirebase();
   }
 
+  public isInitialized(): boolean {
+    return this.initialized;
+  }
+
   private initializeFirebase() {
     try {
       // Check if already initialized
@@ -57,6 +61,13 @@ class NotificationService {
         data: data ?? {},
         token: fcmToken,
       };
+
+      // Log the exact payload being sent
+      console.log('📤 Sending FCM notification:');
+      console.log('  Title:', title);
+      console.log('  Body:', body);
+      console.log('  Data:', data);
+      console.log('  Token (first 20 chars):', fcmToken.substring(0, 20) + '...');
 
       const response = await admin.messaging().send(message);
       logger.info('Successfully sent notification:', response);

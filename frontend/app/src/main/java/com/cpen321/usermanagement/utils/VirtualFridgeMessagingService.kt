@@ -21,27 +21,44 @@ class VirtualFridgeMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        Log.d(TAG, "Message received from: ${message.from}")
+        Log.e(TAG, "🔔 ========== FCM MESSAGE RECEIVED ==========")
+        Log.e(TAG, "🔔 Message from: ${message.from}")
+        Log.e(TAG, "🔔 Message ID: ${message.messageId}")
+        Log.e(TAG, "🔔 Sent time: ${message.sentTime}")
 
         // Check if message contains a notification payload
         message.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
+            Log.e(TAG, "🔔 Notification Title: ${it.title}")
+            Log.e(TAG, "🔔 Notification Body: ${it.body}")
+            Log.e(TAG, "🔔 Calling showNotification()...")
             showNotification(it.title, it.body)
-        }
+            Log.e(TAG, "🔔 showNotification() completed")
+        } ?: Log.e(TAG, "🔔 No notification payload in message")
 
         // Check if message contains a data payload
         if (message.data.isNotEmpty()) {
-            Log.d(TAG, "Message data payload: ${message.data}")
+            Log.e(TAG, "🔔 Message data payload: ${message.data}")
+        } else {
+            Log.e(TAG, "🔔 No data payload in message")
         }
+
+        Log.e(TAG, "🔔 ========== END FCM MESSAGE ==========")
     }
 
     private fun showNotification(title: String?, body: String?) {
+        Log.e(TAG, "📱 showNotification() called")
+        Log.e(TAG, "📱 Title: $title")
+        Log.e(TAG, "📱 Body: $body")
+
         val channelId = "expiry_notifications"
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        Log.e(TAG, "📱 Got NotificationManager")
+
         // Create notification channel for Android O and above
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.e(TAG, "📱 Creating notification channel for Android O+")
             val channel = NotificationChannel(
                 channelId,
                 "Food Expiry Notifications",
@@ -50,18 +67,24 @@ class VirtualFridgeMessagingService : FirebaseMessagingService() {
                 description = "Notifications for expiring food items"
             }
             notificationManager.createNotificationChannel(channel)
+            Log.e(TAG, "📱 Notification channel created")
         }
 
         // Build and show notification
+        Log.e(TAG, "📱 Building notification...")
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle(title ?: "Virtual Fridge")
             .setContentText(body ?: "You have a notification")
-            .setSmallIcon(R.drawable.ic_account_circle) // You may want to use a different icon
+            .setSmallIcon(R.drawable.ic_account_circle)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        Log.e(TAG, "📱 Notification built, calling notify()...")
+        val notificationId = System.currentTimeMillis().toInt()
+        Log.e(TAG, "📱 Notification ID: $notificationId")
+        notificationManager.notify(notificationId, notification)
+        Log.e(TAG, "📱 ✅ notify() called successfully!")
     }
 
     companion object {

@@ -110,14 +110,21 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        Log.e(TAG, "🚀 ========== REQUESTING FCM TOKEN ==========")
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
-                Log.d(TAG, "FCM Token: $token")
+                Log.e(TAG, "🚀 ========== FCM TOKEN RECEIVED ==========")
+                Log.e(TAG, "🚀 FCM Token: $token")
+                Log.e(TAG, "🚀 Token length: ${token.length}")
+                Log.e(TAG, "🚀 Registering token with backend...")
                 tokenRegistered = true
                 authViewModel.registerFcmToken(token)
+                Log.e(TAG, "🚀 ========== TOKEN REGISTRATION INITIATED ==========")
             } else {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                Log.e(TAG, "❌ ========== FCM TOKEN FETCH FAILED ==========")
+                Log.e(TAG, "❌ Error: ${task.exception?.message}")
+                Log.e(TAG, "❌ ==========================================")
             }
         }
     }

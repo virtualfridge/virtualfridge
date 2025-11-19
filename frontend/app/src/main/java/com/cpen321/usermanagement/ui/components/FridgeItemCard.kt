@@ -308,46 +308,77 @@ fun FridgeItemCard(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Edit/Cancel Button
+                // If item is empty (0%), show prominent removal button only
+                if (foodItem.percentLeft == 0) {
                     Button(
-                        onClick = { showSlider = !showSlider },
-                        modifier = Modifier.weight(1f),
+                        onClick = { onRemove() },
+                        modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (showSlider)
-                                MaterialTheme.colorScheme.surfaceVariant
-                            else
-                                MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = if (showSlider)
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            else
-                                MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
                         ),
                         elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 2.dp,
-                            pressedElevation = 4.dp
+                            defaultElevation = 4.dp,
+                            pressedElevation = 6.dp
                         )
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 4.dp)
                         ) {
                             Text(
-                                text = if (showSlider) "✕" else "✎",
-                                fontSize = 16.sp
+                                text = "🗑",
+                                fontSize = 20.sp
                             )
                             Text(
-                                text = if (showSlider) "Cancel" else "Edit",
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.SemiBold
+                                text = "Remove Empty Item",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
+                } else {
+                    // Normal buttons when item has quantity
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Edit Button
+                        Button(
+                            onClick = { showSlider = !showSlider },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (showSlider)
+                                    MaterialTheme.colorScheme.surfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (showSlider)
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                else
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(
+                                defaultElevation = 2.dp,
+                                pressedElevation = 4.dp
+                            )
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (showSlider) "✕" else "✎",
+                                    fontSize = 16.sp
+                                )
+                                Text(
+                                    text = if (showSlider) "Cancel" else "Edit",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
 
-                    if (foodItem.percentLeft > 0) {
                         // Remove Button
                         Button(
                             onClick = { onRemove() },

@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
 import com.cpen321.usermanagement.data.repository.FridgeRepository
-import com.cpen321.usermanagement.data.repository.NotificationRepository
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,19 +46,13 @@ data class MainUiState(
     val aiModel: String? = null,
     val isGeneratingAiRecipe: Boolean = false,
     val aiError: String? = null,
-    val selectedIngredientKeys: Set<String> = emptySet(),
-
-    // Notification data
-    val isSendingTestNotification: Boolean = false,
-    val notificationSuccessMessage: String? = null,
-    val notificationError: String? = null
+    val selectedIngredientKeys: Set<String> = emptySet()
 )
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val barcodeRepository: FridgeRepository,
-    private val recipeRepository: RecipeRepository,
-    private val notificationRepository: NotificationRepository
+    private val recipeRepository: RecipeRepository
 ) : ViewModel() {
 
     private val ingredientOptions = listOf(
@@ -320,44 +313,4 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // --- Notification testing ---
-    fun sendTestNotification() {
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                isSendingTestNotification = true,
-                notificationSuccessMessage = null,
-                notificationError = null
-            )
-
-            val result = notificationRepository.sendTestNotification()
-            result.fold(
-                onSuccess = { response ->
-                    Log.d("NotificationTest", "Successfully sent test notification")
-                    val message = if (response.expiringItemsCount == 0) {
-                        "No items expiring soon!"
-                    } else {
-                        "${response.expiringItemsCount} item(s) expiring soon! Check your notifications."
-                    }
-                    _uiState.value = _uiState.value.copy(
-                        notificationSuccessMessage = message,
-                        isSendingTestNotification = false
-                    )
-                },
-                onFailure = { error ->
-                    Log.e("NotificationTest", "Failed to send test notification: ${error.message}", error)
-                    _uiState.value = _uiState.value.copy(
-                        notificationError = "Test notification failed: ${error.message ?: "Unknown error"}",
-                        isSendingTestNotification = false
-                    )
-                }
-            )
-        }
-    }
-
-    fun clearNotificationMessages() {
-        _uiState.value = _uiState.value.copy(
-            notificationSuccessMessage = null,
-            notificationError = null
-        )
-    }
 }

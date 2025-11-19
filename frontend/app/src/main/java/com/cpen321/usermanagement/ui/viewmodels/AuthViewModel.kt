@@ -197,16 +197,22 @@ class AuthViewModel @Inject constructor(
     fun registerFcmToken(fcmToken: String) {
         viewModelScope.launch {
             try {
-                Log.d(TAG, "Registering FCM token: $fcmToken")
+                Log.e(TAG, "📡 ========== SENDING FCM TOKEN TO BACKEND ==========")
+                Log.e(TAG, "📡 Token: $fcmToken")
                 profileRepository.updateFcmToken(fcmToken)
                     .onSuccess {
-                        Log.d(TAG, "FCM token registered successfully")
+                        Log.e(TAG, "📡 ✅ FCM TOKEN REGISTERED WITH BACKEND SUCCESSFULLY!")
+                        Log.e(TAG, "📡 ================================================")
                     }
                     .onFailure { error ->
-                        Log.e(TAG, "Failed to register FCM token", error)
+                        Log.e(TAG, "📡 ❌ FAILED TO REGISTER FCM TOKEN WITH BACKEND")
+                        Log.e(TAG, "📡 Error: ${error.message}")
+                        Log.e(TAG, "📡 ================================================")
                     }
             } catch (e: RuntimeException) {
-                Log.e(TAG, "Unexpected runtime error while registering FCM token", e)
+                Log.e(TAG, "📡 ❌ RUNTIME ERROR WHILE REGISTERING FCM TOKEN")
+                Log.e(TAG, "📡 Error: ${e.message}")
+                Log.e(TAG, "📡 ================================================")
             }
         }
     }

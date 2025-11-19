@@ -9,12 +9,16 @@ import foodItemRoutes from './foodItem';
 import foodTypeRoutes from './foodType';
 import recipeRoutes from './recipe';
 import notificationRoutes from './notification';
+import notificationAdminRoutes from './notification-admin';
 import fridgeRoutes from './fridge';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/test-auth', testAuthRoutes); // Test-only endpoint for E2E tests
+
+// Admin/testing notification routes (no auth required)
+router.use('/notifications/admin', notificationAdminRoutes);
 
 router.use('/user', authenticateToken, usersRoutes);
 
