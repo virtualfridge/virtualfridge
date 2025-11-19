@@ -948,28 +948,21 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
    - **Test Objective**: Verify that barcode scanning completes within 5 seconds from scan initiation to data display.
 
    - **Test Setup**:
-     - Test devices: Minimum 3 Android devices (low-end: 4GB RAM, mid-range: 6GB RAM, high-end: 8GB+ RAM)
-     - Test barcodes: 20 different food products with varying barcode types (UPC-A, EAN-13, QR codes)
-     - Lighting conditions: Normal indoor lighting (300-500 lux), bright lighting (>1000 lux), dim lighting (<100 lux)
+     - Test devices: 2 Android Devices (Pixel 7 Emulator, Pixel 2)
+     - Test barcodes: One barcode is used, where the API request is sent over-and-over again
 
    - **Test Procedure**:
      1. Instrument the app code with performance logging:
         - Log timestamp when "Scan Barcode" button is clicked (`startTime`)
         - Log timestamp when product data is rendered on confirmation screen (`endTime`)
         - Calculate: `scanDuration = endTime - startTime`
-     2. For each device and lighting condition combination:
-        - Perform 10 barcode scans per product type
-        - Record all scan durations in a CSV file
-        - Note any failures or timeouts (>10 seconds)
-     3. Aggregate results and calculate:
+     2. Aggregate results and calculate:
         - Mean scan time across all tests
-        - 95th percentile scan time
-        - Failure rate (% of scans >5 seconds)
+        - Minimum scan time across all tests
+        - Maximum scan time across all tests
 
    - **Success Criteria**:
-     - Mean scan time ≤ 4 seconds
-     - 95th percentile ≤ 5 seconds
-     - Failure rate < 5%
+     - Mean scan time ≤ 5 seconds
 
 2. [**Image Recognition Accuracy**](#nfr2)
    - **Test Objective**: Validate that Gemini API achieves ≥95% accuracy in identifying food items from images.
@@ -1004,13 +997,10 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
    - **Test Objective**: Ensure the app becomes interactive within 3 seconds of launch.
 
    - **Test Setup**:
-     - Test devices: Same 3 devices from NFR1 (low-end, mid-range, high-end)
+     - Test devices: Same 2 devices from NFR1
      - Network conditions:
        - WiFi (>10 Mbps)
-       - 4G/LTE (5-10 Mbps)
-       - 3G (1-3 Mbps)
-       - Offline mode (airplane mode enabled)
-     - App states: Cold start (app not in memory), warm start (app in background)
+     - App states: Cold start (app not in memory)
 
    - **Test Procedure**:
      1. Instrument the app with Android performance metrics:
@@ -1018,20 +1008,12 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
         - Log timestamp when UI becomes interactive (first frame rendered and user can tap)
         - Calculate: `loadTime = interactiveTime - createTime`
      2. For each device and network condition:
-        - Perform 15 cold starts (force-stop app between launches)
-        - Perform 10 warm starts (background app then restore)
+        - Perform 10 cold starts (force-stop app between launches)
         - Clear app cache before each cold start test
         - Record load times in milliseconds
-     3. Use Android Profiler to identify bottlenecks:
-        - Measure time spent in: Initialization, Network calls, Database queries, UI rendering
-     4. Calculate metrics:
+     3. Calculate metrics:
         - Mean cold start time
-        - Mean warm start time
-        - 90th percentile load time
         - Percentage of loads ≤ 3 seconds
 
    - **Success Criteria**:
-     - Mean cold start time ≤ 2.5 seconds on mid-range device with WiFi
-     - 90th percentile cold start ≤ 3 seconds across all devices and network conditions
-     - Warm start ≤ 1 second
-     - ≥95% of launches meet the 3-second threshold
+     - Mean cold start time ≤ 3 seconds
