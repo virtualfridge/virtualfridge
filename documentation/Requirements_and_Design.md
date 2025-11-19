@@ -964,36 +964,7 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
    - **Success Criteria**:
      - Mean scan time ≤ 5 seconds
 
-2. [**Image Recognition Accuracy**](#nfr2)
-   - **Test Objective**: Validate that Gemini API achieves ≥95% accuracy in identifying food items from images.
-
-   - **Test Setup**:
-     - Create standardized test dataset: 100 food images (50 fruits, 50 vegetables)
-     - Image variations:
-       - 40 images: Optimal conditions (good lighting, centered, clear background)
-       - 30 images: Suboptimal lighting (dim or harsh shadows)
-       - 20 images: Angled perspective (30-45° rotation)
-       - 10 images: Partial occlusion (10-30% of food item hidden)
-     - Ground truth labels: Manual annotation of correct food name for each image
-
-   - **Test Procedure**:
-     1. Submit each test image to the backend `/api/fridge/image` endpoint
-     2. Record the identified food name returned by Gemini API
-     3. Compare API response with ground truth label:
-        - **Correct**: Exact match or acceptable synonym (e.g., "apple" vs "red apple")
-        - **Incorrect**: Wrong food type (e.g., "apple" identified as "orange")
-        - **Failed**: API returns "not food" or low confidence error
-     4. Calculate metrics:
-        - Accuracy = (Correct identifications / Total images) × 100%
-        - Per-category accuracy (fruits vs vegetables)
-        - Accuracy by image condition (optimal, suboptimal, angled, occluded)
-
-   - **Success Criteria**:
-     - Overall accuracy ≥ 95%
-     - Optimal conditions accuracy ≥ 98%
-     - Suboptimal conditions accuracy ≥ 90%
-
-3. [**Mobile App Load Time**](#nfr3)
+3. [**Mobile App Load Time**](#nfr2)
    - **Test Objective**: Ensure the app becomes interactive within 3 seconds of launch.
 
    - **Test Setup**:
