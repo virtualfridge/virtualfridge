@@ -21,7 +21,6 @@ class CronService {
     }
 
     console.log('Starting CronService...');
-    console.log('='.repeat(60));
 
     // Check Firebase initialization status
     if (notificationService.isInitialized()) {
@@ -32,20 +31,11 @@ class CronService {
       console.error('  Please set FIREBASE_SERVICE_ACCOUNT in your .env file');
     }
 
-    console.log('='.repeat(60));
-
     // Schedule expiration notifications to run twice daily at 9 AM and 6 PM
-    // Cron format: '0 9,18 * * *' means: minute=0, hour=9 or 18, every day
     cron.schedule('0 9,18 * * *', async () => {
       console.log('Running scheduled expiration notification check...');
       await this.checkAndSendExpirationNotifications();
     });
-
-    // For testing/development: Also run every hour (uncomment if needed)
-    // cron.schedule('0 * * * *', async () => {
-    //   console.log('Running hourly expiration notification check...');
-    //   await this.checkAndSendExpirationNotifications();
-    // });
 
     this.isRunning = true;
     console.log('CronService started successfully. Expiration notifications scheduled for 9 AM and 6 PM daily.');

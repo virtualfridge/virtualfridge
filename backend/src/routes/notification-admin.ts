@@ -9,14 +9,38 @@ const router = Router();
 // Admin/Testing routes for notifications (NO AUTH REQUIRED)
 // These are for testing and debugging purposes
 
+// Simple test notification to a specific token
+router.post('/test-simple', async (req: Request, res: Response) => {
+  try {
+    const { fcmToken } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({ message: 'FCM token required in request body' });
+    }
+
+    const success = await notificationService.sendNotification(
+      fcmToken,
+      'Test Notification',
+      'If you see this, FCM is working!',
+      { test: 'true' }
+    );
+
+    return res.status(200).json({
+      success,
+      message: success ? 'Test notification sent!' : 'Failed to send notification. Check logs.',
+    });
+  } catch (error) {
+    console.error('Error sending test notification:', error);
+    return res.status(500).json({
+      message: 'Failed to send test notification',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 // Manual trigger endpoint for testing/debugging (checks ALL users)
 router.post('/trigger', async (req: Request, res: Response) => {
   try {
-    console.log('\n' + '='.repeat(60));
-    console.log('Manual notification trigger requested via API');
-    console.log('='.repeat(60) + '\n');
-
-    // Trigger the notification check immediately
     await cronService.triggerNotificationCheck();
 
     return res.status(200).json({
