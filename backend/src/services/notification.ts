@@ -8,6 +8,10 @@ class NotificationService {
     this.initializeFirebase();
   }
 
+  public isInitialized(): boolean {
+    return this.initialized;
+  }
+
   private initializeFirebase() {
     try {
       // Check if already initialized
@@ -59,10 +63,14 @@ class NotificationService {
       };
 
       const response = await admin.messaging().send(message);
-      logger.info('Successfully sent notification:', response);
+      logger.info(`Notification sent: "${title}" to ${fcmToken.substring(0, 15)}...`);
       return true;
-    } catch (error) {
-      logger.error('Error sending notification:', error);
+    } catch (error: any) {
+      logger.error('Failed to send notification:', {
+        error: error?.message,
+        code: error?.code,
+        title,
+      });
       return false;
     }
   }

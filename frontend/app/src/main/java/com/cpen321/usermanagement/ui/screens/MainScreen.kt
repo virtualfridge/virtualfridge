@@ -108,8 +108,7 @@ fun MainScreen(
                 if (fridgeUiState.selectedItems.isNotEmpty()) {
                     showRecipeSheet = true
                 }
-            },
-            onNotificationClick = { mainViewModel.sendTestNotification() },
+            }
         )
     )
 
@@ -283,8 +282,7 @@ private fun MainContent(
                 hasSelectedItems = state.fridgeUiState.selectedItems.isNotEmpty(),
                 onScanClick = actions.onScanRequested,
                 onTestBarcodeClick = actions.onTestBarcodeClick,
-                onRecipeClick = actions.onRecipeButtonClick,
-                onNotificationClick = actions.onNotificationClick
+                onRecipeClick = actions.onRecipeButtonClick
             )
         }
     ) { paddingValues ->
@@ -323,8 +321,7 @@ private data class MainContentActions(
     val onItemRemove: (String) -> Unit,
     val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
     val onTestBarcodeClick: () -> Unit,
-    val onRecipeButtonClick: () -> Unit,
-    val onNotificationClick: () -> Unit,
+    val onRecipeButtonClick: () -> Unit
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -619,7 +616,6 @@ private fun MainBottomBar(
     onScanClick: () -> Unit,
     onTestBarcodeClick: () -> Unit,
     onRecipeClick: () -> Unit,
-    onNotificationClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar(
@@ -699,27 +695,6 @@ private fun MainBottomBar(
                     )
                     Text(
                         text = "Recipe",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Notification Test Button
-            OutlinedButton(
-                onClick = onNotificationClick,
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🔔",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Notify",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }

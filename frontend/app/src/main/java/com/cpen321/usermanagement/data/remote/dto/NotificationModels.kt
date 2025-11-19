@@ -9,3 +9,9 @@ data class ExpiringItem(
     val name: String,
     val expirationDate: String
 )
+
+data class NotificationCheckResponse(
+    val message: String,
+    val itemsExpiring: Int,
+    val notificationSent: Boolean
+)

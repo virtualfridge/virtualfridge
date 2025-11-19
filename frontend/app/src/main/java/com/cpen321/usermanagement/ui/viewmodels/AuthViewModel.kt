@@ -40,7 +40,8 @@ data class AuthUiState(
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
-    private val navigationStateManager: NavigationStateManager
+    private val navigationStateManager: NavigationStateManager,
+    private val notificationRepository: com.cpen321.usermanagement.data.repository.NotificationRepository
 ) : ViewModel() {
 
     companion object {
@@ -197,16 +198,35 @@ class AuthViewModel @Inject constructor(
     fun registerFcmToken(fcmToken: String) {
         viewModelScope.launch {
             try {
-                Log.d(TAG, "Registering FCM token: $fcmToken")
                 profileRepository.updateFcmToken(fcmToken)
                     .onSuccess {
                         Log.d(TAG, "FCM token registered successfully")
                     }
                     .onFailure { error ->
-                        Log.e(TAG, "Failed to register FCM token", error)
+                        Log.e(TAG, "Failed to register FCM token: ${error.message}")
                     }
             } catch (e: RuntimeException) {
-                Log.e(TAG, "Unexpected runtime error while registering FCM token", e)
+                Log.e(TAG, "Runtime error registering FCM token: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Check for expiring items and send notifications if needed
+     * This is called when the app opens
+     */
+    fun checkExpiringItems() {
+        viewModelScope.launch {
+            try {
+                notificationRepository.checkNotifications()
+                    .onSuccess { response ->
+                        Log.d(TAG, "Notification check: ${response.itemsExpiring} items expiring")
+                    }
+                    .onFailure { error ->
+                        Log.e(TAG, "Failed to check notifications: ${error.message}")
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking expiring items", e)
             }
         }
     }
