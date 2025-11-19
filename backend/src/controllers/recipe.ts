@@ -27,16 +27,14 @@ export class RecipeController {
       : defaultRecipeIngredients;
 
     try {
-      const meals = await this.recipeService.fetchRecipes({
+      const recipes = await this.recipeService.getRecipes({
         ingredients: ingredientList,
       });
 
       res.status(200).json({
         message: 'Recipes fetched successfully',
         data: {
-          ingredients: ingredientList,
-          meals,
-          externalSource: this.recipeService.getExternalSourceLink(),
+          recipes,
         },
       });
     } catch (error) {
@@ -45,13 +43,7 @@ export class RecipeController {
       if (error instanceof Error) {
         return res.status(502).json({
           message:
-            error.message ||
-            'Failed to fetch recipes from TheMealDB service.',
-          data: {
-            ingredients: ingredientList,
-            meals: [],
-            externalSource: this.recipeService.getExternalSourceLink(),
-          },
+            error.message || 'Failed to fetch recipes from TheMealDB service.',
         });
       }
 
