@@ -56,10 +56,7 @@ export class RecipeService {
       return null;
     });
     const recipes = (await Promise.all(recipePromises))
-      .filter(meals => meals !== null)
-      .reduce((previousMeals, currentMeals) =>
-        previousMeals.concat(currentMeals)
-      )
+      .flatMap(meals => meals ?? [])
       .map(meal => this.getRecipeFromApiResponse(meal));
     // Now we score the recipes based on nutrition facts
     // What we have:
@@ -104,10 +101,14 @@ export class RecipeService {
         }, 0);
     });
     const scores = await Promise.all(scorePromises);
-    const maxScore = Math.max(...scores);
-    const bestIndex = scores.indexOf(maxScore);
-    const bestRecipe = recipes[bestIndex];
-    return [bestRecipe];
+    if (scores.length > 0) {
+      const maxScore = Math.max(...scores);
+      const bestIndex = scores.indexOf(maxScore);
+      const bestRecipe = recipes[bestIndex];
+      return [bestRecipe];
+    } else {
+      return [];
+    }
   }
 
   private getPercentDailyValue(

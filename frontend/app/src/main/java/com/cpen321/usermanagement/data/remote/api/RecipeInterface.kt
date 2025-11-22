@@ -1,8 +1,8 @@
 package com.cpen321.usermanagement.data.remote.api
 
 import com.cpen321.usermanagement.data.remote.dto.ApiResponse
-import com.cpen321.usermanagement.data.remote.dto.AiRecipeDataDto
-import com.cpen321.usermanagement.data.remote.dto.RecipeDataDto
+import com.cpen321.usermanagement.data.remote.dto.AiRecipeData
+import com.cpen321.usermanagement.data.remote.dto.RecipeData
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Body
@@ -19,11 +19,11 @@ interface RecipeInterface {
     suspend fun getRecipes(
         @Header("Authorization") authHeader: String,
         @Query("ingredients") ingredients: String? = null
-    ): Response<ApiResponse<RecipeDataDto>>
+    ): Response<ApiResponse<RecipeData>>
 
     @POST("recipes/ai")
     suspend fun generateAiRecipe(
         @Header("Authorization") authHeader: String,
         @Body request: AiRecipeRequest
-    ): Response<ApiResponse<AiRecipeDataDto>>
+    ): Response<ApiResponse<AiRecipeData>>
 }

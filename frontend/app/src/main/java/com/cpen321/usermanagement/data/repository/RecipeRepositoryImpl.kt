@@ -3,8 +3,6 @@ package com.cpen321.usermanagement.data.repository
 import android.util.Log
 import com.cpen321.usermanagement.data.remote.api.AiRecipeRequest
 import com.cpen321.usermanagement.data.remote.api.RecipeInterface
-import com.cpen321.usermanagement.data.remote.dto.AiRecipeDataDto
-import com.cpen321.usermanagement.data.remote.dto.RecipeDataDto
 import com.google.gson.GsonBuilder
 import com.cpen321.usermanagement.utils.JsonUtils.parseErrorMessage
 import retrofit2.HttpException
@@ -28,13 +26,8 @@ class RecipeRepositoryImpl @Inject constructor(
 
     override suspend fun fetchRecipes(ingredients: List<String>?): Result<RecipeFetchResult> {
         return try {
-            val token = authRepository.getStoredToken()
-            if (token.isNullOrEmpty()) {
-                return Result.failure(Exception("User is not authenticated"))
-            }
-
             val response = recipeInterface.getRecipes(
-                authHeader = "Bearer $token",
+                authHeader = "",
                 ingredients = ingredients?.joinToString(",")
             )
 
