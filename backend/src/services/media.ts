@@ -12,12 +12,12 @@ export async function saveImage(
     const fileName = `${userId}-${Date.now()}${fileExtension}`;
     const newPath = path.join(IMAGES_DIR, fileName);
 
-    fs.renameSync(filePath, newPath);
+    await fs.promises.rename(filePath, newPath);
 
     return newPath.split(path.sep).join('/');
   } catch (error) {
     if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+      await fs.promises.unlink(filePath);
     }
     throw new Error(`Failed to save profile picture: ${error}`);
   }
@@ -28,7 +28,7 @@ export async function deleteImage(url: string): Promise<void> {
     if (url.startsWith(IMAGES_DIR)) {
       const filePath = path.join(process.cwd(), url.substring(1));
       if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+        await fs.promises.unlink(filePath);
       }
     }
   } catch (error) {
@@ -42,7 +42,7 @@ export async function deleteAllUserImages(userId: string): Promise<void> {
       return;
     }
 
-    const files = fs.readdirSync(IMAGES_DIR);
+    const files = await fs.promises.readdir(IMAGES_DIR);
     const userFiles = files.filter(file => file.startsWith(userId + '-'));
 
     await Promise.all(userFiles.map(file => deleteImage(file)));
