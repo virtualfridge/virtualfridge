@@ -2,20 +2,20 @@ import { sanitizeArgs, sanitizeInput } from './sanitizeInput';
 
 const logger = {
   info: (message: string, ...args: unknown[]) => {
-    const sanitizedMessage = sanitizeInput(message);
-    console.log('[INFO]', sanitizedMessage, ...sanitizeArgs(args));
+    const sanitizedMessage = `[INFO] ${sanitizeInput(message)}`;
+    console.log(sanitizedMessage, ...sanitizeArgs(args));
   },
   error: (message: string, ...args: unknown[]) => {
-    const sanitizedMessage = sanitizeInput(message);
-    console.error('[ERROR]', sanitizedMessage, ...sanitizeArgs(args));
+    const sanitizedMessage = `[ERROR] ${sanitizeInput(message)}`;
+    console.error(sanitizedMessage, ...sanitizeArgs(args));
   },
   warn: (message: string, ...args: unknown[]) => {
-    const sanitizedMessage = sanitizeInput(message);
-    console.warn('[WARN]', sanitizedMessage, ...sanitizeArgs(args));
+    const sanitizedMessage = `[WARN] ${sanitizeInput(message)}`;
+    console.warn(sanitizedMessage, ...sanitizeArgs(args));
   },
   debug: (message: string, ...args: unknown[]) => {
-    const sanitizedMessage = sanitizeInput(message);
-    console.debug('[DEBUG]', sanitizedMessage, ...sanitizeArgs(args));
+    const sanitizedMessage = `[DEBUG] ${sanitizeInput(message)}`;
+    console.debug(sanitizedMessage, ...sanitizeArgs(args));
   },
 };
 
