@@ -33,7 +33,17 @@ export interface RecipeApiSummaryResponse {
   meals: RecipeApiSummary[] | null;
 }
 
-export interface Recipe {
+export interface IRecipe {
+  name: string;
+  instructions: string;
+  thumbnail?: string;
+  youtube?: string;
+  ingredients: { name: string; measure: string }[];
+  source?: string;
+  image?: string;
+}
+
+export interface RecipeApiMeal {
   idMeal: string;
   strMeal: string;
   strMealAlternate?: string;
@@ -90,13 +100,13 @@ export interface Recipe {
 }
 
 export interface RecipeApiResponse {
-  meals: Recipe[] | null;
+  meals: RecipeApiMeal[] | null;
 }
 
 export interface GetRecipesResponse {
   message: string;
   data?: {
-    recipes: Recipe[];
+    recipes: IRecipe[];
   };
 }
 

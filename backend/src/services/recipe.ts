@@ -7,7 +7,8 @@ import {
   RecipeQuery,
   defaultRecipeIngredients,
   RecipeApiResponse,
-  Recipe,
+  RecipeApiMeal,
+  IRecipe,
 } from '../types/recipe';
 import { foodTypeModel } from '../models/foodType';
 import { IFoodType, INutrients } from '../types/foodType';
@@ -25,7 +26,7 @@ export class RecipeService {
     this.apiBaseUrl = apiBaseUrl.replace(/\/$/, '');
   }
 
-  async getRecipes(query: RecipeQuery): Promise<Recipe[]> {
+  async getRecipes(query: RecipeQuery): Promise<IRecipe[]> {
     const ingredients = query.ingredients?.length
       ? query.ingredients
       : defaultRecipeIngredients;
@@ -47,14 +48,19 @@ export class RecipeService {
         recipeIds.push(entry[0]);
       }
     });
-    var recipes: Recipe[] = [];
     const recipePromises = recipeIds.map(async id => {
       const recipe = await this.getRecipe(id);
       if (recipe.meals) {
-        recipes = recipes.concat(recipe.meals);
+        return recipe.meals;
       }
+      return null;
     });
-    await Promise.all(recipePromises);
+    const recipes = (await Promise.all(recipePromises))
+      .filter(meals => meals !== null)
+      .reduce((previousMeals, currentMeals) =>
+        previousMeals.concat(currentMeals)
+      )
+      .map(meal => this.getRecipeFromApiResponse(meal));
     // Now we score the recipes based on nutrition facts
     // What we have:
     // A list of ingredients
@@ -75,31 +81,8 @@ export class RecipeService {
       'potassium',
     ];
     var scorePromises = recipes.map(async recipe => {
-      const ingredients = [
-        recipe.strIngredient1,
-        recipe.strIngredient2,
-        recipe.strIngredient2,
-        recipe.strIngredient3,
-        recipe.strIngredient4,
-        recipe.strIngredient5,
-        recipe.strIngredient6,
-        recipe.strIngredient7,
-        recipe.strIngredient8,
-        recipe.strIngredient9,
-        recipe.strIngredient10,
-        recipe.strIngredient11,
-        recipe.strIngredient12,
-        recipe.strIngredient13,
-        recipe.strIngredient14,
-        recipe.strIngredient15,
-        recipe.strIngredient16,
-        recipe.strIngredient17,
-        recipe.strIngredient18,
-        recipe.strIngredient19,
-        recipe.strIngredient20,
-      ];
-      const foodTypePromises = ingredients.map(
-        async ingredient => await foodTypeModel.findByName(ingredient)
+      const foodTypePromises = recipe.ingredients.map(
+        async ingredient => await foodTypeModel.findByName(ingredient.name)
       );
 
       const foodTypes = await Promise.all(foodTypePromises);
@@ -160,6 +143,39 @@ export class RecipeService {
       throw new Error('Nutrient not found in Daily Value table');
     }
     return amountGrams / dailyValue;
+  }
+
+  private getRecipeFromApiResponse(recipe: RecipeApiMeal): IRecipe {
+    const newRecipe: IRecipe = {
+      name: recipe.strMeal,
+      instructions: recipe.strInstructions,
+      source: recipe.strSource,
+      image: recipe.strImageSource,
+      ingredients: [],
+    };
+    newRecipe.ingredients = [
+      { name: recipe.strIngredient1, measure: recipe.strMeasure1 },
+      { name: recipe.strIngredient2, measure: recipe.strMeasure2 },
+      { name: recipe.strIngredient3, measure: recipe.strMeasure3 },
+      { name: recipe.strIngredient4, measure: recipe.strMeasure4 },
+      { name: recipe.strIngredient5, measure: recipe.strMeasure5 },
+      { name: recipe.strIngredient6, measure: recipe.strMeasure6 },
+      { name: recipe.strIngredient7, measure: recipe.strMeasure7 },
+      { name: recipe.strIngredient8, measure: recipe.strMeasure8 },
+      { name: recipe.strIngredient9, measure: recipe.strMeasure9 },
+      { name: recipe.strIngredient10, measure: recipe.strMeasure10 },
+      { name: recipe.strIngredient11, measure: recipe.strMeasure11 },
+      { name: recipe.strIngredient12, measure: recipe.strMeasure12 },
+      { name: recipe.strIngredient13, measure: recipe.strMeasure13 },
+      { name: recipe.strIngredient14, measure: recipe.strMeasure14 },
+      { name: recipe.strIngredient15, measure: recipe.strMeasure15 },
+      { name: recipe.strIngredient16, measure: recipe.strMeasure16 },
+      { name: recipe.strIngredient17, measure: recipe.strMeasure17 },
+      { name: recipe.strIngredient18, measure: recipe.strMeasure18 },
+      { name: recipe.strIngredient19, measure: recipe.strMeasure19 },
+      { name: recipe.strIngredient20, measure: recipe.strMeasure20 },
+    ].filter(ingredient => ingredient.name !== '');
+    return newRecipe;
   }
 
   private async queryRecipesByIngredient(
