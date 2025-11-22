@@ -3,6 +3,7 @@ import { userModel } from '../models/user';
 import { foodItemModel } from '../models/foodItem';
 import { foodTypeModel } from '../models/foodType';
 import { notificationService } from './notification';
+import logger from '../util/logger';
 
 /**
  * CronService handles scheduled tasks for the application
@@ -16,36 +17,38 @@ class CronService {
    */
   public start(): void {
     if (this.isRunning) {
-      console.log('CronService is already running');
+      logger.info('CronService is already running');
       return;
     }
 
-    console.log('Starting CronService...');
+    logger.info('Starting CronService...');
 
     // Check Firebase initialization status
     if (notificationService.isInitialized()) {
-      console.log('✓ Firebase Admin SDK: INITIALIZED');
+      logger.info('✓ Firebase Admin SDK: INITIALIZED');
     } else {
-      console.error('✗ Firebase Admin SDK: NOT INITIALIZED');
-      console.error('  Notifications will NOT work!');
-      console.error('  Please set FIREBASE_SERVICE_ACCOUNT in your .env file');
+      logger.error('✗ Firebase Admin SDK: NOT INITIALIZED');
+      logger.error('  Notifications will NOT work!');
+      logger.error('  Please set FIREBASE_SERVICE_ACCOUNT in your .env file');
     }
 
     // Schedule expiration notifications to run twice daily at 9 AM and 6 PM
     cron.schedule('0 9,18 * * *', async () => {
-      console.log('Running scheduled expiration notification check...');
+      logger.info('Running scheduled expiration notification check...');
       await this.checkAndSendExpirationNotifications();
     });
 
     this.isRunning = true;
-    console.log('CronService started successfully. Expiration notifications scheduled for 9 AM and 6 PM daily.');
+    logger.info(
+      'CronService started successfully. Expiration notifications scheduled for 9 AM and 6 PM daily.'
+    );
   }
 
   /**
    * Manually trigger the expiration notification check (for testing/debugging)
    */
   public async triggerNotificationCheck(): Promise<void> {
-    console.log('Manually triggering expiration notification check...');
+    logger.info('Manually triggering expiration notification check...');
     await this.checkAndSendExpirationNotifications();
   }
 
@@ -62,7 +65,7 @@ class CronService {
       // Get all users who have FCM tokens (able to receive notifications)
       const users = await userModel.findUsersWithFcmTokens();
 
-      console.log(`Found ${users.length} users with FCM tokens`);
+      logger.info(`Found ${users.length} users with FCM tokens`);
 
       for (const user of users) {
         try {
@@ -73,46 +76,58 @@ class CronService {
           }
         } catch (error) {
           errors++;
-          console.error(`Error processing notifications for user ${user._id}:`, error);
+          logger.error(
+            `Error processing notifications for user ${user._id}:`,
+            error
+          );
         }
       }
 
       const duration = Date.now() - startTime;
-      console.log(`Expiration notification check completed in ${duration}ms`);
-      console.log(`Users processed: ${usersProcessed}, Notifications sent: ${notificationsSent}, Errors: ${errors}`);
+      logger.info(`Expiration notification check completed in ${duration}ms`);
+      logger.info(
+        `Users processed: ${usersProcessed}, Notifications sent: ${notificationsSent}, Errors: ${errors}`
+      );
     } catch (error) {
-      console.error('Error in checkAndSendExpirationNotifications:', error);
+      logger.error('Error in checkAndSendExpirationNotifications:', error);
     }
   }
 
   /**
    * Processes expiration notifications for a single user
    */
-  private async processUserNotifications(user: any): Promise<{ sent: boolean }> {
+  private async processUserNotifications(
+    user: any
+  ): Promise<{ sent: boolean }> {
     // Get user's notification preferences (default threshold: 2 days)
-    const expiryThresholdDays = user.notificationPreferences?.expiryThresholdDays || 2;
+    const expiryThresholdDays =
+      user.notificationPreferences?.expiryThresholdDays || 2;
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() + expiryThresholdDays);
 
-    console.log(`Processing user ${user._id}:`);
-    console.log(`  - FCM Token: ${user.fcmToken ? 'Present' : 'Missing'}`);
-    console.log(`  - Expiry threshold: ${expiryThresholdDays} days`);
-    console.log(`  - Checking items expiring before: ${thresholdDate.toISOString()}`);
+    logger.info(`Processing user ${user._id}:`);
+    logger.info(`  - FCM Token: ${user.fcmToken ? 'Present' : 'Missing'}`);
+    logger.info(`  - Expiry threshold: ${expiryThresholdDays} days`);
+    logger.info(
+      `  - Checking items expiring before: ${thresholdDate.toISOString()}`
+    );
 
     // Get all food items for this user
     const foodItems = await foodItemModel.findAllByUserId(user._id);
 
-    console.log(`  - Total food items: ${foodItems.length}`);
+    logger.info(`  - Total food items: ${foodItems.length}`);
 
     if (foodItems.length === 0) {
-      console.log(`  - No food items found for user ${user._id}`);
+      logger.info(`  - No food items found for user ${user._id}`);
       return { sent: false };
     }
 
     // Get all food types to map names
     const typeIds = foodItems.map(item => item.typeId);
     const foodTypes = await foodTypeModel.findByIds(typeIds);
-    const typeMap = new Map(foodTypes.map(type => [type._id.toString(), type.name]));
+    const typeMap = new Map(
+      foodTypes.map(type => [type._id.toString(), type.name])
+    );
 
     // Filter items that are expiring within the threshold or already expired
     const expiringItems: { name: string; expirationDate: Date }[] = [];
@@ -128,47 +143,59 @@ class CronService {
         const expirationDate = new Date(item.expirationDate);
         expirationDate.setHours(0, 0, 0, 0); // Reset to start of day
 
-        const daysUntilExpiry = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        const daysUntilExpiry = Math.ceil(
+          (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
         // Include items that are:
         // 1. Already expired (expirationDate < now)
         // 2. Expiring within threshold (expirationDate <= thresholdDate)
         if (expirationDate <= thresholdDate) {
-          console.log(`    ✓ EXPIRING: "${foodName}" - ${daysUntilExpiry} days (expires: ${expirationDate.toDateString()})`);
+          logger.info(
+            `    ✓ EXPIRING: "${foodName}" - ${daysUntilExpiry} days (expires: ${expirationDate.toDateString()})`
+          );
 
           expiringItems.push({
             name: foodName,
             expirationDate: expirationDate,
           });
         } else {
-          console.log(`    • OK: "${foodName}" - ${daysUntilExpiry} days (expires: ${expirationDate.toDateString()})`);
+          logger.info(
+            `    • OK: "${foodName}" - ${daysUntilExpiry} days (expires: ${expirationDate.toDateString()})`
+          );
         }
       } else {
-        console.log(`    • SKIP: "${foodName}" - No expiration date`);
+        logger.info(`    • SKIP: "${foodName}" - No expiration date`);
       }
     }
 
-    console.log(`  - Items with expiration dates: ${itemsWithExpiration}/${foodItems.length}`);
-    console.log(`  - Items expiring: ${expiringItems.length}`);
+    logger.info(
+      `  - Items with expiration dates: ${itemsWithExpiration}/${foodItems.length}`
+    );
+    logger.info(`  - Items expiring: ${expiringItems.length}`);
 
     // Send notification if there are expiring items
     if (expiringItems.length > 0) {
-      console.log(`  - Attempting to send notification...`);
+      logger.info(`  - Attempting to send notification...`);
       const success = await notificationService.sendExpiryNotifications(
         user.fcmToken,
         expiringItems
       );
 
       if (success) {
-        console.log(`  ✓ SUCCESS: Notification sent to user ${user._id}`);
+        logger.info(`  ✓ SUCCESS: Notification sent to user ${user._id}`);
       } else {
-        console.error(`  ✗ FAILED: Could not send notification to user ${user._id}`);
-        console.error(`    Check if Firebase is initialized and FCM token is valid`);
+        logger.error(
+          `  ✗ FAILED: Could not send notification to user ${user._id}`
+        );
+        logger.error(
+          `    Check if Firebase is initialized and FCM token is valid`
+        );
       }
 
       return { sent: success };
     } else {
-      console.log(`  - No notification needed (no expiring items)`);
+      logger.info(`  - No notification needed (no expiring items)`);
     }
 
     return { sent: false };
@@ -179,14 +206,14 @@ class CronService {
    */
   public stop(): void {
     if (!this.isRunning) {
-      console.log('CronService is not running');
+      logger.info('CronService is not running');
       return;
     }
 
     // Note: node-cron doesn't provide a direct way to stop all tasks
     // In a production environment, you might want to store task references
     this.isRunning = false;
-    console.log('CronService stopped');
+    logger.info('CronService stopped');
   }
 }
 
