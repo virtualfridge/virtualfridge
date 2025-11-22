@@ -2,8 +2,14 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { z, ZodError } from 'zod';
 import logger from '../util/logger';
 
-export const validateBody = <T>(schema: z.ZodSchema<T>): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction) => {
+export const validateBody = <T>(
+  schema: z.ZodSchema<T>
+): RequestHandler<unknown, unknown, T, unknown> => {
+  return (
+    req: Request<unknown, unknown, T, unknown>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const validatedData = schema.parse(req.body);
 

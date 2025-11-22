@@ -4,6 +4,7 @@ import { foodItemModel } from '../models/foodItem';
 import { foodTypeModel } from '../models/foodType';
 import { notificationService } from './notification';
 import logger from '../util/logger';
+import { IUser } from '../types/user';
 
 /**
  * CronService handles scheduled tasks for the application
@@ -77,7 +78,7 @@ class CronService {
         } catch (error) {
           errors++;
           logger.error(
-            `Error processing notifications for user ${user._id}:`,
+            `Error processing notifications for user ${user._id.toString()}:`,
             error
           );
         }
@@ -97,7 +98,7 @@ class CronService {
    * Processes expiration notifications for a single user
    */
   private async processUserNotifications(
-    user: any
+    user: IUser
   ): Promise<{ sent: boolean }> {
     // Get user's notification preferences (default threshold: 2 days)
     const expiryThresholdDays =
@@ -105,7 +106,7 @@ class CronService {
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() + expiryThresholdDays);
 
-    logger.info(`Processing user ${user._id}:`);
+    logger.info(`Processing user ${user._id.toString()}:`);
     logger.info(`  - FCM Token: ${user.fcmToken ? 'Present' : 'Missing'}`);
     logger.info(`  - Expiry threshold: ${expiryThresholdDays} days`);
     logger.info(
@@ -118,16 +119,14 @@ class CronService {
     logger.info(`  - Total food items: ${foodItems.length}`);
 
     if (foodItems.length === 0) {
-      logger.info(`  - No food items found for user ${user._id}`);
+      logger.info(`  - No food items found for user ${user._id.toString()}`);
       return { sent: false };
     }
 
     // Get all food types to map names
     const typeIds = foodItems.map(item => item.typeId);
     const foodTypes = await foodTypeModel.findByIds(typeIds);
-    const typeMap = new Map(
-      foodTypes.map(type => [type._id.toString(), type.name])
-    );
+    const typeMap = new Map(foodTypes.map(type => [type._id, type.name]));
 
     // Filter items that are expiring within the threshold or already expired
     const expiringItems: { name: string; expirationDate: Date }[] = [];
@@ -136,7 +135,7 @@ class CronService {
 
     let itemsWithExpiration = 0;
     for (const item of foodItems) {
-      const foodName = typeMap.get(item.typeId.toString()) ?? 'Unknown item';
+      const foodName = typeMap.get(item.typeId) ?? 'Unknown item';
 
       if (item.expirationDate) {
         itemsWithExpiration++;
@@ -157,7 +156,7 @@ class CronService {
 
           expiringItems.push({
             name: foodName,
-            expirationDate: expirationDate,
+            expirationDate,
           });
         } else {
           logger.info(
@@ -175,7 +174,7 @@ class CronService {
     logger.info(`  - Items expiring: ${expiringItems.length}`);
 
     // Send notification if there are expiring items
-    if (expiringItems.length > 0) {
+    if (expiringItems.length > 0 && user.fcmToken) {
       logger.info(`  - Attempting to send notification...`);
       const success = await notificationService.sendExpiryNotifications(
         user.fcmToken,
@@ -183,10 +182,12 @@ class CronService {
       );
 
       if (success) {
-        logger.info(`  ✓ SUCCESS: Notification sent to user ${user._id}`);
+        logger.info(
+          `  ✓ SUCCESS: Notification sent to user ${user._id.toString()}`
+        );
       } else {
         logger.error(
-          `  ✗ FAILED: Could not send notification to user ${user._id}`
+          `  ✗ FAILED: Could not send notification to user ${user._id.toString()}`
         );
         logger.error(
           `    Check if Firebase is initialized and FCM token is valid`

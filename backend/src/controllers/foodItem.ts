@@ -46,9 +46,9 @@ export class FoodItemController {
       const foodItem = await foodItemModel.update(newFoodItem._id, newFoodItem);
 
       if (!foodItem) {
-        return res
-          .status(404)
-          .json({ message: `FoodItem with ID ${newFoodItem._id} not found.` });
+        return res.status(404).json({
+          message: `FoodItem with ID ${newFoodItem._id.toString()} not found.`,
+        });
       }
 
       res.status(200).json({
@@ -84,7 +84,7 @@ export class FoodItemController {
       if (!foodItem) {
         return res
           .status(404)
-          .json({ message: `FoodItem with ID ${_id} not found.` });
+          .json({ message: `FoodItem with ID ${_id.toString()} not found.` });
       }
 
       res.status(200).json({
@@ -92,7 +92,10 @@ export class FoodItemController {
         data: { foodItem },
       });
     } catch (error) {
-      logger.error(`Failed to get foodItem with ID ${req.params._id}:`, error);
+      logger.error(
+        `Failed to get foodItem with ID ${req.params._id.toString()}:`,
+        error
+      );
 
       if (error instanceof Error) {
         return res.status(500).json({
@@ -118,7 +121,7 @@ export class FoodItemController {
       if (!foodItem) {
         return res
           .status(404)
-          .json({ message: `FoodItem with ID ${_id} not found.` });
+          .json({ message: `FoodItem with ID ${_id.toString()} not found.` });
       }
 
       res.status(200).json({

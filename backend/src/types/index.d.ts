@@ -1,3 +1,5 @@
+import z from 'zod';
+
 declare global {
   namespace Express {
     interface Request {
@@ -5,5 +7,4 @@ declare global {
     }
   }
 }
-
 export {};
