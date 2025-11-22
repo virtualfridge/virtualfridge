@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
 import logger from '../util/logger';
-import { MediaService } from '../services/media';
 import { UploadImageRequest, UploadImageResponse } from '../types/media';
 import { sanitizeInput } from '../util/sanitizeInput';
 import path from 'path';
@@ -9,6 +8,7 @@ import { aiVisionService } from '../services/aiVision';
 import { foodTypeModel } from '../models/foodType';
 import { foodItemModel } from '../models/foodItem';
 import { FridgeItemResponse } from '../types/fridge';
+import { saveImage } from '../services/media';
 
 export class MediaController {
   uploadImage = async (
@@ -37,10 +37,7 @@ export class MediaController {
         throw new Error('Wrong type for request file.path');
       }
       const sanitizedFilePath = sanitizeInput(req.file.path);
-      const image = await MediaService.saveImage(
-        sanitizedFilePath,
-        user._id.toString()
-      );
+      const image = await saveImage(sanitizedFilePath, user._id.toString());
 
       res.status(200).json({
         message: 'Image uploaded successfully',
@@ -81,7 +78,7 @@ export class MediaController {
       }
       const user = req.user;
       const sanitizedFilePath = sanitizeInput(req.file.path);
-      const storedPath = await MediaService.saveImage(
+      const storedPath = await saveImage(
         sanitizedFilePath,
         user._id.toString()
       );
