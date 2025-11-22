@@ -2,6 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { userModel } from '../models/user';
+import logger from '../util/logger';
 
 export const authenticateToken: RequestHandler = async (
   req: Request,
@@ -28,8 +29,16 @@ export const authenticateToken: RequestHandler = async (
       });
       return;
     }
+    if (!process.env.JWT_SECRET) {
+      res.status(500).json({
+        error: 'Internal server error',
+        message: 'Try again later',
+      });
+      logger.error('JWT_SECRET not set');
+      return;
+    }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
       id: mongoose.Types.ObjectId;
     };
 
