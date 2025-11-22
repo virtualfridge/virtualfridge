@@ -92,10 +92,7 @@ export class FoodItemController {
         data: { foodItem },
       });
     } catch (error) {
-      logger.error(
-        `Failed to get foodItem with ID ${req.params._id || 'N/A'}:`,
-        error
-      );
+      logger.error(`Failed to get foodItem with ID ${req.params._id}:`, error);
 
       if (error instanceof Error) {
         return res.status(500).json({

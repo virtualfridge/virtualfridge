@@ -136,7 +136,7 @@ class CronService {
 
     let itemsWithExpiration = 0;
     for (const item of foodItems) {
-      const foodName = typeMap.get(item.typeId.toString()) || 'Unknown item';
+      const foodName = typeMap.get(item.typeId.toString()) ?? 'Unknown item';
 
       if (item.expirationDate) {
         itemsWithExpiration++;
