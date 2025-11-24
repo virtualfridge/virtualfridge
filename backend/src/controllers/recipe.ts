@@ -10,6 +10,7 @@ import {
   AiRecipeResponse,
 } from '../types/recipe';
 import logger from '../util/logger';
+import { AxiosError } from 'axios';
 
 export class RecipeController {
   constructor(
@@ -46,10 +47,9 @@ export class RecipeController {
     } catch (error) {
       logger.error('Failed to fetch recipes', error);
 
-      if (error instanceof Error) {
-        return res.status(502).json({
-          message:
-            error.message || 'Failed to fetch recipes from TheMealDB service.',
+      if (error instanceof AxiosError) {
+        return res.status(503).json({
+          message: 'Failed to fetch recipes from TheMealDB service.',
         });
       }
 
