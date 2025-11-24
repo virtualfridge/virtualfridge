@@ -38,9 +38,14 @@ export interface IRecipe {
   instructions: string;
   thumbnail?: string;
   youtube?: string;
-  ingredients: { name: string; measure: string }[];
+  ingredients: IIngredient[];
   source?: string;
   image?: string;
+}
+
+export interface IIngredient {
+  name: string;
+  measure: string;
 }
 
 export interface RecipeApiMeal {
