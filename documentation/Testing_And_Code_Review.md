@@ -295,5 +295,13 @@ https://app.codacy.com/gh/virtualfridge/virtualfridge/issues/current
   - **Justification:** Eslint, with the current configuration, does not detect types provided by libraries. So every instance of a type provided/inferred by zod (and occasionally other libraries) is considered `any` when really it should be a strongly typed value. Furthermore, in any of the indicated cases it is easy to verify in vscode or another editor that the specified type is correct.
 
 - Code Pattern: **[Enforce Unbound Methods Are Called With Their Expected Scope](#)**
-  - **Location in Git**: [`backend/src/routes`](#)
+  - **Location in Git:** [`backend/src/routes`](#)
   - **Justification:** These issues are still appearing in codacy. However, the functions are all arrow functions so it should not be an issue (as per the recommended resolution steps that codacy provides).
+
+- Code Pattern: **[Unnecessary conditional, expected left-hand side of `??` operator to be possibly null or undefined.](#)**
+  - **Location in Git**: [`backend/src/util/sanitizeInput.ts:17`](#)
+  - **Justification:** JSON.stringify can actually return undefined if it fails to parse the object, for example in the case of circular references. See [the official Mozilla docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#return_value). Unfortunately, the typescript prototype for the function says that it only returns a string, which is incorrect.
+
+- Variable Assigned to Object Injection Sink
+  - **Location in Git:** [`backend/src/services/recipe.ts:134`](#)
+  - **Justification:**  This is only used with the statically type-checked value `nutrient` which is, by definition, a key of the object it is indexing, so there should be no issues accessing the value from that standpoint. The reasoning behind leaving this in is that it allows us to iterate over a set of 5-10 keys in the `recipe.nutrients` object, which would otherwise result in a lot of duplicate code, so doing things this way makes the code more readable and maintainable. Furthermore, all the `nutrient` keys being passed in to the function being flagged are compile-time constants, which greatly mitigates the security risk as they are not affected by used input.
