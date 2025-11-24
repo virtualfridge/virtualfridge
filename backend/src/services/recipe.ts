@@ -63,13 +63,13 @@ export class RecipeService {
       .flatMap(meals => meals ?? [])
       .map(meal => this.getRecipeFromApiResponse(meal));
     // Now we score the recipes based on nutrition facts
-    const badNutrients: Array<keyof INutrients> = [
+    const badNutrients: (keyof INutrients)[] = [
       'fat',
       'saturatedFat',
       'transFat',
       'sugars',
     ];
-    const goodNutrients: Array<keyof INutrients> = [
+    const goodNutrients: (keyof INutrients)[] = [
       'fiber',
       'calcium',
       'iron',
@@ -102,8 +102,8 @@ export class RecipeService {
     if (scores.length > 0) {
       const maxScore = Math.max(...scores);
       const bestIndex = scores.indexOf(maxScore);
-      const bestRecipe = recipes[bestIndex];
-      return [bestRecipe];
+      const bestRecipe = recipes.at(bestIndex);
+      return bestRecipe ? [bestRecipe] : [];
     } else {
       return [];
     }
@@ -113,7 +113,7 @@ export class RecipeService {
     nutrient: keyof INutrients,
     foodType: IFoodType
   ) {
-    const dailyValues: Map<keyof INutrients, number> = new Map([
+    const dailyValues = new Map<keyof INutrients, number>([
       ['fat', 75],
       ['saturatedFat', 10],
       ['transFat', 10],
@@ -128,7 +128,7 @@ export class RecipeService {
       ['zinc', 0.011],
     ]);
 
-    if (!foodType || !foodType.nutrients) {
+    if (!foodType.nutrients) {
       return 0;
     }
     const amount = foodType.nutrients[nutrient];
