@@ -42,12 +42,16 @@ export class RecipeService {
       });
     });
     await Promise.all(promises);
-    var recipeIds: string[] = [];
-    [...mealsToIngredients.entries()].forEach(entry => {
-      if (entry[1].size == query.ingredients?.length) {
-        recipeIds.push(entry[0]);
-      }
-    });
+    const mealsToIngredientsArray = [...mealsToIngredients.entries()];
+    // Retrieve only the recipes that match the greatest number of ingredients possible
+    const mostIngredientMatches = mealsToIngredientsArray.reduce(
+      (max: number, currentValue: [string, Set<string>]) =>
+        Math.max(max, currentValue[1].size),
+      0
+    );
+    const recipeIds = mealsToIngredientsArray
+      .filter(entry => entry[1].size == mostIngredientMatches)
+      .map(entry => entry[0]);
     const recipePromises = recipeIds.map(async id => {
       const recipe = await this.getRecipe(id);
       if (recipe.meals) {
@@ -59,10 +63,6 @@ export class RecipeService {
       .flatMap(meals => meals ?? [])
       .map(meal => this.getRecipeFromApiResponse(meal));
     // Now we score the recipes based on nutrition facts
-    // What we have:
-    // A list of ingredients
-    // A list of their measurements as strings :(
-    // The nutrition facts for the foods that are in the database
     const badNutrients: Array<keyof INutrients> = [
       'fat',
       'saturatedFat',
@@ -77,28 +77,26 @@ export class RecipeService {
       'zinc',
       'potassium',
     ];
-    var scorePromises = recipes.map(async recipe => {
+    const scorePromises = recipes.map(async recipe => {
       const foodTypePromises = recipe.ingredients.map(
         async ingredient => await foodTypeModel.findByName(ingredient.name)
       );
 
       const foodTypes = await Promise.all(foodTypePromises);
 
-      return foodTypes
-        .filter(foodType => foodType !== null)
-        .reduce((currentScore: number, foodType) => {
-          var newScore = currentScore;
-          if (!foodType) {
-            return currentScore;
-          }
-          for (const nutrient of goodNutrients) {
-            newScore += this.getPercentDailyValue(nutrient, foodType);
-          }
-          for (const nutrient of badNutrients) {
-            newScore -= this.getPercentDailyValue(nutrient, foodType);
-          }
-          return newScore;
-        }, 0);
+      return foodTypes.reduce((currentScore: number, foodType) => {
+        var newScore = currentScore;
+        if (!foodType) {
+          return currentScore;
+        }
+        for (const nutrient of goodNutrients) {
+          newScore += this.getPercentDailyValue(nutrient, foodType);
+        }
+        for (const nutrient of badNutrients) {
+          newScore -= this.getPercentDailyValue(nutrient, foodType);
+        }
+        return newScore;
+      }, 0);
     });
     const scores = await Promise.all(scorePromises);
     if (scores.length > 0) {

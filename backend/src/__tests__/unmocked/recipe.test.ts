@@ -44,7 +44,9 @@ describe('Recipe controller integration tests', () => {
       expect(response.body.data.recipes).toBeInstanceOf(Array<IRecipe>);
       expect(response.body.data.recipes.length).toBeGreaterThanOrEqual(1);
       (response.body.data.recipes as Array<IRecipe>).forEach(recipe => {
-        containsIngredientByName(recipe.ingredients, ingredients[0]);
+        expect(
+          containsIngredientByName(recipe.ingredients, ingredients[0])
+        ).toEqual(true);
       });
     });
 
@@ -60,8 +62,10 @@ describe('Recipe controller integration tests', () => {
       expect(response.body.data.recipes).toBeInstanceOf(Array<IRecipe>);
       expect(response.body.data.recipes.length).toBeGreaterThanOrEqual(1);
       (response.body.data.recipes as Array<IRecipe>).forEach(recipe => {
-        containsIngredientByName(recipe.ingredients, ingredients[0]) &&
-          containsIngredientByName(recipe.ingredients, ingredients[1]);
+        expect(
+          containsIngredientByName(recipe.ingredients, ingredients[0]) &&
+            containsIngredientByName(recipe.ingredients, ingredients[1])
+        ).toEqual(true);
       });
     });
 
@@ -94,7 +98,8 @@ const containsIngredientByName = (
 ) => {
   return ingredientList.reduce(
     (previousValue: boolean, currentValue: IIngredient) =>
-      currentValue.name == ingredientName || previousValue,
+      currentValue.name.toLowerCase().replace(/\s/g, '_') ==
+        ingredientName.toLowerCase().replace(/\s/g, '_') || previousValue,
     false
   );
 };
