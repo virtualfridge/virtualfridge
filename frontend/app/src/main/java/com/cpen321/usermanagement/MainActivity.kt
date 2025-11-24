@@ -63,6 +63,8 @@ class MainActivity : ComponentActivity() {
             authViewModel.uiState.collect { state ->
                 if (state.isAuthenticated && !tokenRegistered) {
                     getFcmToken()
+                    // Check for expiring items when app opens
+                    authViewModel.checkExpiringItems()
                 }
             }
         }
@@ -110,21 +112,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        Log.e(TAG, "🚀 ========== REQUESTING FCM TOKEN ==========")
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val token = task.result
-                Log.e(TAG, "🚀 ========== FCM TOKEN RECEIVED ==========")
-                Log.e(TAG, "🚀 FCM Token: $token")
-                Log.e(TAG, "🚀 Token length: ${token.length}")
-                Log.e(TAG, "🚀 Registering token with backend...")
+                Log.d(TAG, "FCM token received, registering with backend")
                 tokenRegistered = true
                 authViewModel.registerFcmToken(token)
-                Log.e(TAG, "🚀 ========== TOKEN REGISTRATION INITIATED ==========")
             } else {
-                Log.e(TAG, "❌ ========== FCM TOKEN FETCH FAILED ==========")
-                Log.e(TAG, "❌ Error: ${task.exception?.message}")
-                Log.e(TAG, "❌ ==========================================")
+                Log.e(TAG, "Failed to fetch FCM token: ${task.exception?.message}")
             }
         }
     }

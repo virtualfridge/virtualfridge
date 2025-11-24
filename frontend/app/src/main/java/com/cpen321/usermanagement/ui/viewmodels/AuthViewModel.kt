@@ -40,7 +40,8 @@ data class AuthUiState(
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
-    private val navigationStateManager: NavigationStateManager
+    private val navigationStateManager: NavigationStateManager,
+    private val notificationRepository: com.cpen321.usermanagement.data.repository.NotificationRepository
 ) : ViewModel() {
 
     companion object {
@@ -197,22 +198,35 @@ class AuthViewModel @Inject constructor(
     fun registerFcmToken(fcmToken: String) {
         viewModelScope.launch {
             try {
-                Log.e(TAG, "📡 ========== SENDING FCM TOKEN TO BACKEND ==========")
-                Log.e(TAG, "📡 Token: $fcmToken")
                 profileRepository.updateFcmToken(fcmToken)
                     .onSuccess {
-                        Log.e(TAG, "📡 ✅ FCM TOKEN REGISTERED WITH BACKEND SUCCESSFULLY!")
-                        Log.e(TAG, "📡 ================================================")
+                        Log.d(TAG, "FCM token registered successfully")
                     }
                     .onFailure { error ->
-                        Log.e(TAG, "📡 ❌ FAILED TO REGISTER FCM TOKEN WITH BACKEND")
-                        Log.e(TAG, "📡 Error: ${error.message}")
-                        Log.e(TAG, "📡 ================================================")
+                        Log.e(TAG, "Failed to register FCM token: ${error.message}")
                     }
             } catch (e: RuntimeException) {
-                Log.e(TAG, "📡 ❌ RUNTIME ERROR WHILE REGISTERING FCM TOKEN")
-                Log.e(TAG, "📡 Error: ${e.message}")
-                Log.e(TAG, "📡 ================================================")
+                Log.e(TAG, "Runtime error registering FCM token: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Check for expiring items and send notifications if needed
+     * This is called when the app opens
+     */
+    fun checkExpiringItems() {
+        viewModelScope.launch {
+            try {
+                notificationRepository.checkNotifications()
+                    .onSuccess { response ->
+                        Log.d(TAG, "Notification check: ${response.itemsExpiring} items expiring")
+                    }
+                    .onFailure { error ->
+                        Log.e(TAG, "Failed to check notifications: ${error.message}")
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking expiring items", e)
             }
         }
     }
