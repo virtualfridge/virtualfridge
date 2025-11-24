@@ -1,11 +1,11 @@
 import { describe, expect, test, beforeAll, afterAll, afterEach } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { createTestApp } from '../../helpers/testApp';
-import * as dbHandler from '../../helpers/dbHandler';
-import { userModel } from '../../../models/user';
-import { foodTypeModel } from '../../../models/foodType';
-import { mockGoogleUserInfo, mockFoodType } from '../../helpers/testData';
+import { createTestApp } from '../helpers/testApp';
+import * as dbHandler from '../helpers/dbHandler';
+import { userModel } from '../../models/user';
+import { foodTypeModel } from '../../models/foodType';
+import { mockGoogleUserInfo, mockFoodType } from '../helpers/testData';
 
 describe('FoodType Controller Integration Tests', () => {
   const app = createTestApp();
@@ -54,6 +54,17 @@ describe('FoodType Controller Integration Tests', () => {
         .send(mockFoodType)
         .expect(401);
     });
+
+    test('should return 400 if invalid ID format is provided', async () => {
+      const response = await request(app)
+        .patch('/api/food-type/invalid-id') // <-- invalid ObjectId format
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({ name: 'Updated Name' })
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toBe('Validation error');
+    });
+
 
     test('should return 401 with invalid token', async () => {
       await request(app)
