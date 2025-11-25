@@ -19,7 +19,11 @@ export async function saveImage(
     if (fs.existsSync(filePath)) {
       await fs.promises.unlink(filePath);
     }
-    throw new Error(`Failed to save profile picture: ${error}`);
+    if (error instanceof Error) {
+      throw new Error(`Failed to save profile picture: ${error.message}`);
+    } else {
+      throw new Error(`Failed to save profile picture: ${String(error)}`);
+    }
   }
 }
 
