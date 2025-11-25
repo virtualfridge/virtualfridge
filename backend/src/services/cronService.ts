@@ -102,7 +102,7 @@ class CronService {
   ): Promise<{ sent: boolean }> {
     // Get user's notification preferences (default threshold: 2 days)
     const expiryThresholdDays =
-      user.notificationPreferences?.expiryThresholdDays || 2;
+      user.notificationPreferences?.expiryThresholdDays ?? 2;
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() + expiryThresholdDays);
 
