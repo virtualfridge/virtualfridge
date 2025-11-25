@@ -534,3 +534,137 @@ describe('Validation Middleware - Non-ZodError Handling', () => {
     console.log('[TEST] ✓ validateQuery non-ZodError path is defensive code');
   });
 });
+
+/**
+ * =============================================================================
+ * VALIDATION MIDDLEWARE - validateQuery COMPREHENSIVE TESTS
+ * =============================================================================
+ */
+
+describe('Validation Middleware - validateQuery Error Paths', () => {
+  const app = createTestApp();
+  let authToken: string;
+  let userId: string;
+
+  beforeAll(async () => {
+    await dbHandler.connect();
+  });
+
+  beforeEach(async () => {
+    const user = await userModel.create(mockGoogleUserInfo);
+    userId = user._id.toString();
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+  });
+
+  afterEach(async () => {
+    await dbHandler.clearDatabase();
+    jest.restoreAllMocks();
+  });
+
+  afterAll(async () => {
+    await dbHandler.closeDatabase();
+  });
+
+  /**
+   * Test: Valid query parameters (success path)
+   * Tests that validateQuery allows valid queries through
+   */
+  test('should allow valid query parameters', async () => {
+    // Use the recipe endpoint which has validateQuery
+    const response = await request(app)
+      .get('/api/recipes')
+      .set('Authorization', `Bearer ${authToken}`)
+      .query({ ingredients: 'chicken,rice' })
+      .expect(200);
+
+    expect(response.status).toBe(200);
+
+    console.log('[TEST] ✓ Allowed valid query parameters');
+  });
+
+  /**
+   * Test: ZodError in validateQuery
+   * Tests validation.ts lines 72-81 (ZodError handling in validateQuery)
+   *
+   * This requires creating a scenario where query validation fails.
+   * Since the recipe endpoint's query schema has optional fields with transforms,
+   * we need to use a different approach to trigger validation errors.
+   */
+  test('should handle ZodError in validateQuery', async () => {
+    // We need to create a mock schema that will fail validation
+    const z = require('zod');
+    const { validateQuery } = require('../../middleware/validation');
+    const express = require('express');
+
+    // Create a test app with a custom route that uses validateQuery
+    const testApp = express();
+    testApp.use(express.json());
+
+    // Create a schema that requires a specific query parameter
+    const strictQuerySchema = z.object({
+      requiredField: z.string().min(5, 'Must be at least 5 characters'),
+    });
+
+    testApp.get('/test-query-validation', validateQuery(strictQuerySchema), (req: any, res: any) => {
+      res.json({ success: true });
+    });
+
+    // Test with missing required field
+    const response1 = await request(testApp)
+      .get('/test-query-validation')
+      .expect(400);
+
+    expect(response1.body.error).toBe('Validation error');
+    expect(response1.body.message).toBe('Invalid input data');
+    expect(response1.body.details).toBeDefined();
+    expect(Array.isArray(response1.body.details)).toBe(true);
+
+    // Test with field that's too short
+    const response2 = await request(testApp)
+      .get('/test-query-validation')
+      .query({ requiredField: 'abc' })
+      .expect(400);
+
+    expect(response2.body.error).toBe('Validation error');
+    expect(response2.body.details).toBeDefined();
+
+    console.log('[TEST] ✓ Handled ZodError in validateQuery');
+  });
+
+  /**
+   * Test: Non-ZodError in validateQuery
+   * Tests validation.ts lines 82-87 (non-ZodError handling in validateQuery)
+   *
+   * This is defensive code - we need to create a broken schema that throws
+   * something other than ZodError
+   */
+  test('should handle non-ZodError in validateQuery', async () => {
+    const { validateQuery } = require('../../middleware/validation');
+    const express = require('express');
+
+    // Create a test app with a custom route
+    const testApp = express();
+    testApp.use(express.json());
+
+    // Create a broken schema that throws a non-ZodError
+    const brokenSchema = {
+      parse: () => {
+        throw new Error('Unexpected schema failure');
+      },
+    };
+
+    testApp.get('/test-error-query', validateQuery(brokenSchema as any), (req: any, res: any) => {
+      res.json({ success: true });
+    });
+
+    const response = await request(testApp)
+      .get('/test-error-query')
+      .query({ anything: 'value' })
+      .expect(500);
+
+    expect(response.body.error).toBe('Internal server error');
+    expect(response.body.message).toBe('Validation processing failed');
+
+    console.log('[TEST] ✓ Handled non-ZodError in validateQuery');
+  });
+});
