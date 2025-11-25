@@ -152,7 +152,7 @@ export class FridgeService {
 
       // Create a food item instance for the user
       const expirationDate = new Date();
-      const days = foodType?.shelfLifeDays;
+      const days = foodType.shelfLifeDays;
       if (typeof days === 'number' && Number.isFinite(days)) {
         expirationDate.setDate(expirationDate.getDate() + days);
       }
