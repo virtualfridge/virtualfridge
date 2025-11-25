@@ -75,7 +75,7 @@ router.post(
           if (expirationDate <= thresholdDate) {
             expiringItems.push({
               name: foodName,
-              expirationDate: expirationDate,
+              expirationDate,
             });
           }
         }

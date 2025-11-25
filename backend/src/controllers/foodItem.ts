@@ -123,7 +123,7 @@ export class FoodItemController {
 
       res.status(200).json({
         message: 'FoodItem deleted successfully',
-        data: { foodItem: foodItem },
+        data: { foodItem },
       });
     } catch (error) {
       logger.error(

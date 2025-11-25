@@ -171,10 +171,7 @@ export class FridgeService {
       return res.status(200).json({
         message: 'Successfully created item from barcode',
         data: {
-          fridgeItem: {
-            foodItem: foodItem,
-            foodType: foodType,
-          },
+          fridgeItem: { foodItem, foodType },
         },
       });
     } catch (error: unknown) {
