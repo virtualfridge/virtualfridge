@@ -3,52 +3,97 @@ title Use Case 3: View Fridge
 
 actor User
 participant "Frontend\n(Android)" as Frontend
-participant "Backend\n(Express)" as Backend
+participant "AuthMiddleware" as Auth
+participant "FridgeController" as Controller
+participant "FoodItemModel" as FoodItemModel
+participant "FoodTypeModel" as FoodTypeModel
 database "MongoDB" as DB
 
 User -> Frontend: Navigates to home page
-Frontend -> Backend: GET /api/fridge\n(Authorization: Bearer <JWT>)
+activate Frontend
+Frontend -> Controller: GET /api/fridge\n(Authorization: Bearer <JWT>)
+activate Controller
 
-Backend -> Backend: authenticateToken()\nExtract userId from JWT
+Controller -> Auth: authenticateToken(req, res, next)
+activate Auth
+Auth -> Auth: Verify JWT signature\nExtract userId from token payload
+Auth --> Controller: req.user = {userId: "..."}
+deactivate Auth
 
-Backend -> DB: FoodItem.findAllByUserId(userId)
-DB --> Backend: Array of FoodItem documents
+Controller -> FoodItemModel: findAllByUserId(userId)
+activate FoodItemModel
+FoodItemModel -> DB: db.fooditems.find({userId: userId})
+activate DB
+DB --> FoodItemModel: Array of FoodItem documents
+deactivate DB
+FoodItemModel --> Controller: FoodItem[](userId, typeId, expirationDate, percentLeft)
+deactivate FoodItemModel
 
-loop For each FoodItem
-    Backend -> DB: FoodItem.getAssociatedFoodType(foodItem)
-    DB --> Backend: FoodType document
+loop For each FoodItem in array
+    Controller -> FoodItemModel: getAssociatedFoodType(foodItem)
+    activate FoodItemModel
+    FoodItemModel -> FoodTypeModel: findById(foodItem.typeId)
+    activate FoodTypeModel
+    FoodTypeModel -> DB: db.foodtypes.findOne({_id: typeId})
+    activate DB
+    DB --> FoodTypeModel: FoodType document
+    deactivate DB
+    FoodTypeModel --> FoodItemModel: FoodType(name, nutrients, shelfLifeDays, image)
+    deactivate FoodTypeModel
+    FoodItemModel --> Controller: FoodType data
+    deactivate FoodItemModel
 end
 
-Backend --> Frontend: 200 OK\nList<FridgeItem>\n(with foodType metadata)
+Controller --> Frontend: 200 OK\nList<FridgeItem>\n(each with foodType metadata:\nname, nutrients, image, expirationDate)
+deactivate Controller
 
-Frontend -> Frontend: sortFridgeItems()\n(by expiration date)
-Frontend --> User: Display sorted inventory
+Frontend -> Frontend: sortFridgeItems(items, "EXPIRATION_DATE")
+Frontend --> User: Display sorted inventory\n(soonest expiry first)
 
 User -> Frontend: Selects "Sort by Expiration Date"
-Frontend -> Frontend: Re-sort items\n(ascending expiration)
+Frontend -> Frontend: Re-sort items by expirationDate\n(ascending order)
 Frontend --> User: Update display\n(soonest expiry at top)
 
 == Update Item Quantity ==
 User -> Frontend: Drags left on food item
 Frontend --> User: Show percentage slider
 User -> Frontend: Adjusts to desired percent
-Frontend -> Backend: PATCH /api/food-item/{itemId}/percent\n{percentRemaining: 50}
+Frontend -> Controller: PATCH /api/food-item/{itemId}/percent\n{percentRemaining: 50}
+activate Controller
 
-Backend -> DB: FoodItem.update(itemId, {percentLeft: 50})
-DB --> Backend: Updated FoodItem
+Controller -> FoodItemModel: update(itemId, {percentLeft: 50})
+activate FoodItemModel
+FoodItemModel -> DB: db.fooditems.findOneAndUpdate(\n{_id: itemId},\n{$set: {percentLeft: 50}},\n{new: true})
+activate DB
+DB --> FoodItemModel: Updated FoodItem document
+deactivate DB
+FoodItemModel --> Controller: FoodItem(userId, typeId, expirationDate, percentLeft: 50)
+deactivate FoodItemModel
 
-Backend --> Frontend: 200 OK\nUpdated FoodItem
-Frontend --> User: Update UI with new percentage
+Controller --> Frontend: 200 OK\nUpdated FoodItem
+deactivate Controller
+Frontend --> User: Update UI with new percentage\n(shows 50% remaining)
+deactivate Frontend
 
 == Remove Item ==
 User -> Frontend: Drags item to 0%
-Frontend -> Backend: DELETE /api/food-item/{itemId}
+activate Frontend
+Frontend -> Controller: DELETE /api/food-item/{itemId}
+activate Controller
 
-Backend -> DB: FoodItem.delete(itemId)
-DB --> Backend: Deleted FoodItem
+Controller -> FoodItemModel: delete(itemId)
+activate FoodItemModel
+FoodItemModel -> DB: db.fooditems.findOneAndDelete({_id: itemId})
+activate DB
+DB --> FoodItemModel: Deleted FoodItem document
+deactivate DB
+FoodItemModel --> Controller: Deleted FoodItem
+deactivate FoodItemModel
 
-Backend --> Frontend: 200 OK
-Frontend -> Frontend: Remove from local list
-Frontend --> User: Item disappears from fridge
+Controller --> Frontend: 200 OK\n{message: "Food item deleted"}
+deactivate Controller
+Frontend -> Frontend: Remove item from local state array
+Frontend --> User: Item disappears from fridge inventory
+deactivate Frontend
 
 @enduml

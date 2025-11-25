@@ -3,30 +3,52 @@ title Use Case 5: View Nutritional Facts
 
 actor User
 participant "Frontend\n(Android)" as Frontend
-participant "Backend\n(Express)" as Backend
+participant "FoodItemController" as Controller
+participant "FoodItemModel" as FoodItemModel
+participant "FoodTypeModel" as FoodTypeModel
 database "MongoDB" as DB
 
 User -> Frontend: Clicks on food item\nin fridge list
+activate Frontend
 Frontend --> User: Display item submenu
 User -> Frontend: Clicks "Nutrition Info"
 
-Frontend -> Backend: GET /api/food-item/{itemId}/nutrition
+Frontend -> Controller: GET /api/food-item/{itemId}/nutrition\n(Authorization: Bearer <JWT>)
+activate Controller
 
-Backend -> DB: FoodItem.findById(itemId)
-DB --> Backend: FoodItem document
+Controller -> FoodItemModel: findById(itemId)
+activate FoodItemModel
+FoodItemModel -> DB: db.fooditems.findOne({_id: itemId})
+activate DB
+DB --> FoodItemModel: FoodItem document
+deactivate DB
+FoodItemModel --> Controller: FoodItem(userId, typeId, expirationDate, percentLeft)
+deactivate FoodItemModel
 
-Backend -> DB: FoodItem.getAssociatedFoodType(foodItem)
-DB --> Backend: FoodType with nutrients
+Controller -> FoodItemModel: getAssociatedFoodType(foodItem)
+activate FoodItemModel
+FoodItemModel -> FoodTypeModel: findById(typeId)
+activate FoodTypeModel
+FoodTypeModel -> DB: db.foodtypes.findOne({_id: typeId})
+activate DB
+DB --> FoodTypeModel: FoodType document
+deactivate DB
+FoodTypeModel --> FoodItemModel: FoodType(name, nutrients, shelfLifeDays)
+deactivate FoodTypeModel
+FoodItemModel --> Controller: FoodType with nutrients
+deactivate FoodItemModel
 
-alt Nutritional data exists
-    Backend --> Frontend: 200 OK\nNutritionInfo\n(calories, protein, fat, carbs,\nsaturatedFat, fiber, sugars, etc.)
-
+alt Nutritional data exists in FoodType.nutrients
+    Controller --> Frontend: 200 OK\nNutritionInfo\n(calories, protein, fat, carbs,\nsaturatedFat, fiber, sugars, etc.)
+    deactivate Controller
     Frontend --> User: Display nutrition facts screen\nwith detailed breakdown
 
 else No nutritional data available
-    Backend --> Frontend: 404 Not Found\n"Nutritional data not available"
+    Controller --> Frontend: 404 Not Found\n"Nutritional data not available"
+    deactivate Controller
     Frontend --> User: Display message:\n"No nutrition data available"\nOffer manual entry option
 end
+deactivate Frontend
 
 note right of DB
   Nutrients stored per 100g
