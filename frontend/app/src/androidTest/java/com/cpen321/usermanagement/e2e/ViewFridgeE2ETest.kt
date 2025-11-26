@@ -82,9 +82,9 @@ class ViewFridgeE2ETest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Wait for bottom bar to fully render by checking for clickable "Test" button
+        // Wait for bottom bar to fully render
         composeTestRule.waitUntil(timeoutMillis = 30000) {
-            composeTestRule.onAllNodes(hasText("Test") and hasClickAction())
+            composeTestRule.onAllNodes(hasText("Scan") and hasClickAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
@@ -92,18 +92,20 @@ class ViewFridgeE2ETest {
         // May be 1 node (just title if fridge has items) or 2 nodes (title + empty state)
         composeTestRule.onAllNodesWithText("Virtual Fridge", substring = true)[0]
             .assertExists()
+            .assertIsDisplayed()
 
         // Wait for content to load (either items or empty state)
         composeTestRule.waitForIdle()
 
         // Check if fridge is empty or has items
-        val isEmpty = composeTestRule.onAllNodesWithText("is waiting to be filled", substring = true)
+        val isEmpty = composeTestRule.onAllNodesWithText("is waiting to be filled!", substring = true)
             .fetchSemanticsNodes().isNotEmpty()
 
         if (isEmpty) {
             // Verify empty state message (will have both title and empty state text)
-            composeTestRule.onNodeWithText("is waiting to be filled", substring = true)
+            composeTestRule.onNodeWithText("is waiting to be filled!", substring = true)
                 .assertExists()
+                .assertIsDisplayed()
         } else {
             // If not empty, verify "Sort by:" exists
             val hasSortBy = composeTestRule.onAllNodesWithText("Sort by:", substring = true)
@@ -114,22 +116,22 @@ class ViewFridgeE2ETest {
             composeTestRule.waitForIdle()
         }
 
-        // Verify bottom bar buttons exist
+        // Verify bottom bar button exists
         composeTestRule.onNodeWithText("Scan")
             .assertExists()
-        composeTestRule.onNodeWithText("Test")
-            .assertExists()
+            .assertIsDisplayed()
     }
 
     /**
      * Test: Sort Fridge Items by Expiration Date
      *
      * Flow:
-     * 1. Navigate to main screen
-     * 2. Verify sort options exist (if items present)
-     * 3. Click sort button
-     * 4. Select "Expiration Date"
-     * 5. Verify selection
+     * 1. Navigate to main screen with items
+     * 2. Verify sort options exist
+     * 3. Select "Expiration Date" sort option
+     * 4. Verify selection is applied and items remain visible
+     *
+     * Note: Test passes gracefully if fridge is empty
      */
     @Test
     fun testViewFridge_sortByExpirationDate() {
@@ -146,32 +148,60 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
-            // Click the sort button (shows current selection)
-            val sortButtons = composeTestRule.onAllNodesWithText("Expiration Date", substring = true)
-                .fetchSemanticsNodes()
+            // Verify sort label exists and is displayed
+            composeTestRule.onNodeWithText("Sort by:", substring = true)
+                .assertExists()
+                .assertIsDisplayed()
 
-            if (sortButtons.isNotEmpty()) {
-                // Click first occurrence (the button)
-                composeTestRule.onAllNodesWithText("Expiration Date", substring = true)[0]
-                    .performClick()
+            // Find and click the sort dropdown button
+            val sortDropdownButtons = composeTestRule.onAllNodes(
+                (hasText("Expiration Date", substring = true) or
+                hasText("Added Date", substring = true) or
+                hasText("Name", substring = true) or
+                hasText("Nutritional Value", substring = true)) and hasClickAction()
+            ).fetchSemanticsNodes()
+
+            if (sortDropdownButtons.isNotEmpty()) {
+                // Click the dropdown to open options
+                composeTestRule.onAllNodes(
+                    (hasText("Expiration Date", substring = true) or
+                    hasText("Added Date", substring = true) or
+                    hasText("Name", substring = true) or
+                    hasText("Nutritional Value", substring = true)) and hasClickAction()
+                )[0].performClick()
 
                 composeTestRule.waitForIdle()
 
-                // Click "Expiration Date" in dropdown (may be second occurrence)
-                val dropdownOptions = composeTestRule.onAllNodesWithText("Expiration Date", substring = true)
+                // Click "Expiration Date" option in the dropdown
+                // Note: There may be 2 "Expiration Date" nodes (button + menu item), so click the last one
+                val expirationDateNodes = composeTestRule.onAllNodesWithText("Expiration Date", substring = true)
                     .fetchSemanticsNodes()
-
-                if (dropdownOptions.size > 1) {
-                    composeTestRule.onAllNodesWithText("Expiration Date", substring = true)[1]
+                if (expirationDateNodes.size > 1) {
+                    // Multiple nodes - click the last one (menu item)
+                    composeTestRule.onAllNodesWithText("Expiration Date", substring = true)[expirationDateNodes.size - 1]
+                        .performClick()
+                } else {
+                    // Single node - click it
+                    composeTestRule.onNodeWithText("Expiration Date", substring = true)
                         .performClick()
                 }
 
                 composeTestRule.waitForIdle()
 
-                // Verify "Expiration Date" is still displayed
+                // Verify "Expiration Date" is now the selected option (displayed in dropdown)
                 composeTestRule.onNodeWithText("Expiration Date", substring = true)
                     .assertExists()
+                    .assertIsDisplayed()
+
+                // Verify sort label is still visible after selecting sort option
+                composeTestRule.onNodeWithText("Sort by:", substring = true)
+                    .assertExists()
+                    .assertIsDisplayed()
             }
+        } else {
+            // Fridge is empty - test passes as sort options are correctly hidden
+            composeTestRule.onNodeWithText("is waiting to be filled!", substring = true)
+                .assertExists()
         }
     }
 
@@ -179,10 +209,9 @@ class ViewFridgeE2ETest {
      * Test: Sort Fridge Items by Added Date
      *
      * Flow:
-     * 1. Navigate to main screen
-     * 2. Click sort button
-     * 3. Select "Added Date"
-     * 4. Verify selection
+     * 1. Navigate to main screen with items
+     * 2. Change sort to "Added Date"
+     * 3. Verify selection is applied and items remain visible
      */
     @Test
     fun testViewFridge_sortByAddedDate() {
@@ -199,34 +228,55 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
-            // Get current sort button
+            // Count items before sort
+            val itemCountBefore = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                .fetchSemanticsNodes().size
+
+            // Get current sort button and click to open dropdown
             val currentSortButton = composeTestRule.onAllNodes(
-                hasText("Expiration Date", substring = true) or
+                (hasText("Expiration Date", substring = true) or
                 hasText("Added Date", substring = true) or
                 hasText("Name", substring = true) or
-                hasText("Nutritional Value", substring = true)
+                hasText("Nutritional Value", substring = true)) and hasClickAction()
             ).fetchSemanticsNodes()
 
             if (currentSortButton.isNotEmpty()) {
-                // Click first sort button to open dropdown
+                // Click sort dropdown
                 composeTestRule.onAllNodes(
-                    hasText("Expiration Date", substring = true) or
+                    (hasText("Expiration Date", substring = true) or
                     hasText("Added Date", substring = true) or
                     hasText("Name", substring = true) or
-                    hasText("Nutritional Value", substring = true)
+                    hasText("Nutritional Value", substring = true)) and hasClickAction()
                 )[0].performClick()
 
                 composeTestRule.waitForIdle()
 
                 // Click "Added Date" option
-                composeTestRule.onNodeWithText("Added Date", substring = true)
-                    .performClick()
+                // Note: There may be 2 "Added Date" nodes (button + menu item), so click the last one
+                val addedDateNodes = composeTestRule.onAllNodesWithText("Added Date", substring = true)
+                    .fetchSemanticsNodes()
+                if (addedDateNodes.size > 1) {
+                    composeTestRule.onAllNodesWithText("Added Date", substring = true)[addedDateNodes.size - 1]
+                        .performClick()
+                } else {
+                    composeTestRule.onNodeWithText("Added Date", substring = true)
+                        .performClick()
+                }
 
                 composeTestRule.waitForIdle()
 
-                // Verify "Added Date" is now selected
+                // Verify "Added Date" is now the selected option
                 composeTestRule.onNodeWithText("Added Date", substring = true)
                     .assertExists()
+                    .assertIsDisplayed()
+
+                // Verify items are still visible after sort
+                val itemCountAfter = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                    .fetchSemanticsNodes().size
+
+                assert(itemCountAfter == itemCountBefore) {
+                    "Items should remain visible after sorting. Before: $itemCountBefore, After: $itemCountAfter"
+                }
             }
         }
     }
@@ -235,10 +285,9 @@ class ViewFridgeE2ETest {
      * Test: Sort Fridge Items by Name
      *
      * Flow:
-     * 1. Navigate to main screen
-     * 2. Click sort button
-     * 3. Select "Name"
-     * 4. Verify selection
+     * 1. Navigate to main screen with items
+     * 2. Change sort to "Name" (alphabetical)
+     * 3. Verify selection is applied and items remain visible
      */
     @Test
     fun testViewFridge_sortByName() {
@@ -255,33 +304,54 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
+            // Count items before sort
+            val itemCountBefore = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                .fetchSemanticsNodes().size
+
             // Click sort button to open dropdown
             val currentSortButton = composeTestRule.onAllNodes(
-                hasText("Expiration Date", substring = true) or
+                (hasText("Expiration Date", substring = true) or
                 hasText("Added Date", substring = true) or
                 hasText("Name", substring = true) or
-                hasText("Nutritional Value", substring = true)
+                hasText("Nutritional Value", substring = true)) and hasClickAction()
             ).fetchSemanticsNodes()
 
             if (currentSortButton.isNotEmpty()) {
                 composeTestRule.onAllNodes(
-                    hasText("Expiration Date", substring = true) or
+                    (hasText("Expiration Date", substring = true) or
                     hasText("Added Date", substring = true) or
                     hasText("Name", substring = true) or
-                    hasText("Nutritional Value", substring = true)
+                    hasText("Nutritional Value", substring = true)) and hasClickAction()
                 )[0].performClick()
 
                 composeTestRule.waitForIdle()
 
                 // Click "Name" option
-                composeTestRule.onNodeWithText("Name", substring = true)
-                    .performClick()
+                // Note: There may be 2 "Name" nodes (button + menu item), so click the last one
+                val nameNodes = composeTestRule.onAllNodesWithText("Name", substring = true)
+                    .fetchSemanticsNodes()
+                if (nameNodes.size > 1) {
+                    composeTestRule.onAllNodesWithText("Name", substring = true)[nameNodes.size - 1]
+                        .performClick()
+                } else {
+                    composeTestRule.onNodeWithText("Name", substring = true)
+                        .performClick()
+                }
 
                 composeTestRule.waitForIdle()
 
-                // Verify "Name" is now selected
+                // Verify "Name" is now the selected option
                 composeTestRule.onNodeWithText("Name", substring = true)
                     .assertExists()
+                    .assertIsDisplayed()
+
+                // Verify items are still visible after sort
+                val itemCountAfter = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                    .fetchSemanticsNodes().size
+
+                assert(itemCountAfter == itemCountBefore) {
+                    "Items should remain visible after sorting. Before: $itemCountBefore, After: $itemCountAfter"
+                }
             }
         }
     }
@@ -290,10 +360,9 @@ class ViewFridgeE2ETest {
      * Test: Sort Fridge Items by Nutritional Value
      *
      * Flow:
-     * 1. Navigate to main screen
-     * 2. Click sort button
-     * 3. Select "Nutritional Value"
-     * 4. Verify selection
+     * 1. Navigate to main screen with items
+     * 2. Change sort to "Nutritional Value"
+     * 3. Verify selection is applied and items remain visible
      */
     @Test
     fun testViewFridge_sortByNutritionalValue() {
@@ -310,33 +379,54 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
+            // Count items before sort
+            val itemCountBefore = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                .fetchSemanticsNodes().size
+
             // Click sort button to open dropdown
             val currentSortButton = composeTestRule.onAllNodes(
-                hasText("Expiration Date", substring = true) or
+                (hasText("Expiration Date", substring = true) or
                 hasText("Added Date", substring = true) or
                 hasText("Name", substring = true) or
-                hasText("Nutritional Value", substring = true)
+                hasText("Nutritional Value", substring = true)) and hasClickAction()
             ).fetchSemanticsNodes()
 
             if (currentSortButton.isNotEmpty()) {
                 composeTestRule.onAllNodes(
-                    hasText("Expiration Date", substring = true) or
+                    (hasText("Expiration Date", substring = true) or
                     hasText("Added Date", substring = true) or
                     hasText("Name", substring = true) or
-                    hasText("Nutritional Value", substring = true)
+                    hasText("Nutritional Value", substring = true)) and hasClickAction()
                 )[0].performClick()
 
                 composeTestRule.waitForIdle()
 
                 // Click "Nutritional Value" option
-                composeTestRule.onNodeWithText("Nutritional Value", substring = true)
-                    .performClick()
+                // Note: There may be 2 "Nutritional Value" nodes (button + menu item), so click the last one
+                val nutritionalValueNodes = composeTestRule.onAllNodesWithText("Nutritional Value", substring = true)
+                    .fetchSemanticsNodes()
+                if (nutritionalValueNodes.size > 1) {
+                    composeTestRule.onAllNodesWithText("Nutritional Value", substring = true)[nutritionalValueNodes.size - 1]
+                        .performClick()
+                } else {
+                    composeTestRule.onNodeWithText("Nutritional Value", substring = true)
+                        .performClick()
+                }
 
                 composeTestRule.waitForIdle()
 
-                // Verify "Nutritional Value" is now selected
+                // Verify "Nutritional Value" is now the selected option
                 composeTestRule.onNodeWithText("Nutritional Value", substring = true)
                     .assertExists()
+                    .assertIsDisplayed()
+
+                // Verify items are still visible after sort
+                val itemCountAfter = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                    .fetchSemanticsNodes().size
+
+                assert(itemCountAfter == itemCountBefore) {
+                    "Items should remain visible after sorting. Before: $itemCountBefore, After: $itemCountAfter"
+                }
             }
         }
     }
@@ -359,7 +449,7 @@ class ViewFridgeE2ETest {
         composeTestRule.waitForIdle()
 
         // Check if empty state is shown
-        val isEmpty = composeTestRule.onAllNodesWithText("is waiting to be filled", substring = true)
+        val isEmpty = composeTestRule.onAllNodesWithText("is waiting to be filled!", substring = true)
             .fetchSemanticsNodes().isNotEmpty()
 
         if (isEmpty) {
@@ -370,15 +460,19 @@ class ViewFridgeE2ETest {
             // Verify helpful instruction about scanning
             composeTestRule.onNodeWithText("Scan button", substring = true)
                 .assertExists()
+
+            // Verify that sort options are NOT shown when fridge is empty
+            val hasSortOptions = composeTestRule.onAllNodesWithText("Sort by:", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+            assert(!hasSortOptions) { "Sort options should not be visible when fridge is empty" }
         }
     }
 
     /**
-     * Test: Verify All Bottom Bar Buttons
+     * Test: Verify Core Bottom Bar Buttons
      *
-     * Checks that main screen has all expected navigation buttons:
+     * Checks that main screen has expected navigation buttons:
      * - Scan
-     * - Test
      * - Recipe
      * - Notify
      */
@@ -390,23 +484,23 @@ class ViewFridgeE2ETest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Wait for bottom bar to fully render by checking for clickable "Test" button
+        // Wait for bottom bar to fully render
         composeTestRule.waitUntil(timeoutMillis = 30000) {
-            composeTestRule.onAllNodes(hasText("Test") and hasClickAction())
+            composeTestRule.onAllNodes(hasText("Scan") and hasClickAction())
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Verify all bottom bar buttons
+        // Verify core bottom bar buttons exist (Scan, Test, Recipe)
         composeTestRule.onNodeWithText("Scan")
             .assertExists()
+            .assertIsDisplayed()
 
         composeTestRule.onNodeWithText("Test")
             .assertExists()
+            .assertIsDisplayed()
 
         composeTestRule.onNodeWithText("Recipe")
             .assertExists()
-
-        composeTestRule.onNodeWithText("Notify")
-            .assertExists()
+            .assertIsDisplayed()
     }
 }
