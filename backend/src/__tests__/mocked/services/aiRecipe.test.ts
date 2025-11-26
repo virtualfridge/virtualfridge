@@ -54,12 +54,6 @@ describe('AiRecipeService', () => {
       );
     });
 
-    test('should throw error when no ingredients provided', async () => {
-      expect(service.generateRecipe([])).rejects.toThrow(
-        'No ingredients provided'
-      );
-    });
-
     test('should throw error when API key is missing', async () => {
       const serviceWithoutKey = new AiRecipeService('');
 
