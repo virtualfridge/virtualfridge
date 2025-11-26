@@ -5,7 +5,16 @@
  * in one complete example. Use this as a reference when writing new tests.
  */
 
-import { describe, expect, test, jest, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import * as dbHandler from '../../helpers/dbHandler';
@@ -82,9 +91,7 @@ describe('Example 1: Model Testing', () => {
     await userModel.create(mockGoogleUserInfo);
 
     // Try to create duplicate
-    await expect(
-      userModel.create(mockGoogleUserInfo)
-    ).rejects.toThrow();
+    await expect(userModel.create(mockGoogleUserInfo)).rejects.toThrow();
   });
 });
 
@@ -139,9 +146,7 @@ Top with honey or maple syrup for extra sweetness.`,
     mockedAxios.post.mockResolvedValue(mockGeminiResponse);
 
     // Call the service
-    const result = await service.generateRecipe({
-      ingredients: ['apples', 'oats', 'cinnamon'],
-    });
+    const result = await service.generateRecipe(['apples', 'oats', 'cinnamon']);
 
     // Verify results
     expect(result).toBeDefined();
@@ -176,9 +181,9 @@ Top with honey or maple syrup for extra sweetness.`,
     );
 
     // Expect service to throw
-    await expect(
-      service.generateRecipe({ ingredients: ['apples'] })
-    ).rejects.toThrow('API Error');
+    await expect(service.generateRecipe(['apples'])).rejects.toThrow(
+      'API Error'
+    );
 
     expect(mockedAxios.post).toHaveBeenCalledTimes(1);
   });
@@ -192,9 +197,7 @@ Top with honey or maple syrup for extra sweetness.`,
     timeoutError.code = 'ECONNABORTED';
     mockedAxios.post.mockRejectedValue(timeoutError);
 
-    await expect(
-      service.generateRecipe({ ingredients: ['apples'] })
-    ).rejects.toThrow('timeout');
+    await expect(service.generateRecipe(['apples'])).rejects.toThrow('timeout');
   });
 });
 
@@ -257,9 +260,7 @@ describe('Example 3: OAuth Service Testing', () => {
     const authService = new AuthService();
 
     // Mock token verification failure
-    mockVerifyIdToken.mockRejectedValue(
-      new Error('Token verification failed')
-    );
+    mockVerifyIdToken.mockRejectedValue(new Error('Token verification failed'));
 
     await expect(
       authService.signUpWithGoogle('invalid-token')
@@ -283,11 +284,9 @@ describe('Example 4: Controller Integration Testing', () => {
     // Create test user and generate auth token
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign(
-      { id: userId },
-      process.env.JWT_SECRET!,
-      { expiresIn: '1h' }
-    );
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -313,16 +312,12 @@ describe('Example 4: Controller Integration Testing', () => {
         barcodeId: '123456789',
       })
       .expect(200);
-      expect(response.body.data.foodType).toHaveProperty('_id');
-      expect(response.body.data.foodType.name).toBe('Test Apple');
-
+    expect(response.body.data.foodType).toHaveProperty('_id');
+    expect(response.body.data.foodType.name).toBe('Test Apple');
   });
 
   test('should reject request without auth token', async () => {
-    await request(app)
-      .post('/api/food-type')
-      .send(mockFoodType)
-      .expect(401);
+    await request(app).post('/api/food-type').send(mockFoodType).expect(401);
   });
 
   test('should reject request with invalid token', async () => {
@@ -373,7 +368,7 @@ describe('Example 5: Error Handling', () => {
     // Try to create user with invalid data
     await expect(
       userModel.create({
-        googleId: '',  // Empty googleId should fail
+        googleId: '', // Empty googleId should fail
         email: 'invalid',
         name: '',
       } as any)
@@ -436,7 +431,8 @@ describe('Example 6: Spying on Methods', () => {
 
   test('should mock specific method while keeping others real', async () => {
     // Mock only findById to return null
-    const findByIdSpy = jest.spyOn(userModel, 'findById')
+    const findByIdSpy = jest
+      .spyOn(userModel, 'findById')
       .mockResolvedValue(null);
 
     // Create still works normally
@@ -468,7 +464,7 @@ describe('Example 7: Async Testing', () => {
     await expect(promise).rejects.toThrow('failed');
   });
 
-  test('should test with callbacks', (done) => {
+  test('should test with callbacks', done => {
     setTimeout(() => {
       expect(true).toBe(true);
       done();

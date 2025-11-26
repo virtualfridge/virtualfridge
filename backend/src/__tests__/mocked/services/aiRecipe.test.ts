@@ -36,9 +36,7 @@ describe('AiRecipeService', () => {
 
       mockedAxios.post.mockResolvedValue(mockResponse);
 
-      const result = await service.generateRecipe({
-        ingredients: ['apples', 'flour', 'sugar'],
-      });
+      const result = await service.generateRecipe(['apples', 'flour', 'sugar']);
 
       expect(result).toBeDefined();
       expect(result.recipe).toContain('Apple Pie');
@@ -56,33 +54,18 @@ describe('AiRecipeService', () => {
       );
     });
 
-    test('should use default ingredients when none provided', async () => {
-      const mockResponse = {
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [{ text: '## Simple Recipe\n\n### Ingredients\n- Tomatoes\n\n### Steps\n1. Cook' }],
-              },
-            },
-          ],
-        },
-      };
-
-      mockedAxios.post.mockResolvedValue(mockResponse);
-
-      const result = await service.generateRecipe({ ingredients: [] });
-
-      expect(result).toBeDefined();
-      expect(result.ingredients.length).toBeGreaterThan(0);
+    test('should throw error when no ingredients provided', async () => {
+      expect(service.generateRecipe([])).rejects.toThrow(
+        'No ingredients provided'
+      );
     });
 
     test('should throw error when API key is missing', async () => {
       const serviceWithoutKey = new AiRecipeService('');
 
-      await expect(
-        serviceWithoutKey.generateRecipe({ ingredients: ['apple'] })
-      ).rejects.toThrow('GEMINI_API_KEY is not set');
+      await expect(serviceWithoutKey.generateRecipe(['apple'])).rejects.toThrow(
+        'GEMINI_API_KEY is not set'
+      );
     });
 
     test('should throw error when Gemini returns empty response', async () => {
@@ -94,17 +77,17 @@ describe('AiRecipeService', () => {
 
       mockedAxios.post.mockResolvedValue(mockResponse);
 
-      await expect(
-        service.generateRecipe({ ingredients: ['apple'] })
-      ).rejects.toThrow('Gemini returned an empty response');
+      await expect(service.generateRecipe(['apple'])).rejects.toThrow(
+        'Gemini returned an empty response'
+      );
     });
 
     test('should handle API errors gracefully', async () => {
       mockedAxios.post.mockRejectedValue(new Error('API Error'));
 
-      await expect(
-        service.generateRecipe({ ingredients: ['apple'] })
-      ).rejects.toThrow('API Error');
+      await expect(service.generateRecipe(['apple'])).rejects.toThrow(
+        'API Error'
+      );
     });
 
     test('should format ingredient names correctly', async () => {
@@ -113,7 +96,11 @@ describe('AiRecipeService', () => {
           candidates: [
             {
               content: {
-                parts: [{ text: '## Recipe\n\n### Ingredients\n- Test\n\n### Steps\n1. Cook' }],
+                parts: [
+                  {
+                    text: '## Recipe\n\n### Ingredients\n- Test\n\n### Steps\n1. Cook',
+                  },
+                ],
               },
             },
           ],
@@ -122,11 +109,17 @@ describe('AiRecipeService', () => {
 
       mockedAxios.post.mockResolvedValue(mockResponse);
 
-      const result = await service.generateRecipe({
-        ingredients: ['red_apple', 'brown-sugar', 'whole_wheat_flour'],
-      });
+      const result = await service.generateRecipe([
+        'red_apple',
+        'brown-sugar',
+        'whole_wheat_flour',
+      ]);
 
-      expect(result.ingredients).toEqual(['Red Apple', 'Brown Sugar', 'Whole Wheat Flour']);
+      expect(result.ingredients).toEqual([
+        'Red Apple',
+        'Brown Sugar',
+        'Whole Wheat Flour',
+      ]);
     });
   });
 });

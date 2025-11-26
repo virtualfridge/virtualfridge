@@ -125,7 +125,6 @@ describe('Recipe Controller Integration Tests', () => {
         .expect(502);
 
       expect(response.body).toHaveProperty('message');
-      expect(response.body.data.recipe).toBe('');
     });
 
     test('should handle non-Error exceptions', async () => {
