@@ -1,7 +1,7 @@
 /**
- * User Model - Error Coverage
+ * User Model - Unit Tests
  *
- * Tests user.ts error handling for multiple methods
+ * Tests user.ts error handling for validation and database operations
  *
  * Coverage targets:
  * - create method (lines 74-79):
@@ -17,7 +17,7 @@ import { describe, expect, test, jest, beforeAll, afterAll, afterEach } from '@j
 import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
 
-describe('User Model - create() Error Handling (lines 74-79)', () => {
+describe('User Model - Unit Tests', () => {
   beforeAll(async () => {
     await dbHandler.connect();
   });
@@ -236,6 +236,51 @@ describe('User Model - create() Error Handling (lines 74-79)', () => {
 
     console.log('[TEST] ✓ Threw "Failed to update user" for generic error');
   });
+
+  /**
+   * Test: findUsersWithFcmTokens database error
+   * Tests user.ts lines 150-151 (error handling in findUsersWithFcmTokens)
+   *
+   * This covers:
+   * - Line 150: logger.error('Error finding users with FCM tokens:', error)
+   * - Line 151: throw new Error('Failed to find users with FCM tokens')
+   */
+  test('should throw "Failed to find users with FCM tokens" for database error', async () => {
+    // Mock the internal mongoose find method to throw error
+    const originalFind = userModel['user'].find;
+    userModel['user'].find = jest.fn().mockRejectedValueOnce(new Error('DB connection error'));
+
+    await expect(userModel.findUsersWithFcmTokens())
+      .rejects
+      .toThrow('Failed to find users with FCM tokens');
+
+    // Restore
+    userModel['user'].find = originalFind;
+
+    console.log('[TEST] ✓ Threw "Failed to find users with FCM tokens" for database error (lines 150-151)');
+  });
+
+  /**
+   * Test: findUsersWithFcmTokens with query timeout error
+   * Tests user.ts lines 150-151 with timeout scenario
+   */
+  test('should throw "Failed to find users with FCM tokens" for query timeout', async () => {
+    // Mock timeout error
+    const timeoutError = new Error('Query timeout');
+    (timeoutError as any).name = 'MongooseError';
+
+    const originalFind = userModel['user'].find;
+    userModel['user'].find = jest.fn().mockRejectedValueOnce(timeoutError);
+
+    await expect(userModel.findUsersWithFcmTokens())
+      .rejects
+      .toThrow('Failed to find users with FCM tokens');
+
+    // Restore
+    userModel['user'].find = originalFind;
+
+    console.log('[TEST] ✓ Threw "Failed to find users with FCM tokens" for query timeout');
+  });
 });
 
-console.log('✓ User create error tests loaded');
+console.log('✓ User model unit tests loaded');

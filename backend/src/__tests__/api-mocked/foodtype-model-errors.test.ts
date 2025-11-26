@@ -1,16 +1,16 @@
 /**
- * FoodType Model - Error Path Coverage
+ * FoodType Model - API Error Path Coverage
  *
- * Tests foodType.ts error handling for all CRUD operations
+ * Tests foodType.ts error handling through API endpoints
  *
  * Coverage targets:
  * - create: lines 43-45
  * - update: lines 61-63
  * - delete: lines 70-72
  * - findById: lines 81-83
- * - findByBarcode: lines 91-93
- * - findByName: lines 101-103
- * - findByIds: lines 111-113
+ *
+ * Note: Tests for findByBarcode, findByName, and findByIds have been moved
+ * to src/__tests__/unit/foodtype-model.test.ts as they have no API endpoints
  */
 
 import { describe, expect, test, jest, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
@@ -160,64 +160,6 @@ describe('FoodType Model - Error Path Coverage', () => {
   });
 
   /**
-   * Test: findByBarcode error handling (unit test - no API endpoint)
-   * Tests foodType.ts lines 91-93
-   */
-  test('should handle database error in foodType.findByBarcode()', async () => {
-    // Direct unit test since there's no dedicated API endpoint
-    const originalFindOne = foodTypeModel['foodType'].findOne;
-    foodTypeModel['foodType'].findOne = jest.fn().mockRejectedValueOnce(new Error('Barcode lookup failed'));
-
-    await expect(foodTypeModel.findByBarcode('123456789'))
-      .rejects
-      .toThrow('Failed to find foodType by barcodeId');
-
-    // Restore
-    foodTypeModel['foodType'].findOne = originalFindOne;
-
-    console.log('[TEST] ✓ Handled error in foodType.findByBarcode() (lines 91-93)');
-  });
-
-  /**
-   * Test: findByName error handling (unit test)
-   * Tests foodType.ts lines 101-103
-   */
-  test('should handle database error in foodType.findByName()', async () => {
-    // Direct unit test
-    const originalFindOne = foodTypeModel['foodType'].findOne;
-    foodTypeModel['foodType'].findOne = jest.fn().mockRejectedValueOnce(new Error('Name lookup failed'));
-
-    await expect(foodTypeModel.findByName('Apple'))
-      .rejects
-      .toThrow('Failed to find foodType by name');
-
-    // Restore
-    foodTypeModel['foodType'].findOne = originalFindOne;
-
-    console.log('[TEST] ✓ Handled error in foodType.findByName() (lines 101-103)');
-  });
-
-  /**
-   * Test: findByIds error handling (unit test)
-   * Tests foodType.ts lines 111-113
-   */
-  test('should handle database error in foodType.findByIds()', async () => {
-    // Direct unit test
-    const originalFind = foodTypeModel['foodType'].find;
-    foodTypeModel['foodType'].find = jest.fn().mockRejectedValueOnce(new Error('Bulk find failed'));
-
-    const fakeIds = [new mongoose.Types.ObjectId()];
-    await expect(foodTypeModel.findByIds(fakeIds))
-      .rejects
-      .toThrow('Failed to find foodTypes by ids');
-
-    // Restore
-    foodTypeModel['foodType'].find = originalFind;
-
-    console.log('[TEST] ✓ Handled error in foodType.findByIds() (lines 111-113)');
-  });
-
-  /**
    * Additional test: Duplicate key error in create
    * Tests that database constraint violations are handled
    */
@@ -254,4 +196,4 @@ describe('FoodType Model - Error Path Coverage', () => {
 
 });
 
-console.log('✓ FoodType model error tests loaded');
+console.log('✓ FoodType model API error tests loaded');
