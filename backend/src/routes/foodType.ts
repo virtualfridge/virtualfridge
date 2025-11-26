@@ -24,7 +24,7 @@ router.post(
 router.put(
   '/:_id',
   validateParams<FindFoodTypeParams>(findFoodTypeSchema),
-  validateBody(updateFoodTypeSchema),
+  validateBody<UpdateFoodTypeBody>(updateFoodTypeSchema),
   foodTypeController.updateFoodType.bind(foodTypeController)
 );
 

@@ -2,7 +2,7 @@ import { describe, expect, test, jest, beforeEach } from '@jest/globals';
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { MediaController } from '../../../controllers/media';
-import { MediaService } from '../../../services/media';
+import * as MediaService from '../../../services/media';
 import { aiVisionService } from '../../../services/aiVision';
 import { foodTypeModel } from '../../../models/foodType';
 import { foodItemModel } from '../../../models/foodItem';
@@ -19,7 +19,9 @@ jest.mock('../../../util/sanitizeInput', () => ({
 jest.mock('../../../util/logger');
 
 const mockedMediaService = MediaService as jest.Mocked<typeof MediaService>;
-const mockedAiVisionService = aiVisionService as jest.Mocked<typeof aiVisionService>;
+const mockedAiVisionService = aiVisionService as jest.Mocked<
+  typeof aiVisionService
+>;
 const mockedFoodTypeModel = foodTypeModel as jest.Mocked<typeof foodTypeModel>;
 const mockedFoodItemModel = foodItemModel as jest.Mocked<typeof foodItemModel>;
 
@@ -322,7 +324,9 @@ describe('MediaController', () => {
         category: 'fruit',
         name: 'banana',
       });
-      mockedFoodTypeModel.findByName = jest.fn().mockResolvedValue(existingFoodType);
+      mockedFoodTypeModel.findByName = jest
+        .fn()
+        .mockResolvedValue(existingFoodType);
       mockedFoodItemModel.create = jest.fn().mockResolvedValue({
         _id: mockFoodItemId,
         userId: mockUserId,
@@ -396,9 +400,13 @@ describe('MediaController', () => {
         name: 'apple',
         nutrients,
       });
-      mockedFoodTypeModel.findByName = jest.fn().mockResolvedValue(existingFoodType);
+      mockedFoodTypeModel.findByName = jest
+        .fn()
+        .mockResolvedValue(existingFoodType);
       mockedFoodTypeModel.update = jest.fn().mockResolvedValue(undefined);
-      mockedFoodTypeModel.findById = jest.fn().mockResolvedValue(refreshedFoodType);
+      mockedFoodTypeModel.findById = jest
+        .fn()
+        .mockResolvedValue(refreshedFoodType);
       mockedFoodItemModel.create = jest.fn().mockResolvedValue({
         _id: mockFoodItemId,
         userId: mockUserId,
@@ -454,7 +462,9 @@ describe('MediaController', () => {
         category: 'fruit',
         name: 'orange',
       });
-      mockedFoodTypeModel.findByName = jest.fn().mockResolvedValue(existingFoodType);
+      mockedFoodTypeModel.findByName = jest
+        .fn()
+        .mockResolvedValue(existingFoodType);
       mockedFoodItemModel.create = jest.fn().mockResolvedValue({
         _id: mockFoodItemId,
         userId: mockUserId,
@@ -517,8 +527,12 @@ describe('MediaController', () => {
         name: 'tomato',
         nutrients,
       });
-      mockedFoodTypeModel.findByName = jest.fn().mockResolvedValue(existingFoodType);
-      mockedFoodTypeModel.update = jest.fn().mockRejectedValue(new Error('Update failed'));
+      mockedFoodTypeModel.findByName = jest
+        .fn()
+        .mockResolvedValue(existingFoodType);
+      mockedFoodTypeModel.update = jest
+        .fn()
+        .mockRejectedValue(new Error('Update failed'));
       mockedFoodItemModel.create = jest.fn().mockResolvedValue({
         _id: mockFoodItemId,
         userId: mockUserId,
@@ -569,7 +583,9 @@ describe('MediaController', () => {
         name: 'cucumber',
         nutrients,
       });
-      mockedFoodTypeModel.findByName = jest.fn().mockResolvedValue(existingFoodType);
+      mockedFoodTypeModel.findByName = jest
+        .fn()
+        .mockResolvedValue(existingFoodType);
       mockedFoodTypeModel.update = jest.fn().mockResolvedValue(undefined);
       mockedFoodTypeModel.findById = jest.fn().mockResolvedValue(null);
       mockedFoodItemModel.create = jest.fn().mockResolvedValue({
@@ -656,7 +672,9 @@ describe('MediaController', () => {
       const mockFoodTypeId = new mongoose.Types.ObjectId();
       const mockFoodItemId = new mongoose.Types.ObjectId();
 
-      mockedMediaService.saveImage = jest.fn().mockResolvedValue(mockAbsolutePath);
+      mockedMediaService.saveImage = jest
+        .fn()
+        .mockResolvedValue(mockAbsolutePath);
       mockedAiVisionService.analyzeProduce = jest.fn().mockResolvedValue({
         isProduce: true,
         category: 'fruit',
@@ -681,7 +699,9 @@ describe('MediaController', () => {
       );
 
       // Should use absolute path directly
-      expect(mockedAiVisionService.analyzeProduce).toHaveBeenCalledWith(mockAbsolutePath);
+      expect(mockedAiVisionService.analyzeProduce).toHaveBeenCalledWith(
+        mockAbsolutePath
+      );
       expect(statusMock).toHaveBeenCalledWith(200);
     });
 
@@ -734,7 +754,9 @@ describe('MediaController', () => {
         name: 'avocado',
         nutrients: fullNutrients,
       });
-      mockedFoodTypeModel.findByName = jest.fn().mockResolvedValue(existingFoodType);
+      mockedFoodTypeModel.findByName = jest
+        .fn()
+        .mockResolvedValue(existingFoodType);
       mockedFoodTypeModel.update = jest.fn().mockResolvedValue(undefined);
       mockedFoodTypeModel.findById = jest.fn().mockResolvedValue({
         ...existingFoodType,

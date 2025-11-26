@@ -31,7 +31,7 @@ router.post('/test-user', async (req: Request, res: Response) => {
     // Generate JWT token (use 'id' to match auth middleware expectation)
     const token = jwt.sign(
       { id: user._id, email: user.email },
-      process.env.JWT_SECRET || 'default-secret',
+      process.env.JWT_SECRET ?? 'default-secret',
       { expiresIn: '24h' }
     );
 
@@ -42,7 +42,7 @@ router.post('/test-user', async (req: Request, res: Response) => {
           _id: user._id,
           email: user.email,
           name: user.name,
-          bio: user.bio || '',
+          bio: user.bio ?? '',
           profilePicture: user.profilePicture,
         },
       },
