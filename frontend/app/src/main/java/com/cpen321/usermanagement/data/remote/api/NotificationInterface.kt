@@ -1,6 +1,7 @@
 package com.cpen321.usermanagement.data.remote.api
 
 import com.cpen321.usermanagement.data.remote.dto.ApiResponse
+import com.cpen321.usermanagement.data.remote.dto.NotificationCheckResponse
 import com.cpen321.usermanagement.data.remote.dto.NotificationTestResponse
 import retrofit2.Response
 import retrofit2.http.Header
@@ -11,4 +12,9 @@ interface NotificationInterface {
     suspend fun sendTestNotification(
         @Header("Authorization") authHeader: String
     ): Response<ApiResponse<NotificationTestResponse>>
+
+    @POST("notifications/check")
+    suspend fun checkNotifications(
+        @Header("Authorization") authHeader: String
+    ): Response<NotificationCheckResponse>
 }

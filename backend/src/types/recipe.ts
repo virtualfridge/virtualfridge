@@ -117,8 +117,6 @@ export interface GetRecipesResponse {
 
 export const defaultRecipeIngredients = ['chicken_breast'];
 
-export const defaultAiIngredients = ['broccoli', 'carrot'];
-
 export const aiRecipeRequestSchema = z.object({
   ingredients: z.array(z.string().min(1)).nonempty(),
 });
@@ -134,5 +132,7 @@ export interface AiRecipeData {
 
 export interface AiRecipeResponse {
   message: string;
-  data: AiRecipeData;
+  data?: AiRecipeData;
 }
+
+export class ApiKeyError extends Error {}

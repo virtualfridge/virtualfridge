@@ -3,49 +3,54 @@ import path from 'path';
 
 import { IMAGES_DIR } from '../config/constants';
 
-export class MediaService {
-  static async saveImage(filePath: string, userId: string): Promise<string> {
-    try {
-      const fileExtension = path.extname(filePath);
-      const fileName = `${userId}-${Date.now()}${fileExtension}`;
-      const newPath = path.join(IMAGES_DIR, fileName);
+export async function saveImage(
+  filePath: string,
+  userId: string
+): Promise<string> {
+  try {
+    const fileExtension = path.extname(filePath);
+    const fileName = `${userId}-${Date.now()}${fileExtension}`;
+    const newPath = path.join(IMAGES_DIR, fileName);
 
-      fs.renameSync(filePath, newPath);
+    await fs.promises.rename(filePath, newPath);
 
-      return newPath.split(path.sep).join('/');
-    } catch (error) {
+    return newPath.split(path.sep).join('/');
+  } catch (error) {
+    if (fs.existsSync(filePath)) {
+      await fs.promises.unlink(filePath);
+    }
+    if (error instanceof Error) {
+      throw new Error(`Failed to save profile picture: ${error.message}`);
+    } else {
+      throw new Error(`Failed to save profile picture: ${String(error)}`);
+    }
+  }
+}
+
+export async function deleteImage(url: string): Promise<void> {
+  try {
+    if (url.startsWith(IMAGES_DIR)) {
+      const filePath = path.join(process.cwd(), url.substring(1));
       if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+        await fs.promises.unlink(filePath);
       }
-      throw new Error(`Failed to save profile picture: ${error}`);
     }
+  } catch (error) {
+    console.error('Failed to delete old profile picture:', error);
   }
+}
 
-  static async deleteImage(url: string): Promise<void> {
-    try {
-      if (url.startsWith(IMAGES_DIR)) {
-        const filePath = path.join(process.cwd(), url.substring(1));
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to delete old profile picture:', error);
+export async function deleteAllUserImages(userId: string): Promise<void> {
+  try {
+    if (!fs.existsSync(IMAGES_DIR)) {
+      return;
     }
-  }
 
-  static async deleteAllUserImages(userId: string): Promise<void> {
-    try {
-      if (!fs.existsSync(IMAGES_DIR)) {
-        return;
-      }
+    const files = await fs.promises.readdir(IMAGES_DIR);
+    const userFiles = files.filter(file => file.startsWith(userId + '-'));
 
-      const files = fs.readdirSync(IMAGES_DIR);
-      const userFiles = files.filter(file => file.startsWith(userId + '-'));
-
-      await Promise.all(userFiles.map(file => this.deleteImage(file)));
-    } catch (error) {
-      console.error('Failed to delete user images:', error);
-    }
+    await Promise.all(userFiles.map(file => deleteImage(file)));
+  } catch (error) {
+    console.error('Failed to delete user images:', error);
   }
 }

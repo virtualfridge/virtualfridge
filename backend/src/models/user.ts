@@ -139,6 +139,18 @@ export class UserModel {
       throw new Error('Failed to find user');
     }
   }
+
+  async findUsersWithFcmTokens(): Promise<IUser[]> {
+    try {
+      const users = await this.user.find({
+        fcmToken: { $exists: true, $nin: [null, ''] }
+      });
+      return users;
+    } catch (error) {
+      logger.error('Error finding users with FCM tokens:', error);
+      throw new Error('Failed to find users with FCM tokens');
+    }
+  }
 }
 
 export const userModel = new UserModel();

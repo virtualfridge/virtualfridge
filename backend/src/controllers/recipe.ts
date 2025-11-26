@@ -8,6 +8,7 @@ import {
   defaultRecipeIngredients,
   AiRecipeRequestBody,
   AiRecipeResponse,
+  ApiKeyError,
 } from '../types/recipe';
 import logger from '../util/logger';
 import { AxiosError } from 'axios';
@@ -63,7 +64,9 @@ export class RecipeController {
     next: NextFunction
   ) => {
     try {
-      const data = await this.aiRecipeService.generateRecipe(req.body);
+      const data = await this.aiRecipeService.generateRecipe(
+        req.body.ingredients
+      );
 
       res.status(200).json({
         message: 'AI recipe generated successfully',
@@ -71,16 +74,19 @@ export class RecipeController {
       });
     } catch (error) {
       logger.error('Failed to generate AI recipe', error);
-
+      if (error instanceof ApiKeyError) {
+        // We shouldn't let the user know that we have not set Gemini Api key correctly
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      if (error instanceof AxiosError) {
+        return res
+          .status(502)
+          .json({ message: 'Failed to connect to Gemini servers' });
+      }
+      // Response was empty
       if (error instanceof Error) {
         return res.status(502).json({
-          message: error.message || 'Failed to generate recipe with Gemini.',
-          data: {
-            ingredients: req.body.ingredients ?? [],
-            prompt: '',
-            recipe: '',
-            model: '',
-          },
+          message: 'Failed to generate recipe with Gemini.',
         });
       }
 

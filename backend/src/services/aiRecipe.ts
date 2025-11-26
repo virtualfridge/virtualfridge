@@ -2,24 +2,14 @@ import axios from 'axios';
 import logger from '../util/logger';
 import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
 import { GeminiResponse } from '../types/ai';
-import {
-  AiRecipeData,
-  AiRecipeRequestBody,
-  defaultAiIngredients,
-} from '../types/recipe';
+import { AiRecipeData, ApiKeyError } from '../types/recipe';
 
 export class AiRecipeService {
   constructor(private readonly apiKey = process.env.GEMINI_API_KEY) {}
 
-  async generateRecipe(body: AiRecipeRequestBody): Promise<AiRecipeData> {
-    const ingredients = body.ingredients?.length
-      ? body.ingredients
-      : defaultAiIngredients;
-
+  async generateRecipe(ingredients: string[]): Promise<AiRecipeData> {
     if (!this.apiKey) {
-      throw new Error(
-        'GEMINI_API_KEY is not set'
-      );
+      throw new ApiKeyError('GEMINI_API_KEY is not set');
     }
 
     const tomlPayload = this.buildTomlPayload(ingredients);

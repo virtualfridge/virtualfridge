@@ -21,17 +21,16 @@ class VirtualFridgeMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        Log.d(TAG, "Message received from: ${message.from}")
+        Log.d(TAG, "FCM message received: ${message.messageId}")
 
         // Check if message contains a notification payload
         message.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
             showNotification(it.title, it.body)
         }
 
-        // Check if message contains a data payload
+        // Log data payload if present
         if (message.data.isNotEmpty()) {
-            Log.d(TAG, "Message data payload: ${message.data}")
+            Log.d(TAG, "Message data: ${message.data}")
         }
     }
 
@@ -48,6 +47,8 @@ class VirtualFridgeMessagingService : FirebaseMessagingService() {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Notifications for expiring food items"
+                enableLights(true)
+                enableVibration(true)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -56,12 +57,16 @@ class VirtualFridgeMessagingService : FirebaseMessagingService() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle(title ?: "Virtual Fridge")
             .setContentText(body ?: "You have a notification")
-            .setSmallIcon(R.drawable.ic_account_circle) // You may want to use a different icon
+            .setSmallIcon(R.drawable.ic_notification)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
 
-        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+        val notificationId = System.currentTimeMillis().toInt()
+        notificationManager.notify(notificationId, notification)
+        Log.d(TAG, "Notification displayed: $title")
     }
 
     companion object {

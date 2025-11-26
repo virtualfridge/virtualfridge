@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import z from 'zod';
+import { objectIdSchema } from './common';
 
 // Zod schemas
 
@@ -54,7 +55,7 @@ export interface INutrients {
 }
 
 export const foodTypeSchema = z.object({
-  _id: z.custom<mongoose.Types.ObjectId>(),
+  _id: objectIdSchema,
   name: z.string(),
   nutrients: nutrientsSchema.optional(),
   shelfLifeDays: z.number().optional(),
@@ -83,23 +84,16 @@ export const updateFoodTypeSchema = foodTypeSchema
   .partial()
   .required({ _id: true });
 
-// Schemas for route params (params are always strings in Express)
 export const findFoodTypeSchema = z.object({
-  _id: z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
-    message: 'Invalid ObjectId',
-  }),
+  _id: objectIdSchema,
 });
 
 export const deleteFoodTypeSchema = z.object({
-  _id: z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
-    message: 'Invalid ObjectId',
-  }),
+  _id: objectIdSchema,
 });
 
 export const updateFoodTypeParamsSchema = z.object({
-  _id: z.string().refine(val => mongoose.Types.ObjectId.isValid(val), {
-    message: 'Invalid ObjectId',
-  }).optional(),
+  _id: objectIdSchema,
 });
 
 // Request types

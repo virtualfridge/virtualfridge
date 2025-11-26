@@ -28,7 +28,7 @@ export const parseDate = (input: string, format = 'yyyy-mm-dd') => {
 export const dateDiffInDays = (a: Date, b: Date) => {
   const _MS_PER_DAY = 1000 * 60 * 60 * 24;
   // Discard the time and time-zone information.
-  logger.debug(`Date a: ${a}, Date b: ${b}`);
+  logger.debug(`Date a: ${a.toDateString()}, Date b: ${b.toDateString()}`);
   const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
   const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
   logger.debug(`UTC1: ${utc1}, UTC2: ${utc2}`);
