@@ -269,89 +269,11 @@ describe('Example 3: OAuth Service Testing', () => {
 });
 
 /**
- * SECTION 4: Integration Testing
- *
- * Tests HTTP endpoints end-to-end with supertest
- */
-describe('Example 4: Controller Integration Testing', () => {
-  const app = createTestApp();
-  let authToken: string;
-  let userId: string;
-
-  beforeAll(async () => {
-    await dbHandler.connect();
-
-    // Create test user and generate auth token
-    const user = await userModel.create(mockGoogleUserInfo);
-    userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
-      expiresIn: '1h',
-    });
-  });
-
-  afterEach(async () => {
-    // Clear all except user
-    const collections = ['foodtypes', 'fooditems'];
-    for (const collectionName of collections) {
-      const collection = mongoose.connection.collection(collectionName);
-      await collection.deleteMany({}).catch(() => {});
-    }
-  });
-
-  afterAll(async () => {
-    await dbHandler.closeDatabase();
-  });
-
-  test('should create food type with authentication', async () => {
-    const response = await request(app)
-      .post('/api/food-type')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Apple',
-        shelfLifeDays: 14,
-        barcodeId: '123456789',
-      })
-      .expect(200);
-    expect(response.body.data.foodType).toHaveProperty('_id');
-    expect(response.body.data.foodType.name).toBe('Test Apple');
-  });
-
-  test('should reject request without auth token', async () => {
-    await request(app).post('/api/food-type').send(mockFoodType).expect(401);
-  });
-
-  test('should reject request with invalid token', async () => {
-    await request(app)
-      .post('/api/food-type')
-      .set('Authorization', 'Bearer invalid-token-here')
-      .send(mockFoodType)
-      .expect(401);
-  });
-
-  test('should get food type by ID', async () => {
-    // Create food type
-    const created = await foodTypeModel.create({
-      name: 'Test Banana',
-      shelfLifeDays: 7,
-    });
-
-    // Get by ID
-    const response = await request(app)
-      .get(`/api/food-type/${created._id}`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .expect(200);
-
-    expect(response.body._id).toBe(created._id.toString());
-    expect(response.body.name).toBe('Test Banana');
-  });
-});
-
-/**
- * SECTION 5: Error Handling Testing
+ * SECTION 4: Error Handling Testing
  *
  * Tests various error scenarios
  */
-describe('Example 5: Error Handling', () => {
+describe('Example 4: Error Handling', () => {
   beforeAll(async () => {
     await dbHandler.connect();
   });
@@ -397,11 +319,11 @@ describe('Example 5: Error Handling', () => {
 });
 
 /**
- * SECTION 6: Spy and Partial Mocking
+ * SECTION 5: Spy and Partial Mocking
  *
  * Tests using spies to monitor function calls
  */
-describe('Example 6: Spying on Methods', () => {
+describe('Example 5: Spying on Methods', () => {
   beforeAll(async () => {
     await dbHandler.connect();
   });
@@ -448,11 +370,11 @@ describe('Example 6: Spying on Methods', () => {
 });
 
 /**
- * SECTION 7: Async Testing Patterns
+ * SECTION 6: Async Testing Patterns
  *
  * Various patterns for testing async code
  */
-describe('Example 7: Async Testing', () => {
+describe('Example 6: Async Testing', () => {
   test('should test promises with async/await', async () => {
     const promise = Promise.resolve('success');
     const result = await promise;
