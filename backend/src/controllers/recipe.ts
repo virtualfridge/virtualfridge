@@ -29,10 +29,10 @@ export class RecipeController {
       : defaultRecipeIngredients;
 
     try {
-      const recipes = await this.recipeService.getRecipes({
+      const recipe = await this.recipeService.getRecipe({
         ingredients: ingredientList,
       });
-      if (recipes.length == 0) {
+      if (recipe == null) {
         logger.debug('No recipes found; returning 404');
         return res.status(404).json({
           message: 'No recipes found',
@@ -40,9 +40,9 @@ export class RecipeController {
       }
 
       return res.status(200).json({
-        message: 'Recipes fetched successfully',
+        message: 'Recipes etched successfully',
         data: {
-          recipes,
+          recipe,
         },
       });
     } catch (error) {
