@@ -37,7 +37,7 @@ export class NotificationController {
       // Get all food items for the user
       const foodItems = await foodItemModel.findAllByUserId(user._id);
 
-      if (!foodItems || foodItems.length === 0) {
+      if (foodItems.length === 0) {
         return res.status(200).json({
           message: 'No food items found in your fridge',
         });

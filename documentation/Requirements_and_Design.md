@@ -50,8 +50,6 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 
 6. **Google Authentication**: The authentication module provided by Google. This handles Users logging in or otherwise managing their profile using their Google account.
 
-6. **Gemini API**: An API offered by google to make requests to the Gemini LLM.
-
 ### **3.4. Use Case Description**
 - Use cases for feature 1: Authentication
 1. **Sign Up with Google**: Users create an account for the virtual fridge application by linking their Google account. Each Google account can only be registered once.
@@ -76,133 +74,308 @@ Beyond just tracking, Virtual Fridge helps you get the most out of your grocerie
 ### **3.5. Formal Use Case Specifications (5 Most Major Use Cases)**
 <a name="uc1"></a>
 
-#### Use Case 1: Log Food via Image
+#### Use Case 1: Log Food via Image (UC-LOG-2)
 
-**Description**: Users add a food item to their virtual fridge by taking a photo of a food item without a barcode, and the app uses Gemini API to identify and log the item.
+**Description**: Users add a produce item (fruit or vegetable) to their virtual fridge by uploading a photo that is analyzed by Gemini AI.
 
-**Primary actor(s)**: User, Gemini API, Open Food Facts API
+**Primary actor**: User
+
+**Secondary actors**: Gemini API
+
+**Preconditions**:
+- User is authenticated with valid JWT token
+- User has captured an image file on their device
 
 **Main success scenario**:
-1. User selects "Add Food" and chooses the image capture option.
-2. User takes a photo of the food item using the in-app camera.
-3. System sends the image to Gemini API for identification.
-4. Gemini API analyzes the image and identifies the food item.
-5. System retrieves additional details (nutritional info, estimated expiration) from Open Food Facts API using the identified food name.
-6. User reviews the identified food item details.
-7. User clicks "Confirm".
-8. System adds the food item to the user's fridge inventory.
+1. User uploads an image file through the frontend.
+2. Frontend sends POST request to `/api/media/vision` with image (multipart/form-data) and JWT token.
+3. Backend authenticates JWT and extracts userId.
+4. Backend saves uploaded image to server storage.
+5. Backend reads image file and encodes to base64.
+6. Backend sends image to Gemini API requesting produce identification (fruit or vegetable only).
+7. Gemini API analyzes image and returns JSON with `isProduce: true`, produce name (e.g., "apple"), and optional nutrients.
+8. Backend converts produce name to title case and searches database for matching FoodType.
+9. If FoodType not found, backend creates new FoodType with name and default 14-day shelf life.
+10. If Gemini returned nutrients, backend updates FoodType with nutrient data.
+11. Backend calculates expiration date as current date + 14 days.
+12. Backend creates new FoodItem with userId, typeId, expirationDate, and percentLeft=100.
+13. Backend returns 200 OK with FridgeItem (combined foodItem + foodType).
 
-**Failure scenario(s)**:
-- 3a. Network connection unavailable or Gemini API is unreachable.
-  - 3a1. System displays error message: "Unable to process image. Please check your connection and try again."  
+**Postconditions**:
+- New FoodItem exists in database linked to user
+- Image file stored in server storage
+- FoodType exists with produce name
 
-- 4a. Image is too blurry or lighting is insufficient.
-  - 4a1. Gemini API returns low confidence result or error.
-  - 4a2. System displays error and prompts user to retake the photo.
+**Failure scenarios**:
+- **2a. No file uploaded**
+  - 2a1. At step 2, request contains no file.
+  - 2a2. Backend returns 400 with message "No file uploaded".
+  - 2a3. Use case ends unsuccessfully.
 
-- 4b. Gemini API cannot identify the item as food.
-  - 4b1. System notifies user that the image does not appear to contain food.
-  - 4b2. System offers alternative methods (barcode scan or manual selection from pre-made list).
+- **3a. JWT token invalid**
+  - 3a1. At step 3, auth middleware cannot verify token.
+  - 3a2. Backend returns 401 Unauthorized.
+  - 3a3. Use case ends unsuccessfully.
 
-- 4c. Multiple food items detected in the image.
-  - 4c1. Gemini API returns multiple possible food items.
-  - 4c2. System prompts user to select which item they want to add or retake photo with single item.
+- **6a. Gemini API request fails**
+  - 6a1. At step 6, network request to Gemini times out or returns 500+ error.
+  - 6a2. Exception thrown and caught by controller.
+  - 6a3. Backend returns 500 with message "Failed to process vision scan".
+  - 6a4. Use case ends unsuccessfully.
+
+- **7a. Image does not contain produce**
+  - 7a1. At step 7, Gemini returns `isProduce: false` or `name` field is missing/null.
+  - 7a2. Backend returns 400 with message "Item detected must be a fruit or vegetable".
+  - 7a3. Use case ends unsuccessfully.
+
+- **7b. Gemini returns invalid response**
+  - 7b1. At step 7, Gemini response cannot be parsed or validation fails.
+  - 7b2. Backend falls back to `{isProduce: false}`.
+  - 7b3. Continues to failure scenario 7a.
+
+- **9a. Database error creating FoodType**
+  - 9a1. At step 9, FoodType creation fails or returns null.
+  - 9a2. Backend returns 500 with message "Failed to find or create foodType".
+  - 9a3. Use case ends unsuccessfully.
+
+- **12a. Database error creating FoodItem**
+  - 12a1. At step 12, FoodItem creation throws exception.
+  - 12a2. Backend catches error and returns 500 with message "Failed to process vision scan".
+  - 12a3. FoodType may exist without FoodItem (orphaned data).
+  - 12a4. Use case ends unsuccessfully.
 
 <a name="uc2"></a>
 
-#### Use Case 2: Log Food via Barcode
+#### Use Case 2: Log Food via Barcode (UC-LOG-1)
 
-**Description**: Users add a food item to their virtual fridge by scanning its barcode with the in-app scanner.
+**Description**: Users add a packaged food item to their virtual fridge by submitting a scanned barcode that is looked up in Open Food Facts API.
 
-**Primary actor(s)**: User, Barcode Scanner, Open Food Facts API
+**Primary actor**: User
+
+**Secondary actors**: Open Food Facts API
+
+**Preconditions**:
+- User is authenticated with valid JWT token
+- User has scanned a barcode (frontend responsibility)
 
 **Main success scenario**:
-1. User selects "Add Food" and chooses the barcode scan option.
-2. System opens the camera scanner interface
-3. User positions the barcode in the camera view.
-4. System detects and processes the barcode
-5. System retrieves details (name, brand, nutritional info) from the Open Food Facts API database.
-6. System displays confirmation screen with food item details.
-7. User reviews the item and clicks "Confirm".
-8. System adds the food item to the user's fridge inventory.
-9. System refreshes the fridge list to display the newly added item.
+1. User scans barcode using frontend camera and ML Kit (barcode detection happens on device).
+2. Frontend sends POST request to `/api/fridge/barcode` with barcode string and JWT token.
+3. Backend authenticates JWT and extracts userId.
+4. Backend searches database for existing FoodType with matching barcodeId.
+5. If FoodType not found, backend queries Open Food Facts API at `https://world.openfoodfacts.org/api/v2/product/{barcode}.json`.
+6. Open Food Facts API returns product data including name, brand, nutrients, allergens, and optional expiration date.
+7. Backend extracts nutritional data from product.nutriments (calories, protein, fat, carbs, vitamins, etc.).
+8. Backend calculates shelf life days from product expiration_date if available.
+9. Backend creates new FoodType with name, brand, barcodeId, nutrients, shelfLifeDays, image, and allergens.
+10. Backend calculates expiration date as current date + shelfLifeDays (if available).
+11. Backend creates new FoodItem with userId, typeId, expirationDate, and percentLeft=100.
+12. Backend returns 200 OK with FridgeItem (combined foodItem + foodType).
 
-**Failure scenario(s)**:
-- 2a. User wants to cancel scanning.
-  - 2a1. User presses the back button
-  - 2a2. System closes the scanner and returns to the main fridge screen.
+**Postconditions**:
+- New FoodItem exists in database linked to user
+- FoodType exists with barcode and product data
 
-- 4a. Barcode is unreadable or damaged.
-  - 4a1. System displays error and prompts user to re-scan or choose another method.
+**Failure scenarios**:
+- **2a. Request missing barcode**
+  - 2a1. At step 2, request body does not contain barcode field.
+  - 2a2. Validation middleware returns 400 Bad Request.
+  - 2a3. Use case ends unsuccessfully.
 
-- 5a. Food item not found in database.
-  - 5a1. System notifies user that the product could not be found.
-  - 5a2. System offers alternative methods (image capture or manual selection from pre-made list).
+- **3a. JWT token invalid**
+  - 3a1. At step 3, auth middleware cannot verify token.
+  - 3a2. Backend returns 500 with message "Internal server error" (logged as auth error).
+  - 3a3. Use case ends unsuccessfully.
+
+- **6a. Product not found in Open Food Facts**
+  - 6a1. At step 6, API returns response where `data.product` is null/undefined.
+  - 6a2. Backend returns 404 with message "Product not found in OpenFoodFacts".
+  - 6a3. Use case ends unsuccessfully.
+
+- **6b. Open Food Facts API request fails**
+  - 6b1. At step 6, axios request fails (network error, timeout, 500+ response).
+  - 6b2. Exception thrown and caught.
+  - 6b3. Backend returns 500 with message "Internal server error".
+  - 6b4. Use case ends unsuccessfully.
+
+- **9a. Database error creating FoodType**
+  - 9a1. At step 9, FoodType creation fails or returns null.
+  - 9a2. Backend returns 500 with message "Failed to find or create foodType".
+  - 9a3. Use case ends unsuccessfully.
+
+- **11a. Database error creating FoodItem**
+  - 11a1. At step 11, FoodItem creation throws exception.
+  - 11a2. Backend catches error and returns 500 with message "Internal server error".
+  - 11a3. FoodType may exist without FoodItem (orphaned data).
+  - 11a4. Use case ends unsuccessfully.
 
 <a name="uc3"></a>
 
-#### Use Case 3: View Fridge
+#### Use Case 3: View Fridge Contents (UC-FRIDGE-1)
 
-**Description**: Users view a list of all the items in the fridge.
+**Description**: Users retrieve and view all food items currently in their virtual fridge.
 
-**Primary actor(s)**: User
+**Primary actor**: User
 
-Main success scenario:
-1. User navigates to the home page.
-2. System displays a list of all items currently in the user's fridge
+**Secondary actors**: None
 
-Failure scenario(s):
-- 1a. Inventory is empty.  
-  - 1a1. System displays message: “No food logged. Add items to view inventory.”  
+**Preconditions**:
+- User is authenticated with valid JWT token
 
-- 2a. A network error occurs when connecting to the backend
-  - 2a1. System displays message: "Could not connect to VirtualFridge service. Try again later."
+**Main success scenario**:
+1. User navigates to fridge/home page in frontend.
+2. Frontend sends GET request to `/api/fridge` with JWT token.
+3. Backend authenticates JWT and extracts userId.
+4. Backend queries database for all FoodItems where userId matches.
+5. For each FoodItem, backend retrieves associated FoodType by calling `getAssociatedFoodType()`.
+6. Backend builds array of FridgeItems (each containing foodItem + foodType data).
+7. Backend returns 200 OK with array of FridgeItems in response.data.fridgeItems.
+8. Frontend renders list of food items with name, image, expiration date, and percentLeft.
+
+**Postconditions**:
+- User sees current fridge inventory
+- No data is modified
+
+**Failure scenarios**:
+- **2a. Frontend has no network connection**
+  - 2a1. At step 2, network request fails before reaching backend.
+  - 2a2. Frontend displays error (handled by frontend, not backend).
+  - 2a3. Use case ends unsuccessfully.
+
+- **3a. JWT token invalid**
+  - 3a1. At step 3, auth middleware cannot verify token.
+  - 3a2. Backend returns 500 with message "Internal server error" (logged as auth error).
+  - 3a3. Use case ends unsuccessfully.
+
+- **4a. User has empty fridge**
+  - 4a1. At step 4, database query returns empty array.
+  - 4a2. Backend returns 200 OK with empty fridgeItems array.
+  - 4a3. Frontend displays empty state message (frontend responsibility).
+  - 4a4. Use case ends successfully (valid state).
+
+- **4b. Database query fails**
+  - 4b1. At step 4, database operation throws exception.
+  - 4b2. Backend catches error and returns 500 with message "Failed to get fridge items".
+  - 4b3. Use case ends unsuccessfully.
+
+- **5a. FoodType not found for FoodItem**
+  - 5a1. At step 5, `getAssociatedFoodType()` cannot find FoodType (data inconsistency).
+  - 5a2. Method may throw exception or return null.
+  - 5a3. Backend error handling returns 500 with message "Failed to get fridge items".
+  - 5a4. Use case ends unsuccessfully.
 
 <a name="uc4"></a>
 
-#### Use Case 4: Find Recipe Suggestions
+#### Use Case 4: Generate AI Recipe with Gemini (UC-RECIPE-2)
 
-**Description**: Users request recipe suggestions using one or more ingredients from their virtual fridge.
+**Description**: Users generate a custom AI-created recipe using ingredient names from their fridge.
 
-**Primary actor(s)**: User, The MealDB API
+**Primary actor**: User
 
-Main success scenarios:
-For Recipe Via API
-1. User selects ingredients to add to recipe creation
-2. User clicks recipe button
-4. System calls recipe API and fetches 3 recipes containing specified ingredients
-5. System opens screen showcasing dropdown of 3 recipes
-6. User clicks on recipe and is redirected to the link to recipe
+**Secondary actors**: Gemini API
 
-Failure scenario(s):
+**Preconditions**:
+- User is authenticated with valid JWT token
+- User has selected one or more ingredients (or uses default ingredients)
 
-- 3a. No recipes match selected items.  
-  - 3a1. The System notifies the User and suggests adding a different combination of ingredients
-- 3b. The System cannot reach the API
-  - 3b1. The System displays a message saying: “Could not connect to TheMealDB. Please try again later.”
-- 3c. The System is not connected to the internet
-  -3c1. The System displays a message saying: “We cannot connect to the Internet. Please try again later.”
+**Main success scenario**:
+1. User selects ingredients from fridge in frontend and clicks "Generate AI Recipe".
+2. Frontend sends POST request to `/api/recipes/ai` with ingredients array and JWT token.
+3. Backend authenticates JWT (via middleware).
+4. Backend extracts ingredients from request body, or uses default ingredients if array is empty.
+5. Backend formats ingredients into TOML payload with ingredient names, IDs, and display names.
+6. Backend constructs prompt instructing Gemini to create one recipe using provided ingredients in Markdown format.
+7. Backend sends POST request to Gemini API at `{GEMINI_API_HOST}/{GEMINI_MODEL}:generateContent` with prompt.
+8. Gemini API processes request and returns generated recipe text in Markdown format.
+9. Backend extracts recipe text from Gemini response.candidates[0].content.parts.
+10. Backend returns 200 OK with recipe data including ingredients, prompt, recipe text, and model version.
+11. Frontend displays the generated recipe in Markdown viewer.
+
+**Postconditions**:
+- User has received a custom recipe (not saved to database)
+- No data persists server-side
+
+**Failure scenarios**:
+- **2a. Request body missing or invalid**
+  - 2a1. At step 2, validation middleware detects invalid body structure.
+  - 2a2. Backend returns 400 Bad Request.
+  - 2a3. Use case ends unsuccessfully.
+
+- **3a. JWT token invalid**
+  - 3a1. At step 3, auth middleware cannot verify token.
+  - 3a2. Backend proceeds but may fail later (auth check is middleware).
+  - 3a3. Use case may end unsuccessfully.
+
+- **4a. GEMINI_API_KEY not set**
+  - 4a1. At step 4, if environment variable GEMINI_API_KEY is missing.
+  - 4a2. AiRecipeService throws error "GEMINI_API_KEY is not set".
+  - 4a3. Backend catches error and returns 502 with message "Failed to generate recipe with Gemini."
+  - 4a4. Use case ends unsuccessfully.
+
+- **7a. Gemini API request fails**
+  - 7a1. At step 7, axios request to Gemini fails (network error, timeout, 500+ response).
+  - 7a2. Exception thrown.
+  - 7a3. Backend catches error and returns 502 with message "Failed to generate recipe with Gemini."
+  - 7a4. Use case ends unsuccessfully.
+
+- **9a. Gemini returns empty or invalid response**
+  - 9a1. At step 9, response.candidates[0] is missing or parts array is empty.
+  - 9a2. extractRecipeText() returns null.
+  - 9a3. Backend throws error "Gemini returned an empty response."
+  - 9a4. Backend catches and returns 502 with message "Failed to generate recipe with Gemini."
+  - 9a5. Use case ends unsuccessfully.
 
 <a name="uc5"></a>
 
-#### Use Case 5: View Nutritional Facts
+#### Use Case 5: View Food Item Details (UC-FRIDGE-4)
 
-**Description**: Users view the nutritional information for a selected food item.
+**Description**: Users retrieve detailed information about a specific food item in their fridge, including nutritional facts from the associated FoodType.
 
-**Primary actor(s)**: User, Open Food Facts API
+**Primary actor**: User
 
-Main success scenario:
-1. From the home page, User clicks on a food item stored in their fridge
-2. User clicks “Nutrition Info” on the food sub-menu
-3. System fetches nutritional data (i.e. calories, fat, carbs, and protein, etc.) for the item
-4. System displays nutritional information (i.e. calories, fat, carbs, and protein, etc.) within the item's sub-menu
+**Secondary actors**: None
 
-Failure scenario(s):
-- 3a. Selected food item does not have nutritional data available.  
-  - 3a1. System informs user and offers manual entry option.  
+**Preconditions**:
+- User is authenticated with valid JWT token
+- User has at least one food item in their fridge
 
-- 3b. Database or network error occurs.  
-  - 3b1. System displays error and prompts user to retry.
+**Main success scenario**:
+1. User clicks on a food item in the fridge list in frontend.
+2. Frontend sends GET request to `/api/food-item/{itemId}` with JWT token.
+3. Backend authenticates JWT (via middleware).
+4. Backend queries database for FoodItem by _id.
+5. Backend returns FoodItem with userId, typeId, expirationDate, and percentLeft.
+6. Frontend makes separate request to retrieve associated FoodType (or caches it from initial fridge load).
+7. FoodType contains nutrients object with calories, protein, fat, carbs, vitamins, minerals, etc.
+8. Frontend displays food item details including name, expiration, quantity, and nutritional information.
+
+**Postconditions**:
+- User has viewed food item details
+- No data is modified
+
+**Failure scenarios**:
+- **3a. JWT token invalid**
+  - 3a1. At step 3, auth middleware cannot verify token.
+  - 3a2. Backend returns 401 Unauthorized or 500 (depending on middleware implementation).
+  - 3a3. Use case ends unsuccessfully.
+
+- **4a. FoodItem not found**
+  - 4a1. At step 4, database query returns null (item doesn't exist or wrong itemId).
+  - 4a2. Backend returns 404 with message "FoodItem with ID {_id} not found."
+  - 4a3. Use case ends unsuccessfully.
+
+- **4b. Database query fails**
+  - 4b1. At step 4, database operation throws exception.
+  - 4b2. Backend catches error and returns 500 with message "Failed to get foodItem".
+  - 4b3. Use case ends unsuccessfully.
+
+- **7a. FoodType has no nutrients**
+  - 7a1. At step 7, associated FoodType.nutrients is null, undefined, or empty object.
+  - 7a2. Backend still returns 200 OK with FoodItem (doesn't validate nutrient existence).
+  - 7a3. Frontend displays food item but shows "Nutritional information not available" for missing fields.
+  - 7a4. Use case ends successfully but with incomplete data.
+
+**Note**: There is no dedicated `/api/food-item/{itemId}/nutrition` endpoint. Nutritional data must be retrieved through the general FoodItem endpoint and then accessing the associated FoodType's nutrients field.
 
 ### **3.6. Screen Mock-ups**
 
@@ -267,17 +440,14 @@ Failure scenario(s):
         - **Parameters**: `userId` - Authenticated user's ID from JWT token
         - **Returns**: `void`
         - **Purpose**: Permanently removes user account and all associated data from the system.
-    6. **signOut** (Frontend - Internal)
-        - **Signature**: `handleSignOut()`
-        - **Purpose**: Clears the token stored on the frontend, signing the user out from the current device.
 
 2. **Food Logging Component**
    - **Purpose**: Allows users to add food items to their virtual fridge via barcode scan, image recognition, or manual list selection.
    - **Interfaces**:
 
-     1. **sendBarcode** (Frontend → Backend)
+     1. **logFoodItemByBarcode** (Frontend → Backend)
         - **REST Route**: `POST /api/fridge/barcode`
-        - **Signature**: `FridgeItem sendBarcode(String barcode, String userId)`
+        - **Signature**: `FridgeItem logFoodItemByBarcode(String barcode, String userId)`
         - **Parameters**: `barcode` - Scanned barcode number, `userId` - Authenticated user ID
         - **Returns**: `FridgeItem` - Created food item with details and nutritional info
         - **Purpose**: Processes barcode scan by querying Open Food Facts API and creating a food item in the user's fridge.
@@ -335,12 +505,6 @@ Failure scenario(s):
         - **Returns**: `void`
         - **Purpose**: Removes a food item from the fridge when it's consumed or expired.
 
-     4. **sortFridgeItems** (Frontend - Client-side)
-        - **Signature**: `List<FridgeItem> sortFridgeItems(List<FridgeItem> items, SortOption sortBy)`
-        - **Parameters**: `items` - List of fridge items, `sortBy` - Sorting criteria (expiration, added date, nutrition, name)
-        - **Returns**: `List<FridgeItem>` - Sorted list of items
-        - **Purpose**: Organizes food items according to user-selected criteria for better inventory visualization.
-
 4. **Recipe Suggestion Component**
    - **Purpose**: Generates recipe suggestions based on selected ingredients and provides detailed recipe instructions.
    - **Interfaces**:
@@ -391,19 +555,13 @@ Failure scenario(s):
         - **Returns**: `NutritionData` - Complete nutritional breakdown per 100g/serving
         - **Purpose**: Queries external database to get accurate nutritional information for food products.
 
-     3. **displayNutritionFacts** (Frontend - UI Component)
-        - **Signature**: `void displayNutritionFacts(NutritionInfo nutrition)`
-        - **Parameters**: `nutrition` - Nutritional data to display
-        - **Returns**: `void`
-        - **Purpose**: Renders nutritional information in a user-friendly format with charts and comparisons.
-
 6. **Expiry Notification Component**
    - **Purpose**: Monitors expiry dates of logged food items and sends timely notifications to users based on their configured preferences.
    - **Interfaces**:
 
-     1. **sendTestNotification** (Frontend → Backend)
+     1. **triggerExpiryNotificationCheck** (Frontend → Backend)
         - **REST Route**: `POST /api/notifications/test`
-        - **Signature**: `NotificationResponse sendTestNotification(String userId)`
+        - **Signature**: `NotificationResponse triggerExpiryNotificationCheck(String userId)`
         - **Parameters**: `userId` - Authenticated user ID
         - **Returns**: `NotificationResponse` - Status and count of expiring items
         - **Purpose**: Manually triggers a notification check to test the expiry alert system.
@@ -785,17 +943,48 @@ User (1) ──────< (Many) FoodItem (Many) >────── (1) Food
 ![](images/viewNutritionDiagram.svg)
 
 ### **4.7. Design and Ways to Test Non-Functional Requirements**
+
 1. [**Barcode Scanning Response Time**](#nfr1)
-  - **Idea**: Measure the time from when a user initiates the scan to when the food data is displayed.
-  - **Method**: Use a stopwatch or logging timestamps in the app during multiple tests with different devices and lighting conditions.
-  - **Goal**: Ensure the average scan time is ≤ 5 seconds.
+   - **Test Objective**: Verify that barcode scanning completes within 5 seconds from scan initiation to data display.
 
-2. [**Image Recognition Accuracy**](#nfr2)
-  - **Idea**: Prepare a test set of food images (with and without barcodes).
-  - **Method**: Log the number of correctly identified items versus total items.
-  - **Goal**: Confirm accuracy is ≥ 95%, accounting for lighting, angle, and occlusion variations.
+   - **Test Setup**:
+     - Test devices: 2 Android Devices (Pixel 7 Emulator, Pixel 2)
+     - Test barcodes: One barcode is used, where the API request is sent over-and-over again
 
-3. [**Mobile App Load Time**](#nfr3)
-  - **Idea**: Track the time from app launch to full interactivity on Android devices.
-  - **Method**: Perform multiple launches on different devices and network conditions.
-  - **Goal**: Confirm that the app consistently loads in ≤ 2.5 seconds.
+   - **Test Procedure**:
+     1. Instrument the app code with performance logging:
+        - Log timestamp when "Scan Barcode" button is clicked (`startTime`)
+        - Log timestamp when product data is rendered on confirmation screen (`endTime`)
+        - Calculate: `scanDuration = endTime - startTime`
+     2. Aggregate results and calculate:
+        - Mean scan time across all tests
+        - Minimum scan time across all tests
+        - Maximum scan time across all tests
+
+   - **Success Criteria**:
+     - Mean scan time ≤ 5 seconds
+
+3. [**Mobile App Load Time**](#nfr2)
+   - **Test Objective**: Ensure the app becomes interactive within 3 seconds of launch.
+
+   - **Test Setup**:
+     - Test devices: Same 2 devices from NFR1
+     - Network conditions:
+       - WiFi (>10 Mbps)
+     - App states: Cold start (app not in memory)
+
+   - **Test Procedure**:
+     1. Instrument the app with Android performance metrics:
+        - Use `ActivityLifecycleCallbacks` to log `onCreate()` timestamp
+        - Log timestamp when UI becomes interactive (first frame rendered and user can tap)
+        - Calculate: `loadTime = interactiveTime - createTime`
+     2. For each device and network condition:
+        - Perform 10 cold starts (force-stop app between launches)
+        - Clear app cache before each cold start test
+        - Record load times in milliseconds
+     3. Calculate metrics:
+        - Mean cold start time
+        - Percentage of loads ≤ 3 seconds
+
+   - **Success Criteria**:
+     - Mean cold start time ≤ 3 seconds

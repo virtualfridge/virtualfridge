@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 
 import { GetProfileResponse, UpdateProfileRequest } from '../types/user';
 import logger from '../util/logger';
-import { MediaService } from '../services/media';
 import { userModel } from '../models/user';
+import { deleteAllUserImages } from '../services/media';
 
 export class UserController {
   getProfile = (req: Request, res: Response<GetProfileResponse>) => {
@@ -74,7 +74,7 @@ export class UserController {
       }
       const user = req.user;
 
-      await MediaService.deleteAllUserImages(user._id.toString());
+      await deleteAllUserImages(user._id.toString());
 
       await userModel.delete(user._id);
 

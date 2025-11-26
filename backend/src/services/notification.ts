@@ -24,7 +24,9 @@ class NotificationService {
       const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
 
       if (!serviceAccount) {
-        logger.warn('Firebase service account not configured. Notifications will not work.');
+        logger.warn(
+          'Firebase service account not configured. Notifications will not work.'
+        );
         return;
       }
 
@@ -62,15 +64,13 @@ class NotificationService {
         token: fcmToken,
       };
 
-      const response = await admin.messaging().send(message);
-      logger.info(`Notification sent: "${title}" to ${fcmToken.substring(0, 15)}...`);
+      await admin.messaging().send(message);
+      logger.info(
+        `Notification sent: "${title}" to ${fcmToken.substring(0, 15)}...`
+      );
       return true;
-    } catch (error: any) {
-      logger.error('Failed to send notification:', {
-        error: error?.message,
-        code: error?.code,
-        title,
-      });
+    } catch (error: unknown) {
+      logger.error('Failed to send notification:', error);
       return false;
     }
   }
@@ -103,7 +103,10 @@ class NotificationService {
       );
       body = `${item.name} expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}`;
     } else {
-      const itemNames = expiringItems.slice(0, 3).map(item => item.name).join(', ');
+      const itemNames = expiringItems
+        .slice(0, 3)
+        .map(item => item.name)
+        .join(', ');
       body = `${itemNames}${itemCount > 3 ? ` and ${itemCount - 3} more` : ''}`;
     }
 

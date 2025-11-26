@@ -22,4 +22,4 @@ export interface AuthenticateUserResponse {
 export interface AuthResult {
   token: string;
   user: IUser;
-};
+}
