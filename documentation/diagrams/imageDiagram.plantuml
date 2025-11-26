@@ -3,38 +3,75 @@ title Use Case 1: Log Food via Image
 
 actor User
 participant "Frontend\n(Android)" as Frontend
-participant "Backend\n(Express)" as Backend
+participant "MediaController" as Controller
+participant "AiVisionService" as AiVision
 participant "Gemini API" as Gemini
-participant "Open Food Facts\nAPI" as OpenFood
+participant "FoodTypeModel" as FoodTypeModel
+participant "FoodItemModel" as FoodItemModel
 database "MongoDB" as DB
 
 User -> Frontend: Selects "Add Food"\nand chooses image option
+activate Frontend
 Frontend -> Frontend: Opens camera
 User -> Frontend: Takes photo of food item
-Frontend -> Backend: POST /api/fridge/image\n(multipart/form-data: image)
+Frontend -> Controller: POST /api/media/analyze-produce\n(multipart/form-data: image,\nAuthorization: Bearer <JWT>)
+activate Controller
 
-Backend -> Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent\n(base64 image data)
-Gemini --> Backend: FoodIdentification\n(food name, confidence score)
+Controller -> AiVision: analyzeProduce(imagePath)
+activate AiVision
+AiVision -> AiVision: Read image file\nEncode to base64
+AiVision -> Gemini: POST /v1beta/models/gemini-2.5-flash:generateContent\n(base64 image data,\nprompt: "Identify this produce")
+activate Gemini
+Gemini --> AiVision: JSON response\n{name: "apple", category: "fruit",\nconfidence: 0.95, nutrients: {...}}
+deactivate Gemini
+AiVision --> Controller: ProduceAnalysis\n(name, category, nutrients)
+deactivate AiVision
 
-alt High confidence identification
-    Backend -> OpenFood: GET /api/v0/product/{foodName}.json
-    OpenFood --> Backend: Nutritional data\n(nutrients, shelf life)
+alt High confidence identification (confidence ≥ 0.90)
+    Controller -> FoodTypeModel: findByName(name)
+    activate FoodTypeModel
+    FoodTypeModel -> DB: db.foodtypes.findOne({name: "apple"})
+    activate DB
+    DB --> FoodTypeModel: FoodType or null
+    deactivate DB
 
-    Backend -> DB: FoodType.findByName()\nor create new FoodType
-    DB --> Backend: FoodType document
+    alt FoodType exists
+        FoodTypeModel --> Controller: Existing FoodType(id, name, nutrients)
+        deactivate FoodTypeModel
+    else FoodType not found
+        FoodTypeModel --> Controller: null
+        deactivate FoodTypeModel
+        Controller -> FoodTypeModel: create({name, nutrients, shelfLifeDays})
+        activate FoodTypeModel
+        FoodTypeModel -> DB: db.foodtypes.insertOne({name: "apple", nutrients: {...}})
+        activate DB
+        DB --> FoodTypeModel: Created FoodType document
+        deactivate DB
+        FoodTypeModel --> Controller: New FoodType(id, name, nutrients)
+        deactivate FoodTypeModel
+    end
 
-    Backend -> DB: FoodItem.create()\n(userId, typeId, expirationDate, percentLeft=100)
-    DB --> Backend: Created FoodItem
+    Controller -> FoodItemModel: create({userId, typeId, expirationDate, percentLeft: 100})
+    activate FoodItemModel
+    FoodItemModel -> DB: db.fooditems.insertOne(\n{userId, typeId, expirationDate, percentLeft: 100})
+    activate DB
+    DB --> FoodItemModel: Created FoodItem document
+    deactivate DB
+    FoodItemModel --> Controller: FoodItem(id, userId, typeId, expirationDate)
+    deactivate FoodItemModel
 
-    Backend --> Frontend: 200 OK\nFridgeItem with details
-    Frontend --> User: Display confirmation screen
+    Controller --> Frontend: 200 OK\nFridgeItem\n{id, name, nutrients, expirationDate, percentLeft, image}
+    deactivate Controller
+    Frontend --> User: Display confirmation screen\nwith identified food details
     User -> Frontend: Clicks "Confirm"
-    Frontend -> Frontend: Navigate to main screen
-    Frontend --> User: Show updated fridge list
+    Frontend -> Frontend: Navigate to fridge screen
+    Frontend --> User: Show updated fridge list\nwith new item
 
-else Low confidence or not food
-    Backend --> Frontend: 400 Error\n"Cannot identify food item"
-    Frontend --> User: Display error,\noffer alternative methods
+else Low confidence or not food (confidence < 0.90)
+    Controller --> Frontend: 400 Bad Request\n{error: "Cannot identify food item",\nconfidence: 0.45}
+    deactivate Controller
+    Frontend --> User: Display error:\n"Could not identify food"\nOffer alternative methods\n(barcode scan or manual selection)
 end
+deactivate Frontend
 
 @enduml

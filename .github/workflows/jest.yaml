@@ -23,8 +23,8 @@ jobs:
           cache: "npm"
       - name: Install node modules
         run: npm i
-      - name: Start db
-        run: docker compose up -d
+      - name: Run tests
+        run: npm test
         env:
           PORT: ${{vars.PORT}}
           JWT_SECRET: ${{secrets.JWT_SECRET}}
@@ -33,5 +33,3 @@ jobs:
           MONGODB_USER: ${{vars.MONGODB_USER}}
           MONGODB_PASS: ${{secrets.MONGODB_PASS}}
           GEMINI_API_KEY: ${{secrets.GEMINI_API_KEY}}
-      - name: Run tests
-        run: npm test

@@ -1,7 +1,14 @@
-import { describe, expect, test, jest, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { MediaService } from '../../../services/media';
+import * as MediaService from '../../../services/media';
 import { IMAGES_DIR } from '../../../config/constants';
 
 // Mock fs
@@ -87,9 +94,9 @@ describe('MediaService', () => {
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
       mockedFs.unlinkSync = jest.fn();
 
-      await expect(MediaService.saveImage(mockFilePath, mockUserId)).rejects.toThrow(
-        'Failed to save profile picture'
-      );
+      await expect(
+        MediaService.saveImage(mockFilePath, mockUserId)
+      ).rejects.toThrow('Failed to save profile picture');
 
       expect(mockedFs.unlinkSync).toHaveBeenCalledWith(mockFilePath);
     });
@@ -102,7 +109,9 @@ describe('MediaService', () => {
       mockedFs.existsSync = jest.fn().mockReturnValue(false);
       mockedFs.unlinkSync = jest.fn();
 
-      await expect(MediaService.saveImage(mockFilePath, mockUserId)).rejects.toThrow();
+      await expect(
+        MediaService.saveImage(mockFilePath, mockUserId)
+      ).rejects.toThrow();
 
       expect(mockedFs.unlinkSync).not.toHaveBeenCalled();
     });
@@ -115,9 +124,9 @@ describe('MediaService', () => {
       });
       mockedFs.existsSync = jest.fn().mockReturnValue(false);
 
-      await expect(MediaService.saveImage(mockFilePath, mockUserId)).rejects.toThrow(
-        'Failed to save profile picture'
-      );
+      await expect(
+        MediaService.saveImage(mockFilePath, mockUserId)
+      ).rejects.toThrow('Failed to save profile picture');
     });
 
     test('should place file in IMAGES_DIR', async () => {
@@ -180,7 +189,7 @@ describe('MediaService', () => {
       const mockUrl = `${IMAGES_DIR}/user123-123456789.jpg`;
       let capturedPath = '';
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.unlinkSync = jest.fn((filePath) => {
+      mockedFs.unlinkSync = jest.fn(filePath => {
         capturedPath = filePath as string;
       });
 
@@ -255,7 +264,9 @@ describe('MediaService', () => {
 
       // Should filter for files starting with 'user123-' exactly
       const readdirResult = mockedFs.readdirSync(IMAGES_DIR) as string[];
-      const filteredFiles = readdirResult.filter(file => file.startsWith(mockUserId + '-'));
+      const filteredFiles = readdirResult.filter(file =>
+        file.startsWith(mockUserId + '-')
+      );
 
       expect(filteredFiles).toHaveLength(2);
       expect(filteredFiles).toContain('user123-image1.jpg');

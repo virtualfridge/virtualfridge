@@ -271,7 +271,8 @@ private fun MainContent(
         snackbarHost = {
             MainSnackbarHost(
                 hostState = state.snackBarHostState,
-                successMessage = state.mainUiState.successMessage ?: state.fridgeUiState.successMessage,
+                successMessage = state.mainUiState.successMessage
+                    ?: state.fridgeUiState.successMessage,
                 errorMessage = state.mainUiState.scanError ?: state.fridgeUiState.errorMessage,
                 onSuccessMessageShown = actions.onSuccessMessageShown,
                 onErrorMessageShown = actions.onErrorMessageShown
@@ -414,9 +415,11 @@ private fun FridgeListBody(
                 fridgeUiState.isLoading -> {
                     LoadingContent()
                 }
+
                 fridgeUiState.fridgeItems.isEmpty() -> {
                     EmptyFridgeContent()
                 }
+
                 else -> {
                     Column(
                         modifier = Modifier
@@ -936,7 +939,7 @@ private fun RecipeResultsBottomSheet(
 
             // MealDB Results
             val isIdle = !mainUiState.isFetchingRecipes && !mainUiState.isGeneratingAiRecipe
-            val hasNoResults = mainUiState.recipeSummaries.isEmpty() && mainUiState.aiRecipe == null
+            val hasNoResults = mainUiState.recipe == null && mainUiState.aiRecipe == null
             val hasNoErrors = mainUiState.recipeError == null && mainUiState.aiError == null
             if (isIdle && hasNoResults && hasNoErrors) {
                 // Show "No Recipes Found" when done loading but no results
@@ -974,96 +977,84 @@ private fun RecipeResultsBottomSheet(
                 }
             }
 
-            if (mainUiState.recipeSummaries.isNotEmpty()) {
+            if (mainUiState.recipe != null) {
                 Text(
                     text = "🍳 Recipes from MealDB",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
+                Text(
+                    text = "Ingredients: ${mainUiState.recipe.ingredients.joinToString(", ") { ingredient -> ingredient.name }}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = mainUiState.recipe.name,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
 
-                if (mainUiState.recipeIngredients.isNotEmpty()) {
-                    Text(
-                        text = "Ingredients: ${mainUiState.recipeIngredients.joinToString(", ")}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                mainUiState.recipeSummaries.forEach { meal ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        mainUiState.recipe.thumbnail?.takeIf { it.isNotBlank() }?.let { url ->
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = meal.strMeal,
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Text(
-                                text = "Meal ID: ${meal.idMeal}",
+                                text = "Image: $url",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
-
-                            meal.strMealThumb?.takeIf { it.isNotBlank() }?.let { url ->
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Image: $url",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                                )
-                            }
                         }
                     }
                 }
             }
+        }
 
-            // AI Recipe Results
-            mainUiState.aiRecipe?.let { aiRecipeText ->
+        // AI Recipe Results
+        mainUiState.aiRecipe?.let { aiRecipeText ->
+            Text(
+                text = "✨ AI Chef Recipe",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            if (mainUiState.aiIngredients.isNotEmpty()) {
                 Text(
-                    text = "✨ AI Chef Recipe",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    text = "Ingredients: ${mainUiState.aiIngredients.joinToString(", ")}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
 
-                if (mainUiState.aiIngredients.isNotEmpty()) {
-                    Text(
-                        text = "Ingredients: ${mainUiState.aiIngredients.joinToString(", ")}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            mainUiState.aiModel?.let { model ->
+                Text(
+                    text = "Generated by: $model",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
-                mainUiState.aiModel?.let { model ->
-                    Text(
-                        text = "Generated by: $model",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Text(
-                        text = aiRecipeText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Text(
+                    text = aiRecipeText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(16.dp)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

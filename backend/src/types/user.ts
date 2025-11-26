@@ -30,7 +30,7 @@ export interface NotificationPreferences {
   enableNotifications: boolean;
   expiryThresholdDays?: number;
   notificationTime?: number;
-};
+}
 
 // Zod schemas
 // ------------------------------------------------------------
@@ -87,7 +87,7 @@ export interface GetProfileResponse {
   data?: {
     user: IUser;
   };
-};
+}
 
 export type UpdateProfileRequest = z.infer<typeof updateProfileSchema>;
 
@@ -98,4 +98,4 @@ export interface GoogleUserInfo {
   email: string;
   name: string;
   profilePicture?: string;
-};
+}

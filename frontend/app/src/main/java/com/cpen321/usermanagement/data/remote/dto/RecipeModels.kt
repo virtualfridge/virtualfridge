@@ -6,13 +6,22 @@ data class MealSummaryDto(
     val strMealThumb: String?
 )
 
-data class RecipeDataDto(
-    val ingredients: List<String>,
-    val meals: List<MealSummaryDto>,
-    val externalSource: String
+data class Ingredient(
+    val name: String,
+    val measure: String,
 )
 
-data class AiRecipeDataDto(
+data class RecipeData(
+    val name: String,
+    val instructions: String,
+    val thumbnail: String?,
+    val youtube: String?,
+    val ingredients: List<Ingredient>,
+    val source: String?,
+    val image: String?,
+)
+
+data class AiRecipeData(
     val ingredients: List<String>,
     val prompt: String,
     val recipe: String,

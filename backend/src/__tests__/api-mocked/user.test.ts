@@ -4,7 +4,16 @@
  * Tests for all user profile management endpoints
  */
 
-import { describe, expect, test, jest, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
@@ -12,7 +21,7 @@ import { createTestApp } from '../helpers/testApp';
 import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
 import { mockGoogleUserInfo } from '../helpers/testData';
-import { MediaService } from '../../services/media';
+import * as MediaService from '../../services/media';
 
 // Mock MediaService - always mocked as it interacts with file system
 jest.mock('../../services/media');
@@ -36,12 +45,16 @@ describe('GET /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
     jest.clearAllMocks();
 
     // Mock MediaService
-    (MediaService.deleteAllUserImages as jest.Mock) = jest.fn().mockResolvedValue(undefined);
+    (MediaService.deleteAllUserImages as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     // Create test user before each test
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -88,9 +101,18 @@ describe('GET /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
     expect(response.body).toHaveProperty('message');
     expect(response.body).toHaveProperty('data');
     expect(response.body.data).toHaveProperty('user');
-    expect(response.body.data.user).toHaveProperty('email', mockGoogleUserInfo.email);
-    expect(response.body.data.user).toHaveProperty('name', mockGoogleUserInfo.name);
-    expect(response.body.data.user).toHaveProperty('googleId', mockGoogleUserInfo.googleId);
+    expect(response.body.data.user).toHaveProperty(
+      'email',
+      mockGoogleUserInfo.email
+    );
+    expect(response.body.data.user).toHaveProperty(
+      'name',
+      mockGoogleUserInfo.name
+    );
+    expect(response.body.data.user).toHaveProperty(
+      'googleId',
+      mockGoogleUserInfo.googleId
+    );
   });
 
   /**
@@ -118,9 +140,7 @@ describe('GET /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    * - Mock Purpose: MediaService is always mocked to prevent file system interactions
    */
   test('should return 401 without authentication token', async () => {
-    await request(app)
-      .get('/api/user/profile')
-      .expect(401);
+    await request(app).get('/api/user/profile').expect(401);
   });
 
   /**
@@ -174,12 +194,16 @@ describe('POST /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
     jest.clearAllMocks();
 
     // Mock MediaService
-    (MediaService.deleteAllUserImages as jest.Mock) = jest.fn().mockResolvedValue(undefined);
+    (MediaService.deleteAllUserImages as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     // Create test user before each test
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -317,12 +341,16 @@ describe('POST /api/user/profile - WITH ADDITIONAL MOCKING', () => {
     jest.clearAllMocks();
 
     // Mock MediaService
-    (MediaService.deleteAllUserImages as jest.Mock) = jest.fn().mockResolvedValue(undefined);
+    (MediaService.deleteAllUserImages as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     // Create test user before each test
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -403,7 +431,9 @@ describe('POST /api/user/profile - WITH ADDITIONAL MOCKING', () => {
    */
   test('should handle Error exceptions in update', async () => {
     // Mock userModel.update to throw Error
-    jest.spyOn(userModel, 'update').mockRejectedValueOnce(new Error('Database error'));
+    jest
+      .spyOn(userModel, 'update')
+      .mockRejectedValueOnce(new Error('Database error'));
 
     const response = await request(app)
       .post('/api/user/profile')
@@ -473,12 +503,16 @@ describe('DELETE /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
     jest.clearAllMocks();
 
     // Mock MediaService
-    (MediaService.deleteAllUserImages as jest.Mock) = jest.fn().mockResolvedValue(undefined);
+    (MediaService.deleteAllUserImages as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     // Create test user before each test
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -556,9 +590,7 @@ describe('DELETE /api/user/profile - WITHOUT ADDITIONAL MOCKING', () => {
    * - Mock Purpose: MediaService is always mocked to prevent file system interactions
    */
   test('should return 401 without authentication token', async () => {
-    await request(app)
-      .delete('/api/user/profile')
-      .expect(401);
+    await request(app).delete('/api/user/profile').expect(401);
   });
 });
 
@@ -575,12 +607,16 @@ describe('DELETE /api/user/profile - WITH ADDITIONAL MOCKING', () => {
     jest.clearAllMocks();
 
     // Mock MediaService
-    (MediaService.deleteAllUserImages as jest.Mock) = jest.fn().mockResolvedValue(undefined);
+    (MediaService.deleteAllUserImages as jest.Mock) = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     // Create test user before each test
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
