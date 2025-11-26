@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
+import com.cpen321.usermanagement.data.remote.dto.RecipeData
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.IngredientOption
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
@@ -168,17 +169,18 @@ private fun RecipeScreenContent(
         }
 
         when {
-            uiState.recipeSummaries.isNotEmpty() -> {
+            uiState.recipe != null -> {
                 MealDbResultsSection(uiState = uiState)
                 uiState.recipesJson?.let { json ->
                     RawJsonSection(
                         json = json,
                         showRawJson = showRawJson,
                         onToggle = onShowRawJsonChange,
-                        source = uiState.recipeSource
+                        source = uiState.recipe.source
                     )
                 }
             }
+
             uiState.aiRecipe != null -> {
                 uiState.aiRecipe?.let { aiRecipeText ->
                     AiRecipeSection(
@@ -248,8 +250,8 @@ private fun ActionButtonsSection(
             onClick = onGenerateMealDb,
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isFetchingRecipes &&
-                !uiState.isGeneratingAiRecipe &&
-                uiState.selectedIngredientKeys.isNotEmpty()
+                    !uiState.isGeneratingAiRecipe &&
+                    uiState.selectedIngredientKeys.isNotEmpty()
         ) {
             Text(
                 text = if (uiState.isFetchingRecipes) {
@@ -264,8 +266,8 @@ private fun ActionButtonsSection(
             onClick = onGenerateAi,
             modifier = Modifier.fillMaxWidth(),
             enabled = !uiState.isGeneratingAiRecipe &&
-                !uiState.isFetchingRecipes &&
-                uiState.selectedIngredientKeys.isNotEmpty()
+                    !uiState.isFetchingRecipes &&
+                    uiState.selectedIngredientKeys.isNotEmpty()
         ) {
             Text(
                 text = if (uiState.isGeneratingAiRecipe) {
@@ -295,19 +297,12 @@ private fun MealDbResultsSection(
             fontWeight = FontWeight.SemiBold
         )
 
-        if (uiState.recipeIngredients.isNotEmpty()) {
+        if (uiState.recipe != null) {
             Text(
-                text = "Ingredients: ${uiState.recipeIngredients.joinToString(", ")}",
+                text = "Ingredients: ${uiState.recipe.ingredients.joinToString(", ") { ingredient -> ingredient.name }}",
                 style = MaterialTheme.typography.bodyMedium
             )
-        }
-
-        uiState.recipeSummaries.forEach { meal ->
-            RecipeCard(
-                mealName = meal.strMeal,
-                mealId = meal.idMeal,
-                thumbnailUrl = meal.strMealThumb
-            )
+            RecipeCard(uiState.recipe)
         }
     }
 }
@@ -393,9 +388,7 @@ private fun AiRecipeSection(
 
 @Composable
 private fun RecipeCard(
-    mealName: String,
-    mealId: String,
-    thumbnailUrl: String?,
+    recipe: RecipeData,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -406,7 +399,7 @@ private fun RecipeCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = mealName,
+                text = recipe.name,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -414,11 +407,11 @@ private fun RecipeCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Meal ID: $mealId",
+                text = "Instructions: ${recipe.instructions}",
                 style = MaterialTheme.typography.labelMedium
             )
 
-            thumbnailUrl?.takeIf { it.isNotBlank() }?.let { url ->
+            recipe.thumbnail?.takeIf { it.isNotBlank() }?.let { url ->
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Image: $url",

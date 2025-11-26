@@ -29,30 +29,28 @@ export class RecipeController {
       : defaultRecipeIngredients;
 
     try {
-      const meals = await this.recipeService.fetchRecipes({
+      const recipes = await this.recipeService.getRecipes({
         ingredients: ingredientList,
       });
+      if (recipes.length == 0) {
+        logger.debug('No recipes found; returning 404');
+        return res.status(404).json({
+          message: 'No recipes found',
+        });
+      }
 
-      res.status(200).json({
+      return res.status(200).json({
         message: 'Recipes fetched successfully',
         data: {
-          ingredients: ingredientList,
-          meals,
-          externalSource: this.recipeService.getExternalSourceLink(),
+          recipes,
         },
       });
     } catch (error) {
       logger.error('Failed to fetch recipes', error);
 
-      if (error instanceof Error) {
-        return res.status(502).json({
-          message:
-            error.message || 'Failed to fetch recipes from TheMealDB service.',
-          data: {
-            ingredients: ingredientList,
-            meals: [],
-            externalSource: this.recipeService.getExternalSourceLink(),
-          },
+      if (error instanceof AxiosError) {
+        return res.status(503).json({
+          message: 'Failed to fetch recipes from TheMealDB service.',
         });
       }
 
