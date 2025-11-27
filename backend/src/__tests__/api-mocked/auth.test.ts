@@ -13,7 +13,7 @@ import { userModel } from '../../models/user';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
 // Setup mock before any imports
-const mockVerifyIdToken: jest.Mock = jest.fn();
+const mockVerifyIdToken = jest.fn() as jest.Mock;
 jest.mock('google-auth-library', () => ({
   OAuth2Client: jest.fn().mockImplementation(() => ({
     verifyIdToken: mockVerifyIdToken,

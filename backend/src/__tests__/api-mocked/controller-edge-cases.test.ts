@@ -15,7 +15,6 @@ import path from 'path';
 import { createTestApp } from '../helpers/testApp';
 import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
-import { foodTypeModel } from '../../models/foodType';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
 describe('Controller Edge Cases - Comprehensive API Tests', () => {
@@ -40,83 +39,6 @@ describe('Controller Edge Cases - Comprehensive API Tests', () => {
 
   afterAll(async () => {
     await dbHandler.closeDatabase();
-  });
-
-  /**
-   * Test: FoodType controller error handling
-   * Tests foodType.ts lines 66-77
-   */
-  test('should handle database error when creating food type', async () => {
-    // Mock foodTypeModel.create to throw error
-    jest.spyOn(foodTypeModel, 'create')
-      .mockRejectedValueOnce(new Error('Failed to create foodType'));
-
-    const response = await request(app)
-      .post('/api/food-type')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Food',
-        nutrients: {
-          calories: '100',
-        },
-      })
-      .expect(500);
-
-    expect(response.body.message).toBe('Failed to create foodType');
-
-    console.log('[TEST] ✓ Handled foodType creation error');
-  });
-
-  /**
-   * Test: FoodType not found when updating
-   * Tests update error path
-   */
-  test('should handle foodType not found during update', async () => {
-    const nonExistentId = '507f1f77bcf86cd799439011';
-
-    const response = await request(app)
-      .patch(`/api/food-type/${nonExistentId}`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Updated Name',
-      })
-      .expect(404);
-
-    expect(response.body.message).toContain('not found');
-
-    console.log('[TEST] ✓ Handled foodType not found during update');
-  });
-
-  /**
-   * Test: FoodType not found when deleting
-   * Tests delete error path
-   */
-  test('should handle foodType not found during delete', async () => {
-    const nonExistentId = '507f1f77bcf86cd799439011';
-
-    const response = await request(app)
-      .delete(`/api/food-type/${nonExistentId}`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .expect(404);
-
-    expect(response.body.message).toContain('not found');
-
-    console.log('[TEST] ✓ Handled foodType not found during delete');
-  });
-
-  /**
-   * Test: FoodType not found by barcode
-   * Tests barcode lookup miss
-   */
-  test('should return 404 when barcode not found', async () => {
-    const response = await request(app)
-      .get('/api/food-type/barcode/nonexistent-barcode')
-      .set('Authorization', `Bearer ${authToken}`)
-      .expect(404);
-
-    expect(response.body.message).toContain('not found');
-
-    console.log('[TEST] ✓ Handled barcode not found');
   });
 
   /**

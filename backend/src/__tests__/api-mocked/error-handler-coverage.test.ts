@@ -12,6 +12,7 @@ import { createTestApp } from '../helpers/testApp';
 import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
 import { foodItemModel } from '../../models/foodItem';
+import { foodTypeModel } from '../../models/foodType';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
 describe('Error Handler Middleware - Comprehensive Coverage', () => {
@@ -62,6 +63,12 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
    * Tests error propagation through layers
    */
   test('should handle service layer errors', async () => {
+    // Create a valid foodType first so validation passes
+    const foodType = await foodTypeModel.create({
+      name: 'Test Food',
+      nutrients: { calories: '100' },
+    });
+
     // Create a scenario that causes service error
     jest.spyOn(foodItemModel, 'create')
       .mockRejectedValueOnce(new Error('Failed to create foodItem'));
@@ -70,7 +77,7 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
       .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        typeId: '507f1f77bcf86cd799439011', // Valid ObjectId
+        typeId: foodType._id.toString(),
         expirationDate: new Date(),
         percentLeft: 100,
       })
@@ -115,6 +122,12 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .expect(500);
 
+    // Create a valid foodType for the second test
+    const foodType = await foodTypeModel.create({
+      name: 'Test Food 2',
+      nutrients: { calories: '150' },
+    });
+
     // Second error - different mock
     jest.spyOn(foodItemModel, 'create')
       .mockRejectedValueOnce(new Error('Second error'));
@@ -123,7 +136,7 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
       .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        typeId: '507f1f77bcf86cd799439011',
+        typeId: foodType._id.toString(),
         expirationDate: new Date(),
         percentLeft: 100,
       })

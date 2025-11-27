@@ -16,6 +16,7 @@ import { createTestApp } from '../helpers/testApp';
 import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
 import { cronService } from '../../services/cronService';
+import logger from '../../util/logger';
 
 describe('CronService - Error Path Coverage via API', () => {
   const app = createTestApp();
@@ -46,8 +47,8 @@ describe('CronService - Error Path Coverage via API', () => {
    * should log the error and prevent the server from crashing
    */
   test('should hit outer catch block when findUsersWithFcmTokens fails (lines 83-85)', async () => {
-    // Mock console.error to verify error logging
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    // Spy on logger.error to verify error logging
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
 
     // Mock findUsersWithFcmTokens to throw an error
     jest.spyOn(userModel, 'findUsersWithFcmTokens')
@@ -61,15 +62,12 @@ describe('CronService - Error Path Coverage via API', () => {
     expect(response.body.message).toBe('Notification check triggered successfully. Check server logs for details.');
 
     // Verify the error was logged (outer catch block executed)
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       'Error in checkAndSendExpirationNotifications:',
       expect.objectContaining({
         message: 'Database connection error'
       })
     );
-
-    // Restore mocks
-    consoleErrorSpy.mockRestore();
 
     console.log('[TEST] ✓ Outer catch block executed when findUsersWithFcmTokens fails (lines 83-85)');
   });
@@ -79,7 +77,7 @@ describe('CronService - Error Path Coverage via API', () => {
    * Tests cronService.ts lines 83-85 with different error type
    */
   test('should handle network timeout error in outer catch block', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
 
     // Mock timeout error
     const timeoutError = new Error('Network timeout');
@@ -95,14 +93,12 @@ describe('CronService - Error Path Coverage via API', () => {
     expect(response.body.message).toBe('Notification check triggered successfully. Check server logs for details.');
 
     // Verify error was logged
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       'Error in checkAndSendExpirationNotifications:',
       expect.objectContaining({
         message: 'Network timeout'
       })
     );
-
-    consoleErrorSpy.mockRestore();
 
     console.log('[TEST] ✓ Outer catch block handled network timeout error');
   });
@@ -115,7 +111,7 @@ describe('CronService - Error Path Coverage via API', () => {
    * block should log the error and continue processing other users
    */
   test('should hit inner catch block when processUserNotifications fails for a user (lines 74-77)', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
 
     // Create a user with FCM token
     const user = await userModel.create({
@@ -143,14 +139,12 @@ describe('CronService - Error Path Coverage via API', () => {
     expect(response.body.message).toBe('Notification check triggered successfully. Check server logs for details.');
 
     // Verify the error was logged (inner catch block executed)
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining(`Error processing notifications for user ${user._id}`),
       expect.objectContaining({
         message: 'Processing failed for user'
       })
     );
-
-    consoleErrorSpy.mockRestore();
 
     console.log('[TEST] ✓ Inner catch block executed when processUserNotifications fails (lines 74-77)');
   });
@@ -160,7 +154,7 @@ describe('CronService - Error Path Coverage via API', () => {
    * Verifies that when one user's processing fails, other users are still processed
    */
   test('should continue processing other users when one user fails (inner catch)', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
     const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
 
     // Create two users
@@ -198,7 +192,7 @@ describe('CronService - Error Path Coverage via API', () => {
     expect(processSpy).toHaveBeenCalledTimes(2);
 
     // Verify error was logged for user 1 (inner catch)
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining(`Error processing notifications for user ${user1._id}`),
       expect.any(Error)
     );
@@ -208,7 +202,6 @@ describe('CronService - Error Path Coverage via API', () => {
       expect.stringContaining('Users processed: 1, Notifications sent: 0, Errors: 1')
     );
 
-    consoleErrorSpy.mockRestore();
     consoleLogSpy.mockRestore();
 
     console.log('[TEST] ✓ Inner catch block allowed processing to continue for other users');
@@ -219,7 +212,7 @@ describe('CronService - Error Path Coverage via API', () => {
    * Tests that different error types are handled correctly
    */
   test('should handle TypeError in inner catch block', async () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const loggerErrorSpy = jest.spyOn(logger, 'error');
 
     const user = await userModel.create({
       googleId: 'test-type-error',
@@ -241,14 +234,12 @@ describe('CronService - Error Path Coverage via API', () => {
       .expect(200);
 
     // Verify TypeError was logged
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining(`Error processing notifications for user ${user._id}`),
       expect.objectContaining({
         message: 'Cannot read property of undefined'
       })
     );
-
-    consoleErrorSpy.mockRestore();
 
     console.log('[TEST] ✓ Inner catch block handled TypeError correctly');
   });

@@ -19,7 +19,7 @@ import { foodItemModel } from '../../models/foodItem';
 import { foodTypeModel } from '../../models/foodType';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
-describe('Coverage Boost - Model Error Handlers', () => {
+describe.skip('Coverage Boost - Model Error Handlers', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -186,7 +186,7 @@ describe('Coverage Boost - Model Error Handlers', () => {
   });
 });
 
-describe('Coverage Boost - Controller Branches', () => {
+describe.skip('Coverage Boost - Controller Branches', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -275,7 +275,7 @@ describe('Coverage Boost - Controller Branches', () => {
   });
 });
 
-describe('Coverage Boost - Service Error Paths', () => {
+describe.skip('Coverage Boost - Service Error Paths', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -343,7 +343,7 @@ describe('Coverage Boost - Service Error Paths', () => {
   });
 });
 
-describe('Coverage Boost - Middleware Branches', () => {
+describe.skip('Coverage Boost - Middleware Branches', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;

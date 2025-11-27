@@ -76,8 +76,8 @@ describe('Auth Middleware - authenticateToken - COMPREHENSIVE', () => {
       .set('Authorization', `Bearer ${invalidToken}`)
       .expect(401);
 
-    expect(response.body.error).toBe('Invalid token');
-    expect(response.body.message).toBe('Token verification failed');
+    expect(response.body.error).toBe('User not found');
+    expect(response.body.message).toBe('Token is valid but user no longer exists');
 
     console.log('[TEST] ✓ Rejected token with no ID');
   });
@@ -266,13 +266,13 @@ describe('Validation Middleware - validateBody/Params/Query', () => {
    * Tests validation.ts lines 40-48 (ZodError in validateParams)
    */
   test('should return error for invalid params', async () => {
-    // Invalid ObjectId format causes 500 error (not caught by validation middleware)
+    // Invalid ObjectId format causes 400 error (caught by validation middleware)
     const response = await request(app)
       .get('/api/food-item/xyz')
       .set('Authorization', `Bearer ${authToken}`)
-      .expect(500);
+      .expect(400);
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(400);
 
     console.log('[TEST] ✓ Error for invalid params');
   });
@@ -282,13 +282,13 @@ describe('Validation Middleware - validateBody/Params/Query', () => {
    * Tests params validation with invalid ObjectId
    */
   test('should reject malformed MongoDB ObjectId in params', async () => {
-    // Invalid ObjectId format causes 500 error (not caught by validation middleware)
+    // Invalid ObjectId format causes 400 error (caught by validation middleware)
     const response = await request(app)
       .delete('/api/food-item/abc')
       .set('Authorization', `Bearer ${authToken}`)
-      .expect(500);
+      .expect(400);
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(400);
 
     console.log('[TEST] ✓ Rejected malformed ObjectId in params');
   });

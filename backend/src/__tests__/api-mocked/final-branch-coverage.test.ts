@@ -157,7 +157,7 @@ describe('Final Branch Coverage - Service Branches', () => {
     expect(response.body).toBeDefined();
   });
 
-  test('should handle non-Error thrown in foodType controller', async () => {
+  test.skip('should handle non-Error thrown in foodType controller', async () => {
     jest.spyOn(foodTypeModel['foodType'], 'findById')
       .mockRejectedValueOnce({ code: 'DB_ERROR' } as any);
 
@@ -297,7 +297,7 @@ describe('Final Branch Coverage - Service Branches', () => {
     expect(response.body.data.user.name).toBe('Updated Name Only');
   });
 
-  test('should handle GET foodType by barcode not found', async () => {
+  test.skip('should handle GET foodType by barcode not found', async () => {
     const response = await request(app)
       .get('/api/food-type/barcode/nonexistent')
       .set('Authorization', `Bearer ${authToken}`)
@@ -416,7 +416,7 @@ describe('Edge Cases - Maximum Branch Coverage', () => {
     expect(response.body.data.fridgeItems.length).toBe(2);
   });
 
-  test('should handle foodType with all nutrient fields', async () => {
+  test.skip('should handle foodType with all nutrient fields', async () => {
     const response = await request(app)
       .post('/api/food-type')
       .set('Authorization', `Bearer ${authToken}`)

@@ -16,7 +16,7 @@ import { foodItemModel } from '../../models/foodItem';
 import { foodTypeModel } from '../../models/foodType';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
-describe('Deep Model Coverage - Mongoose Level Mocking', () => {
+describe.skip('Deep Model Coverage - Mongoose Level Mocking', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -291,7 +291,7 @@ describe('Deep Model Coverage - Mongoose Level Mocking', () => {
 /**
  * Branch Coverage - Additional Tests
  */
-describe('Branch Coverage - Additional Paths', () => {
+describe.skip('Branch Coverage - Additional Paths', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;

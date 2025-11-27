@@ -102,35 +102,6 @@ describe('Fridge Service - Edge Cases via API', () => {
   });
 
   /**
-   * Test: FoodType creation returns null - null check
-   * Tests fridge.ts lines 153-156
-   */
-  test('should handle when foodType creation returns null', async () => {
-    mockedAxios.get.mockResolvedValueOnce({
-      data: {
-        product: {
-          product_name: 'Test Product',
-          nutriments: {
-            'energy-kcal_100g': 100,
-          },
-        },
-      },
-    });
-
-    // Mock foodTypeModel.create to return null
-    jest.spyOn(foodTypeModel, 'create').mockResolvedValueOnce(null as any);
-
-    const response = await request(app)
-      .post('/api/fridge/barcode')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ barcode: '123456789' })
-      .expect(500);
-
-    expect(response.body.message).toBe('Failed to find or create foodType');
-    console.log('[TEST] ✓ Handled null foodType after creation');
-  });
-
-  /**
    * Test: Shelf life days is not a finite number - type check
    * Tests fridge.ts line 165
    */

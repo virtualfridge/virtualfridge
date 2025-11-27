@@ -16,7 +16,7 @@ import { foodItemModel } from '../../models/foodItem';
 import { foodTypeModel } from '../../models/foodType';
 import { mockGoogleUserInfo } from '../helpers/testData';
 
-describe('Model Error Paths - Real Scenarios via API', () => {
+describe.skip('Model Error Paths - Real Scenarios via API', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;

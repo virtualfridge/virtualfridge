@@ -49,12 +49,12 @@ describe('Validation Middleware - Error Paths', () => {
 
   /**
    * Test: validateBody with missing required fields
-   * Tests validation.ts lines 13-21 (ZodError handling)
+   * Tests validation.ts lines 13-27 (ZodError handling)
    */
   test('should return 400 if body fails validation (validateBody ZodError)', async () => {
-    // POST /api/food-type expects { name: string, nutrients: object }
+    // POST /api/food-item expects { typeId: string, percentLeft: number }
     const response = await request(app)
-      .post('/api/food-type')
+      .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
       .send({}) // Missing required fields
       .expect(400);
@@ -64,24 +64,24 @@ describe('Validation Middleware - Error Paths', () => {
     expect(Array.isArray(response.body.details)).toBe(true);
     expect(response.body.details.length).toBeGreaterThan(0);
 
-    console.log('[TEST] ✓ validateBody returned 400 for ZodError (lines 13-21)');
+    console.log('[TEST] ✓ validateBody returned 400 for ZodError (lines 13-27)');
   });
 
   /**
    * Test: validateBody with wrong data type
-   * Tests validation.ts lines 13-21 with type mismatch
+   * Tests validation.ts lines 13-27 with type mismatch
    */
   test('should return 400 if body has wrong data type (validateBody ZodError)', async () => {
     const response = await request(app)
-      .post('/api/food-type')
+      .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
-      .send({ name: 123 }) // Number instead of string
+      .send({ typeId: 123 }) // Number instead of string
       .expect(400);
 
     expect(response.body.error).toBe('Validation error');
     expect(response.body.details).toBeDefined();
 
-    console.log('[TEST] ✓ validateBody handled type mismatch (lines 13-21)');
+    console.log('[TEST] ✓ validateBody handled type mismatch (lines 13-27)');
   });
 
   /**
@@ -137,11 +137,11 @@ describe('Validation Middleware - Error Paths', () => {
 
   /**
    * Test: validateParams with invalid ID format
-   * Tests validation.ts lines 40-48 (ZodError in validateParams)
+   * Tests validation.ts lines 46-54 (ZodError in validateParams)
    */
   test('should return 400 if params fail validation (validateParams ZodError)', async () => {
     const response = await request(app)
-      .get('/api/food-type/invalid-id-format')
+      .get('/api/food-item/invalid-id-format')
       .set('Authorization', `Bearer ${authToken}`)
       .expect(400);
 
@@ -249,20 +249,20 @@ describe('Validation Middleware - Error Paths', () => {
    * Verifies that valid data passes through
    */
   test('should pass valid body data through validateBody', async () => {
+    const mongoose = await import('mongoose');
+    const typeId = new mongoose.Types.ObjectId().toString();
+
     const response = await request(app)
-      .post('/api/food-type')
+      .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        name: 'Apple',
-        nutrients: {
-          calories: '52',
-          protein: '0.3g',
-          carbs: '14g',
-        },
+        userId,
+        typeId,
+        percentLeft: 100,
       })
       .expect(200);
 
-    expect(response.body.message).toBe('FoodType created successfully');
+    expect(response.body.message).toBe('FoodItem created successfully');
 
     console.log('[TEST] ✓ validateBody passed valid data through');
   });
@@ -274,10 +274,10 @@ describe('Validation Middleware - Error Paths', () => {
    */
   test('should return multiple validation errors in details array', async () => {
     const response = await request(app)
-      .post('/api/food-type')
+      .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
-        // Missing both required fields: name and nutrients
+        // Missing required fields: userId, typeId, percentLeft
       })
       .expect(400);
 

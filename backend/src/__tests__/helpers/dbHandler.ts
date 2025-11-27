@@ -7,6 +7,11 @@ let mongod: MongoMemoryServer | undefined;
  * Connect to the in-memory database.
  */
 export const connect = async () => {
+  // If already connected, disconnect first
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.connection.close();
+  }
+
   mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri();
 

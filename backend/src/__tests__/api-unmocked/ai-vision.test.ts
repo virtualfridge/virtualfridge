@@ -40,9 +40,9 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
   let userId: string;
 
   // Test image paths
-  const testProduceImage = path.join(__dirname, '../fixtures/images/banana1.jpg');
-  const testNotProduceImage = path.join(__dirname, '../fixtures/images/tire.jpg');
-  const testEmptyImage = path.join(__dirname, '../fixtures/images/empty.png');
+  const testProduceImage = path.join(__dirname, '../assets/images/banana1.jpg');
+  const testNotProduceImage = path.join(__dirname, '../assets/images/tire.jpg');
+  const testEmptyImage = path.join(__dirname, '../assets/images/empty.png');
 
   beforeAll(async () => {
     await dbHandler.connect();

@@ -3,6 +3,8 @@
  *
  * Tests for all food type CRUD endpoints
  * Aims for 100% line coverage of foodType controller
+ *
+ * NOTE: SKIPPED - FoodType routes were removed in merge from main
  */
 
 import { describe, expect, test, jest, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
@@ -21,7 +23,7 @@ import { mockGoogleUserInfo } from '../helpers/testData';
  * =============================================================================
  */
 
-describe('POST /api/food-type - Create Food Type', () => {
+describe.skip('POST /api/food-type - Create Food Type', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -158,7 +160,7 @@ describe('POST /api/food-type - Create Food Type', () => {
  * =============================================================================
  */
 
-describe('PUT /api/food-type & PATCH /api/food-type/:_id - Update Food Type', () => {
+describe.skip('PUT /api/food-type & PATCH /api/food-type/:_id - Update Food Type', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -351,7 +353,7 @@ describe('PUT /api/food-type & PATCH /api/food-type/:_id - Update Food Type', ()
  * =============================================================================
  */
 
-describe('GET /api/food-type/:_id - Get Food Type by ID', () => {
+describe.skip('GET /api/food-type/:_id - Get Food Type by ID', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -472,7 +474,7 @@ describe('GET /api/food-type/:_id - Get Food Type by ID', () => {
  * =============================================================================
  */
 
-describe('DELETE /api/food-type/:_id - Delete Food Type', () => {
+describe.skip('DELETE /api/food-type/:_id - Delete Food Type', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;
@@ -597,7 +599,7 @@ describe('DELETE /api/food-type/:_id - Delete Food Type', () => {
  * =============================================================================
  */
 
-describe('GET /api/food-type/barcode/:barcodeId - Get Food Type by Barcode', () => {
+describe.skip('GET /api/food-type/barcode/:barcodeId - Get Food Type by Barcode', () => {
   const app = createTestApp();
   let authToken: string;
   let userId: string;

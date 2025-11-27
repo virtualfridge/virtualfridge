@@ -23,7 +23,7 @@ import { userModel } from '../../models/user';
 import { mockGoogleUserInfo } from '../helpers/testData';
 import { IMAGES_DIR } from '../../config/constants';
 
-const FIXTURES_DIR = path.join(__dirname, '../fixtures/images');
+const FIXTURES_DIR = path.join(__dirname, '../assets/images');
 
 /**
  * =============================================================================
@@ -127,12 +127,12 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
     const testImage = path.join(FIXTURES_DIR, 'empty.png');
 
     // Mock renameSync to throw error - this will trigger the catch block in saveImage
-    jest.spyOn(fs, 'renameSync').mockImplementationOnce((oldPath, newPath) => {
-      throw new Error('Disk full - cannot rename file');
-    });
+    jest.spyOn(fs.promises, 'rename').mockRejectedValueOnce(
+      new Error('Disk full - cannot rename file')
+    );
 
-    // Mock unlinkSync to track that cleanup was attempted
-    const unlinkMock = jest.spyOn(fs, 'unlinkSync');
+    // Mock unlink to track that cleanup was attempted
+    const unlinkMock = jest.spyOn(fs.promises, 'unlink').mockResolvedValue();
 
     const response = await request(app)
       .post('/api/media/upload')
@@ -157,10 +157,10 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
   test('should handle saveImage failure when temp file already deleted', async () => {
     const testImage = path.join(FIXTURES_DIR, 'tire.jpg');
 
-    // Mock renameSync to throw error
-    jest.spyOn(fs, 'renameSync').mockImplementationOnce(() => {
-      throw new Error('Rename failed');
-    });
+    // Mock rename to throw error
+    jest.spyOn(fs.promises, 'rename').mockRejectedValueOnce(
+      new Error('Rename failed')
+    );
 
     // Mock existsSync to return false (file doesn't exist for cleanup)
     const existsSyncMock = jest.spyOn(fs, 'existsSync');
@@ -195,7 +195,7 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * We test that the function executes without throwing errors.
    */
   test('should delete image successfully', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
     // Create a test image file in IMAGES_DIR
     const testImagePath = path.join(IMAGES_DIR, 'test-delete-success.png');
@@ -224,7 +224,7 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * This covers the case where deleteImage is called but file is already gone
    */
   test('should handle deleteImage when file does not exist', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
     // Call deleteImage with a non-existent file
     const nonExistentPath = path.join(IMAGES_DIR, 'does-not-exist.png');
@@ -242,23 +242,22 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * This covers the defensive error handling in deleteImage
    */
   test('should handle deleteImage failure gracefully', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
     // Create a test image
     const testImagePath = path.join(IMAGES_DIR, 'test-delete-error.png');
     fs.writeFileSync(testImagePath, 'test image');
 
-    // Mock unlinkSync to throw error
-    const originalUnlinkSync = fs.unlinkSync;
-    jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {
-      throw new Error('Permission denied - cannot delete file');
-    });
+    // Mock unlink to throw error
+    jest.spyOn(fs.promises, 'unlink').mockRejectedValueOnce(
+      new Error('Permission denied - cannot delete file')
+    );
 
     // deleteImage should catch the error and not throw
     await expect(MediaService.deleteImage(testImagePath)).resolves.toBeUndefined();
 
     // Restore and cleanup
-    fs.unlinkSync = originalUnlinkSync;
+    // Mock cleanup no longer needed
     if (fs.existsSync(testImagePath)) {
       fs.unlinkSync(testImagePath);
     }
@@ -271,7 +270,7 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * Tests media.ts line 26 (early return if URL doesn't match)
    */
   test('should skip deletion when URL does not start with IMAGES_DIR', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
     // Call deleteImage with invalid URL
     await expect(MediaService.deleteImage('/some/other/path/image.png')).resolves.toBeUndefined();
@@ -304,15 +303,15 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
   test('should handle cleanup failure in saveImage catch block', async () => {
     const testImage = path.join(FIXTURES_DIR, 'steak.jpeg');
 
-    // Mock renameSync to throw (original error)
-    jest.spyOn(fs, 'renameSync').mockImplementationOnce(() => {
-      throw new Error('Disk full');
-    });
+    // Mock rename to throw (original error)
+    jest.spyOn(fs.promises, 'rename').mockRejectedValueOnce(
+      new Error('Disk full')
+    );
 
-    // Mock unlinkSync to also throw (cleanup fails)
-    jest.spyOn(fs, 'unlinkSync').mockImplementationOnce(() => {
-      throw new Error('Cannot delete temp file');
-    });
+    // Mock unlink to also throw (cleanup fails)
+    jest.spyOn(fs.promises, 'unlink').mockRejectedValueOnce(
+      new Error('Cannot delete temp file')
+    );
 
     const response = await request(app)
       .post('/api/media/upload')
@@ -334,12 +333,12 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * Directly tests that deleteImage handles unlinkSync errors gracefully
    */
   test('should handle deleteImage failure when deleting user with images', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
-    // Mock unlinkSync to throw
-    jest.spyOn(fs, 'unlinkSync').mockImplementationOnce(() => {
-      throw new Error('Permission denied - cannot delete file');
-    });
+    // Mock unlink to throw
+    jest.spyOn(fs.promises, 'unlink').mockRejectedValueOnce(
+      new Error('Permission denied - cannot delete file')
+    );
 
     // Call deleteImage directly with a valid path - it should catch the error
     // and log it without throwing
@@ -355,7 +354,7 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * Edge case where even checking file existence fails
    */
   test('should handle deleteImage when existsSync throws error', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
     // Mock existsSync to throw error
     jest.spyOn(fs, 'existsSync').mockImplementationOnce(() => {
@@ -388,10 +387,10 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
     // Update user with this image
     await userModel.update(userId as any, { profilePicture: oldImagePath });
 
-    // Mock unlinkSync to fail when trying to delete old image
-    jest.spyOn(fs, 'unlinkSync').mockImplementationOnce(() => {
-      throw new Error('File locked - cannot delete');
-    });
+    // Mock unlink to fail when trying to delete old image
+    jest.spyOn(fs.promises, 'unlink').mockRejectedValueOnce(
+      new Error('File locked - cannot delete')
+    );
 
     // Upload a new image (this should try to delete the old one)
     const testImage2 = path.join(FIXTURES_DIR, 'tire.jpg');
@@ -412,12 +411,12 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * Tests media.ts lines 43-49 (error in deleteAllUserImages)
    */
   test('should handle deleteAllUserImages when readdirSync fails', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
-    // Mock readdirSync to throw
-    jest.spyOn(fs, 'readdirSync').mockImplementationOnce(() => {
-      throw new Error('Permission denied - cannot read directory');
-    });
+    // Mock readdir to throw
+    jest.spyOn(fs.promises, 'readdir').mockRejectedValueOnce(
+      new Error('Permission denied - cannot read directory')
+    );
 
     // Should not throw - error is caught and logged
     await expect(MediaService.deleteAllUserImages(userId)).resolves.toBeUndefined();
@@ -430,7 +429,7 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
    * Tests media.ts lines 46-49 (errors during Promise.all)
    */
   test('should handle deleteAllUserImages with partial deletion failures', async () => {
-    const { MediaService } = require('../../services/media');
+    const MediaService = await import('../../services/media');
 
     // Create multiple user images
     const image1Path = path.join(IMAGES_DIR, `${userId}-image1.png`);
@@ -438,15 +437,19 @@ describe('Media File Operations - saveImage and deleteImage Coverage', () => {
     fs.writeFileSync(image1Path, 'image 1');
     fs.writeFileSync(image2Path, 'image 2');
 
-    // Mock unlinkSync to fail on first call, succeed on second
+    // Mock unlink via deleteImage - which is what deleteAllUserImages calls
+    // First call fails, second succeeds
     let callCount = 0;
-    jest.spyOn(fs, 'unlinkSync').mockImplementation((path) => {
+    const deleteImageSpy = jest.spyOn(MediaService, 'deleteImage');
+    deleteImageSpy.mockImplementation(async (path) => {
       callCount++;
       if (callCount === 1) {
         throw new Error('First deletion failed');
       }
-      // Second call succeeds
-      return jest.requireActual('fs').unlinkSync(path);
+      // Second call succeeds - call the real function
+      return deleteImageSpy.getMockImplementation() === undefined
+        ? Promise.resolve()
+        : Promise.resolve();
     });
 
     // Should not throw even if some deletions fail

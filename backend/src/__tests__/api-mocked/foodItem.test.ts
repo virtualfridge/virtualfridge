@@ -43,11 +43,11 @@ describe('POST /api/food-item - Create Food Item', () => {
     // Create test food type
     const foodType = await foodTypeModel.create({
       name: 'Apple',
-      nutritionalInfo: {
-        calories: 52,
-        protein: 0.3,
-        carbohydrates: 14,
-        fat: 0.2,
+      nutrients: {
+        calories: '52',
+        protein: '0.3',
+        carbohydrates: '14',
+        fat: '0.2',
       },
     });
     foodTypeId = foodType._id.toString();
@@ -203,19 +203,19 @@ describe('PUT /api/food-item - Update Food Item', () => {
     // Create test food type
     const foodType = await foodTypeModel.create({
       name: 'Banana',
-      nutritionalInfo: {
-        calories: 89,
-        protein: 1.1,
-        carbohydrates: 23,
-        fat: 0.3,
+      nutrients: {
+        calories: '89',
+        protein: '1.1',
+        carbohydrates: '23',
+        fat: '0.3',
       },
     });
     foodTypeId = foodType._id.toString();
 
     // Create test food item
     const foodItem = await foodItemModel.create({
-      userId: userId,
-      typeId: foodTypeId,
+      userId: userId as any,
+      typeId: foodTypeId as any,
       expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       percentLeft: 100,
     });
@@ -372,19 +372,19 @@ describe('GET /api/food-item/:_id - Get Food Item by ID', () => {
     // Create test food type
     const foodType = await foodTypeModel.create({
       name: 'Milk',
-      nutritionalInfo: {
-        calories: 42,
-        protein: 3.4,
-        carbohydrates: 5,
-        fat: 1,
+      nutrients: {
+        calories: '42',
+        protein: '3.4',
+        carbohydrates: '5',
+        fat: '1',
       },
     });
     foodTypeId = foodType._id.toString();
 
     // Create test food item
     const foodItem = await foodItemModel.create({
-      userId: userId,
-      typeId: foodTypeId,
+      userId: userId as any,
+      typeId: foodTypeId as any,
       expirationDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       percentLeft: 100,
     });
@@ -504,19 +504,19 @@ describe('DELETE /api/food-item/:_id - Delete Food Item', () => {
     // Create test food type
     const foodType = await foodTypeModel.create({
       name: 'Cheese',
-      nutritionalInfo: {
-        calories: 402,
-        protein: 25,
-        carbohydrates: 1.3,
-        fat: 33,
+      nutrients: {
+        calories: '402',
+        protein: '25',
+        carbohydrates: '1.3',
+        fat: '33',
       },
     });
     foodTypeId = foodType._id.toString();
 
     // Create test food item
     const foodItem = await foodItemModel.create({
-      userId: userId,
-      typeId: foodTypeId,
+      userId: userId as any,
+      typeId: foodTypeId as any,
       expirationDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
       percentLeft: 100,
     });

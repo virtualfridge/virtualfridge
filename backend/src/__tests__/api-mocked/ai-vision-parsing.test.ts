@@ -33,7 +33,7 @@ describe('POST /api/media/vision - REAL JSON PARSING WITH MOCKED GEMINI API', ()
   let authToken: string;
   let userId: string;
 
-  const testProduceImage = path.join(__dirname, '../fixtures/images/banana1.jpg');
+  const testProduceImage = path.join(__dirname, '../assets/images/banana1.jpg');
 
   beforeAll(async () => {
     await dbHandler.connect();
