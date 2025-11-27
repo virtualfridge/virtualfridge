@@ -6,8 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.data.remote.dto.Ingredient
-import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
-import com.cpen321.usermanagement.data.remote.dto.RecipeData
+import com.cpen321.usermanagement.data.remote.dto.Recipe
 import com.cpen321.usermanagement.data.repository.FridgeRepository
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +34,7 @@ data class MainUiState(
 
     // Recipe data
     val recipesJson: String? = null,
-    val recipe: RecipeData? = null,
+    val recipe: Recipe? = null,
     val recipeError: String? = null,
     val isFetchingRecipes: Boolean = false,
 
@@ -187,8 +186,8 @@ class MainViewModel @Inject constructor(
                 onSuccess = { recipeResult ->
                     _uiState.value = _uiState.value.copy(
                         recipesJson = recipeResult.rawJson,
-                        recipe = recipeResult.recipeData.copy(
-                            ingredients = recipeResult.recipeData.ingredients.map { ingredient ->
+                        recipe = recipeResult.recipe.copy(
+                            ingredients = recipeResult.recipe.ingredients.map { ingredient ->
                                     Ingredient(
                                     formatIngredient(ingredient.name) ?: ingredient.name, ingredient.measure
                                     )

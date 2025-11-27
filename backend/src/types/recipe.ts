@@ -111,7 +111,7 @@ export interface RecipeApiResponse {
 export interface GetRecipesResponse {
   message: string;
   data?: {
-    recipes: IRecipe[];
+    recipe: IRecipe;
   };
 }
 
