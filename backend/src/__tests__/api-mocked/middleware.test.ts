@@ -668,3 +668,91 @@ describe('Validation Middleware - validateQuery Error Paths', () => {
     console.log('[TEST] ✓ Handled non-ZodError in validateQuery');
   });
 });
+
+/**
+ * =============================================================================
+ * 404 NOT FOUND HANDLER TESTS (errorHandler.ts)
+ * =============================================================================
+ */
+
+describe('404 Not Found Handler', () => {
+  const app = createTestApp();
+
+  beforeAll(async () => {
+    await dbHandler.connect();
+  });
+
+  afterAll(async () => {
+    await dbHandler.closeDatabase();
+  });
+
+  /**
+   * Test: 404 handler for non-existent routes
+   * Tests errorHandler.ts lines 5-12 (notFoundHandler)
+   */
+  test('should return 404 for non-existent GET route', async () => {
+    const response = await request(app)
+      .get('/api/this-route-does-not-exist')
+      .expect(404);
+
+    expect(response.body.error).toBe('Route not found');
+    expect(response.body.message).toContain('GET');
+    expect(response.body.message).toContain('/api/this-route-does-not-exist');
+    expect(response.body).toHaveProperty('timestamp');
+    expect(response.body).toHaveProperty('path');
+    expect(response.body).toHaveProperty('method');
+
+    console.log('[TEST] ✓ 404 handler for non-existent GET route');
+  });
+
+  /**
+   * Test: 404 handler for non-existent POST route
+   */
+  test('should return 404 for non-existent POST route', async () => {
+    const response = await request(app)
+      .post('/api/invalid/endpoint')
+      .send({ data: 'test' })
+      .expect(404);
+
+    expect(response.body.error).toBe('Route not found');
+    expect(response.body.message).toContain('POST');
+    expect(response.body.message).toContain('/api/invalid/endpoint');
+
+    console.log('[TEST] ✓ 404 handler for non-existent POST route');
+  });
+
+  /**
+   * Test: 404 handler for non-existent DELETE route
+   */
+  test('should return 404 for non-existent DELETE route', async () => {
+    const response = await request(app)
+      .delete('/api/nonexistent')
+      .expect(404);
+
+    expect(response.body.error).toBe('Route not found');
+    expect(response.body.method).toBe('DELETE');
+
+    console.log('[TEST] ✓ 404 handler for non-existent DELETE route');
+  });
+
+  /**
+   * Test: 404 handler includes proper error details
+   */
+  test('should include all required fields in 404 response', async () => {
+    const response = await request(app)
+      .patch('/api/missing')
+      .expect(404);
+
+    expect(response.body).toHaveProperty('error');
+    expect(response.body).toHaveProperty('message');
+    expect(response.body).toHaveProperty('timestamp');
+    expect(response.body).toHaveProperty('path');
+    expect(response.body).toHaveProperty('method');
+
+    expect(response.body.error).toBe('Route not found');
+    expect(response.body.path).toBe('/api/missing');
+    expect(response.body.method).toBe('PATCH');
+
+    console.log('[TEST] ✓ 404 response includes all required fields');
+  });
+});

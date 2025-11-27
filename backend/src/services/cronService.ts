@@ -126,7 +126,7 @@ class CronService {
     // Get all food types to map names
     const typeIds = foodItems.map(item => item.typeId);
     const foodTypes = await foodTypeModel.findByIds(typeIds);
-    const typeMap = new Map(foodTypes.map(type => [type._id, type.name]));
+    const typeMap = new Map(foodTypes.map(type => [type._id.toString(), type.name]));
 
     // Filter items that are expiring within the threshold or already expired
     const expiringItems: { name: string; expirationDate: Date }[] = [];
@@ -135,7 +135,7 @@ class CronService {
 
     let itemsWithExpiration = 0;
     for (const item of foodItems) {
-      const foodName = typeMap.get(item.typeId) ?? 'Unknown item';
+      const foodName = typeMap.get(item.typeId.toString()) ?? 'Unknown item';
 
       if (item.expirationDate) {
         itemsWithExpiration++;
