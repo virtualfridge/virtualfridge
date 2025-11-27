@@ -17,14 +17,14 @@ import {
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { createTestApp } from '../../helpers/testApp';
-import * as dbHandler from '../../helpers/dbHandler';
-import { userModel } from '../../../models/user';
-import { mockGoogleUserInfo } from '../../helpers/testData';
-import * as MediaService from '../../../services/media';
+import { createTestApp } from '../helpers/testApp';
+import * as dbHandler from '../helpers/dbHandler';
+import { userModel } from '../../models/user';
+import { mockGoogleUserInfo } from '../helpers/testData';
+import * as MediaService from '../../services/media';
 
 // Mock MediaService - always mocked as it interacts with file system
-jest.mock('../../../services/media');
+jest.mock('../../services/media');
 
 /**
  * =============================================================================

@@ -10,10 +10,10 @@ import {
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import axios, { AxiosError } from 'axios';
-import { createTestApp } from '../../helpers/testApp';
-import * as dbHandler from '../../helpers/dbHandler';
-import { userModel } from '../../../models/user';
-import { mockGoogleUserInfo } from '../../helpers/testData';
+import { createTestApp } from '../helpers/testApp';
+import * as dbHandler from '../helpers/dbHandler';
+import { userModel } from '../../models/user';
+import { mockGoogleUserInfo } from '../helpers/testData';
 
 // Mock axios
 jest.mock('axios');

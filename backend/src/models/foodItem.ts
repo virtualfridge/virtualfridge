@@ -66,17 +66,17 @@ export class FoodItemModel {
     }
   }
 
-  async findByUserId(
-    userId: mongoose.Types.ObjectId
-  ): Promise<IFoodItem | null> {
-    try {
-      const foodItem = await this.foodItem.findOne({ userId });
-      return foodItem;
-    } catch (error) {
-      logger.error('Error finding foodItem by userId:', error);
-      throw new Error('Failed to find foodItem by userId');
-    }
-  }
+  // async findByUserId(
+  //   userId: mongoose.Types.ObjectId
+  // ): Promise<IFoodItem | null> {
+  //   try {
+  //     const foodItem = await this.foodItem.findOne({ userId });
+  //     return foodItem;
+  //   } catch (error) {
+  //     logger.error('Error finding foodItem by userId:', error);
+  //     throw new Error('Failed to find foodItem by userId');
+  //   }
+  // }
 
   async findAllByUserId(userId: mongoose.Types.ObjectId): Promise<IFoodItem[]> {
     try {
