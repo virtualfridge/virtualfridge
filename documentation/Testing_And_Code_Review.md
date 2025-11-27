@@ -312,3 +312,7 @@ https://app.codacy.com/gh/virtualfridge/virtualfridge/issues/current
 - **Code Pattern: [Variable Assigned to Object Injection Sink](#)**
   - **Location in Git:** [`backend/src/services/recipe.ts:134`](#)
   - **Justification:**  This is only used with the statically type-checked value `nutrient` which is, by definition, a key of the object it is indexing, so there should be no issues accessing the value from that standpoint. The reasoning behind leaving this in is that it allows us to iterate over a set of 5-10 keys in the `recipe.nutrients` object, which would otherwise result in a lot of duplicate code, so doing things this way makes the code more readable and maintainable. Furthermore, all the `nutrient` keys being passed in to the function being flagged are compile-time constants, which greatly mitigates the security risk as they are not affected by used input.
+
+- **Code Pattern: [detect Math.random()](#)**
+  - **Location in Git:** [`backend/util/storage.ts:17`](#)
+  - **Justification:** Using Math.random() is only an issue if it is being used for security/cryptographic purposes. In this file, it is only used to create a unique filename so that when saving files they will not override each other.
