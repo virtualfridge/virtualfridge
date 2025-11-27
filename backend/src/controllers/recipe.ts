@@ -34,6 +34,7 @@ export class RecipeController {
           message: 'No recipes found',
         });
       }
+      logger.debug('Fetched recipe from TheMealDB:', recipe);
 
       return res.status(200).json({
         message: 'Recipes etched successfully',
