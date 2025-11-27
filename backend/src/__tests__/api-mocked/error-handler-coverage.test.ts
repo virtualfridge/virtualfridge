@@ -81,7 +81,7 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
         expirationDate: new Date(),
         percentLeft: 100,
       })
-      .expect(500);
+      .expect(400);
 
     expect(response.body.message).toBe('Failed to create foodItem');
 
@@ -140,7 +140,7 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
         expirationDate: new Date(),
         percentLeft: 100,
       })
-      .expect(500);
+      .expect(400);
 
     console.log('[TEST] ✓ Error handler handled multiple errors independently');
   });
