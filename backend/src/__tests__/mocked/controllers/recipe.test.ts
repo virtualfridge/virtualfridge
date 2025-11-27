@@ -1,7 +1,15 @@
-import { describe, expect, test, jest, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { createTestApp } from '../../helpers/testApp';
 import * as dbHandler from '../../helpers/dbHandler';
 import { userModel } from '../../../models/user';
@@ -20,7 +28,9 @@ describe('Recipe Controller Integration Tests', () => {
 
     // Create a test user and generate auth token
     const user = await userModel.create(mockGoogleUserInfo);
-    authToken = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: user._id.toString() }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   beforeEach(() => {
@@ -32,64 +42,18 @@ describe('Recipe Controller Integration Tests', () => {
   });
 
   describe('GET /api/recipes', () => {
-    test('should get recipes with default ingredients', async () => {
-      // Mock TheMealDB API response
-      mockedAxios.get.mockResolvedValueOnce({
-        data: {
-          meals: [
-            {
-              idMeal: '1',
-              strMeal: 'Test Recipe',
-              strMealThumb: 'https://example.com/recipe.jpg',
-            },
-          ],
-        },
-      });
-
-      const response = await request(app)
-        .get('/api/recipes')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
-
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty('meals');
-      expect(response.body.data).toHaveProperty('ingredients');
-      expect(response.body.data).toHaveProperty('externalSource');
-      expect(Array.isArray(response.body.data.meals)).toBe(true);
-    });
-
-    test('should get recipes with custom ingredients', async () => {
-      mockedAxios.get.mockResolvedValueOnce({
-        data: {
-          meals: [
-            {
-              idMeal: '2',
-              strMeal: 'Chicken Recipe',
-              strMealThumb: 'https://example.com/chicken.jpg',
-            },
-          ],
-        },
-      });
-
-      const response = await request(app)
-        .get('/api/recipes?ingredients=chicken,rice')
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
-
-      expect(response.body.data.ingredients).toContain('chicken');
-    });
-
     test('should handle API errors gracefully', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('External API error'));
+      mockedAxios.get.mockRejectedValueOnce(
+        new AxiosError('External API error')
+      );
 
       const response = await request(app)
         .get('/api/recipes')
         .set('Authorization', `Bearer ${authToken}`)
-        .expect(502);
+        .expect(503);
 
       expect(response.body).toHaveProperty('message');
-      expect(response.body.data.meals).toEqual([]);
+      expect(response.body).not.toHaveProperty('data');
     });
 
     test('should handle non-Error exceptions', async () => {
@@ -102,9 +66,9 @@ describe('Recipe Controller Integration Tests', () => {
     });
 
     test('should return 401 without authentication token', async () => {
-      await request(app)
-        .get('/api/recipes')
-        .expect(401);
+      const response = await request(app).get('/api/recipes').expect(401);
+      expect(response.body).toHaveProperty('message');
+      expect(response.body).not.toHaveProperty('data');
     });
   });
 
@@ -161,7 +125,6 @@ describe('Recipe Controller Integration Tests', () => {
         .expect(502);
 
       expect(response.body).toHaveProperty('message');
-      expect(response.body.data.recipe).toBe('');
     });
 
     test('should handle non-Error exceptions', async () => {

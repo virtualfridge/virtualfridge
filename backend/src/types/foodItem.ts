@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 import z from 'zod';
+import { objectIdSchema } from './common';
 
 // Zod schemas
 
 // Any changes to this schema should also be made to the mongoose schema in models/foodItem.ts
 export const foodItemSchema = z.object({
-  _id: z.custom<mongoose.Types.ObjectId>(),
-  userId: z.custom<mongoose.Types.ObjectId>(),
-  typeId: z.custom<mongoose.Types.ObjectId>(),
+  _id: objectIdSchema,
+  userId: objectIdSchema,
+  typeId: objectIdSchema,
   expirationDate: z.coerce.date().optional(),
   percentLeft: z.number().min(0).max(100),
 });

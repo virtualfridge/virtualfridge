@@ -1,15 +1,15 @@
 package com.cpen321.usermanagement.data.repository
 
-import com.cpen321.usermanagement.data.remote.dto.AiRecipeDataDto
-import com.cpen321.usermanagement.data.remote.dto.RecipeDataDto
+import com.cpen321.usermanagement.data.remote.dto.AiRecipeData
+import com.cpen321.usermanagement.data.remote.dto.RecipeData
 
 data class RecipeFetchResult(
-    val recipeData: RecipeDataDto,
+    val recipeData: RecipeData,
     val rawJson: String
 )
 
 data class AiRecipeFetchResult(
-    val recipeData: AiRecipeDataDto,
+    val recipeData: AiRecipeData,
     val formattedRecipe: String
 )
 

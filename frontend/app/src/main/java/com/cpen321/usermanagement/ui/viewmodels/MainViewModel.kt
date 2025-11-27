@@ -5,7 +5,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cpen321.usermanagement.data.remote.dto.FridgeItem
+import com.cpen321.usermanagement.data.remote.dto.Ingredient
 import com.cpen321.usermanagement.data.remote.dto.MealSummaryDto
+import com.cpen321.usermanagement.data.remote.dto.RecipeData
 import com.cpen321.usermanagement.data.repository.FridgeRepository
 import com.cpen321.usermanagement.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,11 +35,9 @@ data class MainUiState(
 
     // Recipe data
     val recipesJson: String? = null,
-    val recipeIngredients: List<String> = emptyList(),
-    val recipeSource: String? = null,
+    val recipe: RecipeData? = null,
     val recipeError: String? = null,
     val isFetchingRecipes: Boolean = false,
-    val recipeSummaries: List<MealSummaryDto> = emptyList(),
 
     // AI recipe data
     val aiRecipe: String? = null,
@@ -124,7 +124,8 @@ class MainViewModel @Inject constructor(
     // --- Test sending a static barcode (e.g., Nutella) ---
     fun testSendBarcode() {
         viewModelScope.launch {
-            val testBarcode = "3017620425035" // Nutella barcode
+            val testBarcode = "0072745068393" // perdue chicken breast
+            // "3017620425035" // Nutella barcode
             Log.d("BarcodeTest", "Sending test barcode: $testBarcode")
 
             _uiState.value = _uiState.value.copy(
@@ -173,9 +174,7 @@ class MainViewModel @Inject constructor(
                 isFetchingRecipes = true,
                 recipeError = null,
                 recipesJson = null,
-                recipeSource = null,
-                recipeSummaries = emptyList(),
-                recipeIngredients = emptyList(),
+                recipe = null,
                 aiRecipe = null,
                 aiPrompt = null,
                 aiIngredients = emptyList(),
@@ -188,9 +187,13 @@ class MainViewModel @Inject constructor(
                 onSuccess = { recipeResult ->
                     _uiState.value = _uiState.value.copy(
                         recipesJson = recipeResult.rawJson,
-                        recipeIngredients = formatIngredients(recipeResult.recipeData.ingredients),
-                        recipeSource = recipeResult.recipeData.externalSource,
-                        recipeSummaries = recipeResult.recipeData.meals,
+                        recipe = recipeResult.recipeData.copy(
+                            ingredients = recipeResult.recipeData.ingredients.map { ingredient ->
+                                    Ingredient(
+                                    formatIngredient(ingredient.name) ?: ingredient.name, ingredient.measure
+                                    )
+                            }
+                        ),
                         isFetchingRecipes = false
                     )
                 },
@@ -252,9 +255,7 @@ class MainViewModel @Inject constructor(
                 aiIngredients = emptyList(),
                 aiModel = null,
                 recipesJson = null,
-                recipeIngredients = emptyList(),
-                recipeSource = null,
-                recipeSummaries = emptyList(),
+                recipe = null,
                 recipeError = null
             )
 
@@ -285,20 +286,24 @@ class MainViewModel @Inject constructor(
 
     private fun formatIngredients(rawIngredients: List<String>): List<String> {
         return rawIngredients.mapNotNull { ingredient ->
-            ingredient
-                .replace('_', ' ')
-                .trim()
-                .takeIf { it.isNotEmpty() }
-                ?.lowercase()
-                ?.split(" ")
-                ?.filter { it.isNotBlank() }
-                ?.joinToString(" ") { part ->
-                    part.replaceFirstChar { char ->
-                        if (char.isLowerCase()) char.titlecase(Locale.getDefault())
-                        else char.toString()
-                    }
-                }
+            formatIngredient(ingredient)
         }
+    }
+
+    private fun formatIngredient(rawIngredient: String): String? {
+        return rawIngredient
+            .replace('_', ' ')
+            .trim()
+            .takeIf { it.isNotEmpty() }
+            ?.lowercase()
+            ?.split(" ")
+            ?.filter { it.isNotBlank() }
+            ?.joinToString(" ") { part ->
+                part.replaceFirstChar { char ->
+                    if (char.isLowerCase()) char.titlecase(Locale.getDefault())
+                    else char.toString()
+                }
+            }
     }
 
     private fun resolveIngredients(ingredients: List<String>?): List<String> {

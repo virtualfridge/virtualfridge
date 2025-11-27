@@ -149,18 +149,10 @@ export class FridgeService {
 
         foodType = await foodTypeModel.create(productData);
       }
-      if (!foodType) {
-        logger.error(
-          'Error finding or creating foodType in FridgeService.createFromBarcode()'
-        );
-        return res.status(500).json({
-          message: 'Failed to find or create foodType',
-        });
-      }
 
       // Create a food item instance for the user
       const expirationDate = new Date();
-      const days = foodType?.shelfLifeDays;
+      const days = foodType.shelfLifeDays;
       if (typeof days === 'number' && Number.isFinite(days)) {
         expirationDate.setDate(expirationDate.getDate() + days);
       }
@@ -179,10 +171,7 @@ export class FridgeService {
       return res.status(200).json({
         message: 'Successfully created item from barcode',
         data: {
-          fridgeItem: {
-            foodItem: foodItem,
-            foodType: foodType,
-          },
+          fridgeItem: { foodItem, foodType },
         },
       });
     } catch (error: unknown) {
