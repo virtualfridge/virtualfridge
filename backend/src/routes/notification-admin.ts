@@ -15,7 +15,9 @@ router.post('/test-simple', async (req: Request, res: Response) => {
     const { fcmToken } = req.body;
 
     if (!fcmToken) {
-      return res.status(400).json({ message: 'FCM token required in request body' });
+      return res
+        .status(400)
+        .json({ message: 'FCM token required in request body' });
     }
 
     const success = await notificationService.sendNotification(
@@ -27,7 +29,9 @@ router.post('/test-simple', async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success,
-      message: success ? 'Test notification sent!' : 'Failed to send notification. Check logs.',
+      message: success
+        ? 'Test notification sent!'
+        : 'Failed to send notification. Check logs.',
     });
   } catch (error) {
     console.error('Error sending test notification:', error);
@@ -44,7 +48,8 @@ router.post('/trigger', async (req: Request, res: Response) => {
     await cronService.triggerNotificationCheck();
 
     return res.status(200).json({
-      message: 'Notification check triggered successfully. Check server logs for details.',
+      message:
+        'Notification check triggered successfully. Check server logs for details.',
     });
   } catch (error) {
     console.error('Error triggering notification check:', error);
@@ -59,7 +64,11 @@ router.post('/trigger', async (req: Request, res: Response) => {
 router.get('/debug', async (req: Request, res: Response) => {
   try {
     const users = await userModel.findUsersWithFcmTokens();
-    const debugInfo: any = {
+    const debugInfo: {
+      firebaseInitialized: boolean;
+      totalUsersWithTokens: number;
+      users: unknown[];
+    } = {
       firebaseInitialized: notificationService.isInitialized(),
       totalUsersWithTokens: users.length,
       users: [],
@@ -73,7 +82,9 @@ router.get('/debug', async (req: Request, res: Response) => {
         userId: user._id,
         email: user.email,
         hasFcmToken: !!user.fcmToken,
-        fcmTokenPreview: user.fcmToken ? user.fcmToken.substring(0, 20) + '...' : null,
+        fcmTokenPreview: user.fcmToken
+          ? user.fcmToken.substring(0, 20) + '...'
+          : null,
         fcmTokenFull: user.fcmToken, // TEMPORARY: Show full token for debugging
         totalItems: foodItems.length,
         itemsWithExpiry: itemsWithExpiry.length,
