@@ -53,14 +53,8 @@ Frontend --> Notification
 ' --- Backend internal and external connections ---
 Fridge --> OpenFoodFacts
 Fridge --> DB
-FoodItem --> DB
-FoodItem --> TheMealDB
-FoodItem --> OpenFoodFacts
-FoodItem --> Gemini
-FoodType --> DB
-FoodType --> TheMealDB
-FoodType --> OpenFoodFacts
-FoodType --> Gemini
+FoodItem --> Fridge
+FoodType --> Fridge
 aiVision --> Gemini
 User --> DB
 Recipe --> DB
