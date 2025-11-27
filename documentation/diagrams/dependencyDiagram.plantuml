@@ -19,6 +19,10 @@ rectangle "Frontend" as Frontend
 ' --- Backend with internal components ---
 rectangle "Backend" as Backend {
     rectangle "Fridge" as Fridge
+		rectangle "Food Item" as FoodItem 
+		rectangle "Food Type" as FoodType
+		rectangle "AI Vision" as aiVision
+		rectangle "Media" as Media
     rectangle "User" as User
     rectangle "Notification" as Notification
     rectangle "Recipe" as Recipe
@@ -38,6 +42,10 @@ GoogleAuth <-- Frontend
 
 ' --- Frontend to Backend ---
 Frontend --> Fridge
+Frontend --> FoodItem
+Frontend --> FoodType
+Frontend --> aiVision
+Frontend --> Media
 Frontend --> User
 Frontend --> Recipe
 Frontend --> Notification
@@ -45,6 +53,15 @@ Frontend --> Notification
 ' --- Backend internal and external connections ---
 Fridge --> OpenFoodFacts
 Fridge --> DB
+FoodItem --> DB
+FoodItem --> TheMealDB
+FoodItem --> OpenFoodFacts
+FoodItem --> Gemini
+FoodType --> DB
+FoodType --> TheMealDB
+FoodType --> OpenFoodFacts
+FoodType --> Gemini
+aiVision --> Gemini
 User --> DB
 Recipe --> DB
 Recipe --> TheMealDB
