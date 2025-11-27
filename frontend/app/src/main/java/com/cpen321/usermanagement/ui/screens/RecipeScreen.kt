@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
-import com.cpen321.usermanagement.data.remote.dto.RecipeData
+import com.cpen321.usermanagement.data.remote.dto.Recipe
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.IngredientOption
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
@@ -182,12 +182,10 @@ private fun RecipeScreenContent(
             }
 
             uiState.aiRecipe != null -> {
-                uiState.aiRecipe?.let { aiRecipeText ->
-                    AiRecipeSection(
-                        uiState = uiState,
-                        aiRecipe = aiRecipeText,
-                    )
-                }
+                AiRecipeSection(
+                    uiState = uiState,
+                    aiRecipe = uiState.aiRecipe,
+                )
             }
         }
     }
@@ -388,7 +386,7 @@ private fun AiRecipeSection(
 
 @Composable
 private fun RecipeCard(
-    recipe: RecipeData,
+    recipe: Recipe,
     modifier: Modifier = Modifier
 ) {
     Card(

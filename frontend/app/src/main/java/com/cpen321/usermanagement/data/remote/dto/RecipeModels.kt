@@ -12,6 +12,10 @@ data class Ingredient(
 )
 
 data class RecipeData(
+    val recipe: Recipe
+)
+
+data class Recipe(
     val name: String,
     val instructions: String,
     val thumbnail: String?,
