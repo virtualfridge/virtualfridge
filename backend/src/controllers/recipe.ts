@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { RecipeService } from '../services/recipe';
-import { AiRecipeService } from '../services/aiRecipe';
 import {
   GetRecipesQuery,
   GetRecipesResponse,
@@ -14,10 +13,7 @@ import logger from '../util/logger';
 import { AxiosError } from 'axios';
 
 export class RecipeController {
-  constructor(
-    private readonly recipeService = new RecipeService(),
-    private readonly aiRecipeService = new AiRecipeService()
-  ) {}
+  constructor(private readonly recipeService = new RecipeService()) {}
 
   getRecipes = async (
     req: Request<unknown, unknown, unknown, GetRecipesQuery>,
@@ -64,7 +60,7 @@ export class RecipeController {
     next: NextFunction
   ) => {
     try {
-      const data = await this.aiRecipeService.generateRecipe(
+      const data = await this.recipeService.generateRecipe(
         req.body.ingredients
       );
 
