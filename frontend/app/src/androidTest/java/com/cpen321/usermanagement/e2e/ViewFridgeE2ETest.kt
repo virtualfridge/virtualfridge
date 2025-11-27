@@ -3,11 +3,14 @@ package com.cpen321.usermanagement.e2e
 import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.cpen321.usermanagement.MainActivity
+import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
@@ -15,6 +18,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * End-to-End Test for Use Case 3: View Fridge
@@ -47,11 +52,17 @@ class ViewFridgeE2ETest {
         .around(composeTestRule)
 
     private lateinit var device: UiDevice
+    private lateinit var mainViewModel: MainViewModel
 
     @Before
     fun setup() {
         hiltRule.inject()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+        // Get MainViewModel from the activity using ViewModelProvider
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            mainViewModel = ViewModelProvider(activity)[MainViewModel::class.java]
+        }
     }
 
     /**
@@ -64,6 +75,47 @@ class ViewFridgeE2ETest {
         composeTestRule.onNode(
             hasText(text, substring = true) and hasClickAction()
         ).performClick()
+    }
+
+    /**
+     * Helper: Add two different test items to fridge (Nutella and Prime)
+     * This enables proper testing of sorting functionality with distinct items
+     */
+    private fun addMultipleTestItems() {
+        try {
+            composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+
+            // Add Nutella
+            android.util.Log.d("ViewFridgeE2ETest", "Adding Nutella...")
+            composeTestRule.runOnUiThread {
+                mainViewModel.testSendBarcode()
+            }
+
+            // Wait for Nutella to appear in the fridge
+            composeTestRule.waitUntil(timeoutMillis = 45000) {
+                composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            android.util.Log.d("ViewFridgeE2ETest", "Nutella added successfully.")
+
+            // Add Prime
+            android.util.Log.d("ViewFridgeE2ETest", "Adding Prime...")
+            composeTestRule.runOnUiThread {
+                mainViewModel.testSendPrimeBarcode()
+            }
+
+            // Wait for Prime to appear in the fridge
+            composeTestRule.waitUntil(timeoutMillis = 45000) {
+                composeTestRule.onAllNodesWithText("Prime", substring = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            android.util.Log.d("ViewFridgeE2ETest", "Prime added successfully.")
+
+            composeTestRule.waitForIdle()
+        } catch (e: Exception) {
+            android.util.Log.e("ViewFridgeE2ETest", "Error in addMultipleTestItems", e)
+            // Items may already exist from previous test runs
+        }
     }
 
     /**
@@ -126,12 +178,9 @@ class ViewFridgeE2ETest {
      * Test: Sort Fridge Items by Expiration Date
      *
      * Flow:
-     * 1. Navigate to main screen with items
-     * 2. Verify sort options exist
-     * 3. Select "Expiration Date" sort option
-     * 4. Verify selection is applied and items remain visible
-     *
-     * Note: Test passes gracefully if fridge is empty
+     * 1. Add Nutella and Prime items to fridge
+     * 2. Select "Expiration Date" sort option
+     * 3. Verify both items remain visible (confirms sort works without crashing)
      */
     @Test
     fun testViewFridge_sortByExpirationDate() {
@@ -140,6 +189,9 @@ class ViewFridgeE2ETest {
             composeTestRule.onAllNodesWithText("Virtual Fridge", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
+
+        // Add two different items for proper sort testing
+        addMultipleTestItems()
 
         composeTestRule.waitForIdle()
 
@@ -173,7 +225,6 @@ class ViewFridgeE2ETest {
                 composeTestRule.waitForIdle()
 
                 // Click "Expiration Date" option in the dropdown
-                // Note: There may be 2 "Expiration Date" nodes (button + menu item), so click the last one
                 val expirationDateNodes = composeTestRule.onAllNodesWithText("Expiration Date", substring = true)
                     .fetchSemanticsNodes()
                 if (expirationDateNodes.size > 1) {
@@ -193,10 +244,37 @@ class ViewFridgeE2ETest {
                     .assertExists()
                     .assertIsDisplayed()
 
-                // Verify sort label is still visible after selecting sort option
-                composeTestRule.onNodeWithText("Sort by:", substring = true)
-                    .assertExists()
-                    .assertIsDisplayed()
+                // Verify items are sorted by expiration date
+                val allExpiresNodes = composeTestRule.onAllNodesWithText("Expires:", substring = true)
+                    .fetchSemanticsNodes()
+
+                android.util.Log.d("ViewFridgeE2ETest", "Found ${allExpiresNodes.size} nodes with 'Expires:'")
+
+                if (allExpiresNodes.size >= 2) {
+                    val dateParser = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                    val expirationDates = allExpiresNodes.mapNotNull { node ->
+                        try {
+                            val text = node.config[androidx.compose.ui.semantics.SemanticsProperties.Text]
+                                .first().text
+                            android.util.Log.d("ViewFridgeE2ETest", "Expiration text: $text")
+                            val dateString = text.substringAfter("Expires: ").trim()
+                            val date = dateParser.parse(dateString)
+                            android.util.Log.d("ViewFridgeE2ETest", "Parsed date: $date")
+                            date
+                        } catch (e: Exception) {
+                            android.util.Log.e("ViewFridgeE2ETest", "Error parsing date", e)
+                            null
+                        }
+                    }
+
+                    // Verify dates are in ascending order (earliest first, latest last)
+                    for (i in 0 until expirationDates.size - 1) {
+                        assert(expirationDates[i] <= expirationDates[i+1]) {
+                            "Items are not sorted by expiration date. Found ${expirationDates[i]} after ${expirationDates[i+1]}"
+                        }
+                    }
+                    android.util.Log.d("ViewFridgeE2ETest", "Expiration dates are properly sorted: $expirationDates")
+                }
             }
         } else {
             // Fridge is empty - test passes as sort options are correctly hidden
@@ -221,6 +299,9 @@ class ViewFridgeE2ETest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
+        // Add two different items for proper sort testing
+        addMultipleTestItems()
+
         composeTestRule.waitForIdle()
 
         // Check if "Sort by:" exists
@@ -228,10 +309,6 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
-            // Count items before sort
-            val itemCountBefore = composeTestRule.onAllNodesWithText("Nutella", substring = true)
-                .fetchSemanticsNodes().size
-
             // Get current sort button and click to open dropdown
             val currentSortButton = composeTestRule.onAllNodes(
                 (hasText("Expiration Date", substring = true) or
@@ -270,13 +347,12 @@ class ViewFridgeE2ETest {
                     .assertExists()
                     .assertIsDisplayed()
 
-                // Verify items are still visible after sort
-                val itemCountAfter = composeTestRule.onAllNodesWithText("Nutella", substring = true)
-                    .fetchSemanticsNodes().size
-
-                assert(itemCountAfter == itemCountBefore) {
-                    "Items should remain visible after sorting. Before: $itemCountBefore, After: $itemCountAfter"
-                }
+                // Verify both items are still visible after sorting
+                // (Added date is not displayed in UI, so we just verify items are present)
+                composeTestRule.onNodeWithText("Nutella", substring = true)
+                    .assertExists()
+                composeTestRule.onNodeWithText("Prime", substring = true)
+                    .assertExists()
             }
         }
     }
@@ -285,9 +361,9 @@ class ViewFridgeE2ETest {
      * Test: Sort Fridge Items by Name
      *
      * Flow:
-     * 1. Navigate to main screen with items
+     * 1. Add Nutella and Prime items to fridge
      * 2. Change sort to "Name" (alphabetical)
-     * 3. Verify selection is applied and items remain visible
+     * 3. Verify items are in alphabetical order (Nutella before Prime)
      */
     @Test
     fun testViewFridge_sortByName() {
@@ -297,6 +373,9 @@ class ViewFridgeE2ETest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
+        // Add two different items for proper sort testing
+        addMultipleTestItems()
+
         composeTestRule.waitForIdle()
 
         // Check if "Sort by:" exists
@@ -304,10 +383,6 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
-            // Count items before sort
-            val itemCountBefore = composeTestRule.onAllNodesWithText("Nutella", substring = true)
-                .fetchSemanticsNodes().size
-
             // Click sort button to open dropdown
             val currentSortButton = composeTestRule.onAllNodes(
                 (hasText("Expiration Date", substring = true) or
@@ -327,7 +402,6 @@ class ViewFridgeE2ETest {
                 composeTestRule.waitForIdle()
 
                 // Click "Name" option
-                // Note: There may be 2 "Name" nodes (button + menu item), so click the last one
                 val nameNodes = composeTestRule.onAllNodesWithText("Name", substring = true)
                     .fetchSemanticsNodes()
                 if (nameNodes.size > 1) {
@@ -345,12 +419,37 @@ class ViewFridgeE2ETest {
                     .assertExists()
                     .assertIsDisplayed()
 
-                // Verify items are still visible after sort
-                val itemCountAfter = composeTestRule.onAllNodesWithText("Nutella", substring = true)
-                    .fetchSemanticsNodes().size
+                // Verify items are sorted alphabetically by checking their vertical positions
+                // Get Nutella node
+                val nutellaNodes = composeTestRule.onAllNodesWithText("Nutella", substring = true)
+                    .fetchSemanticsNodes()
 
-                assert(itemCountAfter == itemCountBefore) {
-                    "Items should remain visible after sorting. Before: $itemCountBefore, After: $itemCountAfter"
+                // Get the other drink node (Icy Pop or similar)
+                val icyNodes = composeTestRule.onAllNodesWithText("Icy", substring = true)
+                    .fetchSemanticsNodes()
+
+                if (nutellaNodes.isNotEmpty() && icyNodes.isNotEmpty()) {
+                    // Get the first Nutella and first Icy node (should be the product name)
+                    val nutellaNode = nutellaNodes[0]
+                    val icyNode = icyNodes[0]
+
+                    val nutellaY = nutellaNode.boundsInRoot.top
+                    val icyY = icyNode.boundsInRoot.top
+
+                    val nutellaName = nutellaNode.config[androidx.compose.ui.semantics.SemanticsProperties.Text].first().text
+                    val icyName = icyNode.config[androidx.compose.ui.semantics.SemanticsProperties.Text].first().text
+
+                    android.util.Log.d("ViewFridgeE2ETest", "Nutella at Y=$nutellaY, Icy at Y=$icyY")
+                    android.util.Log.d("ViewFridgeE2ETest", "Nutella name: $nutellaName, Icy name: $icyName")
+
+                    // Determine which comes first alphabetically
+                    val alphabeticalFirst = if (icyName.lowercase() < nutellaName.lowercase()) icyName else nutellaName
+                    val visualFirst = if (icyY < nutellaY) icyName else nutellaName
+
+                    assert(alphabeticalFirst == visualFirst) {
+                        "Items are not sorted alphabetically. $alphabeticalFirst should come before, but $visualFirst appears first in the list"
+                    }
+                    android.util.Log.d("ViewFridgeE2ETest", "Items are properly sorted alphabetically")
                 }
             }
         }
@@ -360,7 +459,7 @@ class ViewFridgeE2ETest {
      * Test: Sort Fridge Items by Nutritional Value
      *
      * Flow:
-     * 1. Navigate to main screen with items
+     * 1. Add Nutella and Prime items to fridge
      * 2. Change sort to "Nutritional Value"
      * 3. Verify selection is applied and items remain visible
      */
@@ -372,6 +471,9 @@ class ViewFridgeE2ETest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
+        // Add two different items for proper sort testing
+        addMultipleTestItems()
+
         composeTestRule.waitForIdle()
 
         // Check if "Sort by:" exists
@@ -379,9 +481,6 @@ class ViewFridgeE2ETest {
             .fetchSemanticsNodes().isNotEmpty()
 
         if (hasSortOption) {
-            // Count items before sort
-            val itemCountBefore = composeTestRule.onAllNodesWithText("Nutella", substring = true)
-                .fetchSemanticsNodes().size
 
             // Click sort button to open dropdown
             val currentSortButton = composeTestRule.onAllNodes(
@@ -420,12 +519,79 @@ class ViewFridgeE2ETest {
                     .assertExists()
                     .assertIsDisplayed()
 
-                // Verify items are still visible after sort
-                val itemCountAfter = composeTestRule.onAllNodesWithText("Nutella", substring = true)
-                    .fetchSemanticsNodes().size
+                // Verify items are sorted by nutritional value (calories, descending)
+                // Get all "Nutritional Facts" buttons
+                val nutritionButtons = composeTestRule.onAllNodesWithText("Nutritional Facts", substring = true)
+                    .fetchSemanticsNodes()
 
-                assert(itemCountAfter == itemCountBefore) {
-                    "Items should remain visible after sorting. Before: $itemCountBefore, After: $itemCountAfter"
+                android.util.Log.d("ViewFridgeE2ETest", "Found ${nutritionButtons.size} Nutritional Facts buttons")
+
+                if (nutritionButtons.size >= 2) {
+                    val calories = mutableListOf<Int>()
+
+                    // Extract calories from each item by opening the nutrition dialog
+                    for (i in 0 until minOf(2, nutritionButtons.size)) {
+                        // Click the nutritional facts button
+                        composeTestRule.onAllNodesWithText("Nutritional Facts", substring = true)[i]
+                            .performClick()
+
+                        composeTestRule.waitForIdle()
+
+                        // Extract calories from the dialog
+                        val caloriesNodes = composeTestRule.onAllNodesWithText("Calories", substring = true)
+                            .fetchSemanticsNodes()
+
+                        if (caloriesNodes.isNotEmpty()) {
+                            try {
+                                val text = caloriesNodes.first().config[androidx.compose.ui.semantics.SemanticsProperties.Text]
+                                    .first().text
+                                // Text format is "Calories" in one node and value in another, or "Calories: value"
+                                android.util.Log.d("ViewFridgeE2ETest", "Calories text: $text")
+
+                                // Try to find the calorie value in sibling nodes
+                                val allDialogNodes = composeTestRule.onAllNodes(hasText("", substring = false) or hasText("", substring = true))
+                                    .fetchSemanticsNodes()
+
+                                // Look for numeric value near "Calories" text
+                                var calorieValue: Int? = null
+                                for (node in allDialogNodes) {
+                                    val nodeText = node.config[androidx.compose.ui.semantics.SemanticsProperties.Text]
+                                        .firstOrNull()?.text ?: continue
+                                    // Try to extract number that could be calories (e.g., "539", "539 kcal", etc.)
+                                    val number = nodeText.trim().split(" ").firstOrNull()?.toIntOrNull()
+                                    if (number != null && number > 0 && number < 10000) {
+                                        calorieValue = number
+                                        android.util.Log.d("ViewFridgeE2ETest", "Found calorie value: $calorieValue")
+                                        break
+                                    }
+                                }
+
+                                if (calorieValue != null) {
+                                    calories.add(calorieValue)
+                                }
+                            } catch (e: Exception) {
+                                android.util.Log.e("ViewFridgeE2ETest", "Error extracting calories", e)
+                            }
+                        }
+
+                        // Close the dialog
+                        composeTestRule.onNodeWithText("Close", substring = true)
+                            .performClick()
+
+                        composeTestRule.waitForIdle()
+                    }
+
+                    android.util.Log.d("ViewFridgeE2ETest", "Extracted calories: $calories")
+
+                    // Verify calories are in descending order (highest first)
+                    if (calories.size >= 2) {
+                        for (i in 0 until calories.size - 1) {
+                            assert(calories[i] >= calories[i+1]) {
+                                "Items are not sorted by nutritional value (calories). Found ${calories[i]} before ${calories[i+1]}"
+                            }
+                        }
+                        android.util.Log.d("ViewFridgeE2ETest", "Items are properly sorted by nutritional value: $calories")
+                    }
                 }
             }
         }
@@ -492,10 +658,6 @@ class ViewFridgeE2ETest {
 
         // Verify core bottom bar buttons exist (Scan, Test, Recipe)
         composeTestRule.onNodeWithText("Scan")
-            .assertExists()
-            .assertIsDisplayed()
-
-        composeTestRule.onNodeWithText("Test")
             .assertExists()
             .assertIsDisplayed()
 

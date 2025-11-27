@@ -3,11 +3,14 @@ package com.cpen321.usermanagement.e2e
 import android.Manifest
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.cpen321.usermanagement.MainActivity
+import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
@@ -51,11 +54,17 @@ class FindRecipeSuggestionsE2ETest {
         .around(composeTestRule)
 
     private lateinit var device: UiDevice
+    private lateinit var mainViewModel: MainViewModel
 
     @Before
     fun setup() {
         hiltRule.inject()
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+
+        // Get MainViewModel from the activity using ViewModelProvider
+        composeTestRule.activityRule.scenario.onActivity { activity ->
+            mainViewModel = ViewModelProvider(activity)[MainViewModel::class.java]
+        }
     }
 
     /**
@@ -73,48 +82,33 @@ class FindRecipeSuggestionsE2ETest {
     /**
      * Helper: Add a test item to fridge
      *
-     * Uses the test barcode functionality to add an item to the fridge,
+     * Uses the ViewModel's testSendBarcode() method to add an item to the fridge,
      * which is required for recipe testing.
      *
      * Returns true if item was added successfully, false otherwise.
      */
     private fun addTestItemToFridge(): Boolean {
         return try {
-            // Check if Test button exists
-            val hasTestButton = composeTestRule.onAllNodes(hasText("Test") and hasClickAction())
-                .fetchSemanticsNodes().isNotEmpty()
+            // Ensure activity is resumed
+            composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
-            if (!hasTestButton) {
-                return false
+            // Clear test barcode state
+            composeTestRule.runOnUiThread {
+                mainViewModel.clearTestBarcodeState()
             }
 
-            // Navigate to Test Barcode screen
-            clickButton("Test")
-
-            // Wait for Test Barcode screen
-            composeTestRule.waitUntil(timeoutMillis = 30000) {
-                composeTestRule.onAllNodesWithText("Test Barcode", substring = true)
-                    .fetchSemanticsNodes().isNotEmpty()
+            // Trigger test barcode send via ViewModel
+            composeTestRule.runOnUiThread {
+                mainViewModel.testSendBarcode()
             }
 
-            // Click "Send Test Barcode"
-            composeTestRule.onNodeWithText("Send Test Barcode")
-                .performClick()
-
-            // Wait for product details to load
-            composeTestRule.waitUntil(timeoutMillis = 30000) {
-                composeTestRule.onAllNodesWithText("Product Details", substring = true)
-                    .fetchSemanticsNodes().isNotEmpty()
+            // Wait for the API response (testBarcodeResponse should be set)
+            composeTestRule.waitUntil(timeoutMillis = 45000) {
+                mainViewModel.uiState.value.testBarcodeResponse != null
             }
 
-            // Go back to main screen
-            device.pressBack()
-
-            // Wait for main screen
-            composeTestRule.waitUntil(timeoutMillis = 30000) {
-                composeTestRule.onAllNodesWithText("Virtual Fridge", substring = true)
-                    .fetchSemanticsNodes().isNotEmpty()
-            }
+            // Wait a moment for the fridge to refresh
+            Thread.sleep(1000)
 
             composeTestRule.waitForIdle()
             true
@@ -301,7 +295,7 @@ class FindRecipeSuggestionsE2ETest {
                     .fetchSemanticsNodes().isNotEmpty() ||
                 composeTestRule.onAllNodesWithText("Recipes from MealDB", substring = true)
                     .fetchSemanticsNodes().isNotEmpty() ||
-                composeTestRule.onAllNodesWithText("No Recipes Found", substring = true)
+                composeTestRule.onAllNodesWithText("No recipes found", substring = true)
                     .fetchSemanticsNodes().isNotEmpty()
             }
 
@@ -309,14 +303,14 @@ class FindRecipeSuggestionsE2ETest {
             composeTestRule.waitUntil(timeoutMillis = 30000) {
                 composeTestRule.onAllNodesWithText("Recipes from MealDB", substring = true)
                     .fetchSemanticsNodes().isNotEmpty() ||
-                composeTestRule.onAllNodesWithText("No Recipes Found", substring = true)
+                composeTestRule.onAllNodesWithText("No recipes found", substring = true)
                     .fetchSemanticsNodes().isNotEmpty()
             }
 
             // Verify results section appears
             val hasResults = composeTestRule.onAllNodesWithText("Recipes from MealDB", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
-            val hasNoResults = composeTestRule.onAllNodesWithText("No Recipes Found", substring = true)
+            val hasNoResults = composeTestRule.onAllNodesWithText("No recipes found", substring = true)
                 .fetchSemanticsNodes().isNotEmpty()
 
             assert(hasResults || hasNoResults) {
@@ -519,12 +513,8 @@ class FindRecipeSuggestionsE2ETest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Verify core bottom bar buttons exist (Scan, Test, Recipe)
+        // Verify core bottom bar buttons exist (Scan, Recipe)
         composeTestRule.onNodeWithText("Scan")
-            .assertExists()
-            .assertIsDisplayed()
-
-        composeTestRule.onNodeWithText("Test")
             .assertExists()
             .assertIsDisplayed()
 

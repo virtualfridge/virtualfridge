@@ -47,7 +47,6 @@ fun MainScreen(
     fridgeViewModel: FridgeViewModel,
     onProfileClick: () -> Unit,
     onRecipeClick: () -> Unit,
-    onTestBarcodeClick: () -> Unit,
     onBarcodeResultClick: () -> Unit,
     onFridgeClick: () -> Unit
 ) {
@@ -103,7 +102,6 @@ fun MainScreen(
             onItemPercentChanged = fridgeViewModel::updateFoodItemPercent,
             onItemRemove = fridgeViewModel::removeFoodItem,
             onSortOptionChanged = fridgeViewModel::setSortOption,
-            onTestBarcodeClick = onTestBarcodeClick,
             onRecipeButtonClick = {
                 if (fridgeUiState.selectedItems.isNotEmpty()) {
                     showRecipeSheet = true
@@ -282,7 +280,6 @@ private fun MainContent(
             MainBottomBar(
                 hasSelectedItems = state.fridgeUiState.selectedItems.isNotEmpty(),
                 onScanClick = actions.onScanRequested,
-                onTestBarcodeClick = actions.onTestBarcodeClick,
                 onRecipeClick = actions.onRecipeButtonClick
             )
         }
@@ -321,7 +318,6 @@ private data class MainContentActions(
     val onItemPercentChanged: (String, Int) -> Unit,
     val onItemRemove: (String) -> Unit,
     val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
-    val onTestBarcodeClick: () -> Unit,
     val onRecipeButtonClick: () -> Unit
 )
 
@@ -617,7 +613,6 @@ private fun SelectableFridgeItemCard(
 private fun MainBottomBar(
     hasSelectedItems: Boolean,
     onScanClick: () -> Unit,
-    onTestBarcodeClick: () -> Unit,
     onRecipeClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -650,27 +645,6 @@ private fun MainBottomBar(
                     )
                     Text(
                         text = "Scan",
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Test Barcode Button
-            OutlinedButton(
-                onClick = onTestBarcodeClick,
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "🧪",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "Test",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }

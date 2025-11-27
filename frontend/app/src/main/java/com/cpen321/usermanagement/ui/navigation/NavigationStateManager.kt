@@ -15,7 +15,6 @@ sealed class NavigationEvent {
     data class NavigateToAuthWithMessage(val message: String) : NavigationEvent()
     data class NavigateToMainWithMessage(val message: String) : NavigationEvent()
     object NavigateToScanner : NavigationEvent()
-    object NavigateToTestBarcode : NavigationEvent()
     object NavigateToRecipe : NavigationEvent()
     object NavigateToBarcodeResult : NavigationEvent()
     object NavigateToFridge : NavigationEvent()
@@ -118,11 +117,6 @@ class NavigationStateManager @Inject constructor() {
 
     fun navigateToScanner() {
         _navigationEvent.value = NavigationEvent.NavigateToScanner
-    }
-
-    fun navigateToTestBarcode() {
-        _navigationEvent.value = NavigationEvent.NavigateToTestBarcode
-        _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.TEST_BARCODE)
     }
 
     fun navigateToBarcodeResult() {
