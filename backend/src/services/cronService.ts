@@ -11,7 +11,7 @@ import { IUser } from '../types/user';
  * Currently manages automated expiration notifications
  */
 class CronService {
-  private isRunning: boolean = false;
+  private isRunning = false;
 
   /**
    * Starts all scheduled cron jobs
