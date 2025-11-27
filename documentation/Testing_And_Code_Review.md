@@ -2,9 +2,9 @@
 
 ## 1. Change History
 
-| **Change Date**   | **Modified Sections** | **Rationale** |
-| ----------------- | --------------------- | ------------- |
-| _Nothing to show_ |
+| **Change Date**   | **Modified Sections** |   **Rationale**  |
+| ----------------- | --------------------- | -----------------|
+| 27/11/25          | 2.1.1, 2.1.2, 2.1.3   | Updated to match
 
 ---
 
