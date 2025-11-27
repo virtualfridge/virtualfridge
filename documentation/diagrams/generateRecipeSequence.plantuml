@@ -30,7 +30,6 @@ Controller -> Controller: Aggregate recipes\nFilter by matching ≥2 ingredients
 
 alt Recipes found (≥1 recipe matches)
     Controller --> Controller: RecipeResult[]\n{id, title, thumbnail, sourceUrl}
-    deactivate RecipeService
     Controller --> Frontend: 200 OK\n{recipes: [3 recipe summaries with links]}
     deactivate Controller
     Frontend --> User: Display recipe dropdown\nwith 3 recipe cards
@@ -38,7 +37,6 @@ alt Recipes found (≥1 recipe matches)
     Frontend --> User: Open external link in browser\n(TheMealDB recipe details)
 else No recipes found
     Controller --> Controller: Empty array []
-    deactivate RecipeService
     Controller --> Frontend: 404 Not Found\n{error: "No matching recipes"}
     deactivate Controller
     Frontend --> User: Display message:\n"No recipes found,\ntry different ingredients"
