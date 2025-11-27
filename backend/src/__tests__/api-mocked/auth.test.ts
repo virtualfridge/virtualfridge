@@ -8,12 +8,12 @@
 import { describe, expect, test, jest, beforeAll, afterAll, afterEach, beforeEach } from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import * as dbHandler from '../../helpers/dbHandler';
-import { userModel } from '../../../models/user';
-import { mockGoogleUserInfo } from '../../helpers/testData';
+import * as dbHandler from '../helpers/dbHandler';
+import { userModel } from '../../models/user';
+import { mockGoogleUserInfo } from '../helpers/testData';
 
 // Setup mock before any imports
-const mockVerifyIdToken: jest.Mock = jest.fn();
+const mockVerifyIdToken = jest.fn() as jest.Mock;
 jest.mock('google-auth-library', () => ({
   OAuth2Client: jest.fn().mockImplementation(() => ({
     verifyIdToken: mockVerifyIdToken,
@@ -21,7 +21,7 @@ jest.mock('google-auth-library', () => ({
 }));
 
 // Import after mocking
-import { createTestApp } from '../../helpers/testApp';
+import { createTestApp } from '../helpers/testApp';
 
 /**
  * =============================================================================
@@ -280,7 +280,7 @@ describe('POST /api/auth/google - WITH ADDITIONAL MOCKING', () => {
    */
   test('should handle non-Error exceptions in googleAuth', async () => {
     // Mock authService to throw non-Error
-    const { authService } = require('../../../services/auth');
+    const { authService } = require('../../services/auth');
     jest.spyOn(authService, 'authenticateWithGoogle').mockRejectedValueOnce('string error');
 
     await request(app)
@@ -551,7 +551,7 @@ describe('POST /api/auth/signup - WITH ADDITIONAL MOCKING', () => {
    */
   test('should handle non-Error exceptions in signup', async () => {
     // Mock authService to throw non-Error
-    const { authService } = require('../../../services/auth');
+    const { authService } = require('../../services/auth');
     jest.spyOn(authService, 'signUpWithGoogle').mockRejectedValueOnce('string error');
 
     await request(app)
@@ -784,7 +784,7 @@ describe('POST /api/auth/signin - WITH ADDITIONAL MOCKING', () => {
     });
 
     // Mock authService to throw specific error
-    const { authService } = require('../../../services/auth');
+    const { authService } = require('../../services/auth');
     jest.spyOn(authService, 'signInWithGoogle').mockRejectedValueOnce(new Error('Failed to process user'));
 
     const response = await request(app)
@@ -821,7 +821,7 @@ describe('POST /api/auth/signin - WITH ADDITIONAL MOCKING', () => {
    */
   test('should handle non-Error exceptions in signin', async () => {
     // Mock authService to throw non-Error
-    const { authService } = require('../../../services/auth');
+    const { authService } = require('../../services/auth');
     jest.spyOn(authService, 'signInWithGoogle').mockRejectedValueOnce('string error');
 
     await request(app)

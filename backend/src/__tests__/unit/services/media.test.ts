@@ -11,9 +11,10 @@ import path from 'path';
 import * as MediaService from '../../../services/media';
 import { IMAGES_DIR } from '../../../config/constants';
 
-// Mock fs
+// Mock fs and fs.promises
 jest.mock('fs');
 const mockedFs = fs as jest.Mocked<typeof fs>;
+const mockedFsPromises = fs.promises as jest.Mocked<typeof fs.promises>;
 
 describe('MediaService', () => {
   const mockUserId = 'user123';
@@ -25,12 +26,12 @@ describe('MediaService', () => {
   describe('saveImage', () => {
     test('should save image successfully', async () => {
       const mockFilePath = '/tmp/upload-123.jpg';
-      mockedFs.renameSync = jest.fn();
+      mockedFsPromises.rename = jest.fn().mockResolvedValue(undefined);
 
       const result = await MediaService.saveImage(mockFilePath, mockUserId);
 
-      expect(mockedFs.renameSync).toHaveBeenCalled();
-      const callArgs = mockedFs.renameSync.mock.calls[0];
+      expect(mockedFsPromises.rename).toHaveBeenCalled();
+      const callArgs = mockedFsPromises.rename.mock.calls[0];
       expect(callArgs[0]).toBe(mockFilePath);
       expect(callArgs[1]).toContain(mockUserId);
       expect(callArgs[1]).toContain('.jpg');
@@ -40,7 +41,7 @@ describe('MediaService', () => {
 
     test('should generate unique filename with timestamp', async () => {
       const mockFilePath = '/tmp/upload.png';
-      mockedFs.renameSync = jest.fn();
+      mockedFsPromises.rename = jest.fn().mockResolvedValue(undefined);
 
       const result1 = await MediaService.saveImage(mockFilePath, mockUserId);
 
@@ -54,7 +55,7 @@ describe('MediaService', () => {
 
     test('should preserve file extension', async () => {
       const mockFilePath = '/tmp/upload.webp';
-      mockedFs.renameSync = jest.fn();
+      mockedFsPromises.rename = jest.fn().mockResolvedValue(undefined);
 
       const result = await MediaService.saveImage(mockFilePath, mockUserId);
 
@@ -63,7 +64,7 @@ describe('MediaService', () => {
 
     test('should handle different file extensions', async () => {
       const extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-      mockedFs.renameSync = jest.fn();
+      mockedFsPromises.rename = jest.fn().mockResolvedValue(undefined);
 
       for (const ext of extensions) {
         const mockFilePath = `/tmp/upload${ext}`;
@@ -75,8 +76,9 @@ describe('MediaService', () => {
     test('should normalize path separators to forward slashes', async () => {
       const mockFilePath = '/tmp/upload.jpg';
       let capturedNewPath = '';
-      mockedFs.renameSync = jest.fn((oldPath, newPath) => {
+      mockedFsPromises.rename = jest.fn().mockImplementation((oldPath, newPath) => {
         capturedNewPath = newPath as string;
+        return Promise.resolve();
       });
 
       const result = await MediaService.saveImage(mockFilePath, mockUserId);
@@ -88,40 +90,34 @@ describe('MediaService', () => {
 
     test('should delete original file if save fails', async () => {
       const mockFilePath = '/tmp/upload.jpg';
-      mockedFs.renameSync = jest.fn().mockImplementation(() => {
-        throw new Error('Rename failed');
-      });
+      mockedFsPromises.rename = jest.fn().mockRejectedValue(new Error('Rename failed'));
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await expect(
         MediaService.saveImage(mockFilePath, mockUserId)
       ).rejects.toThrow('Failed to save profile picture');
 
-      expect(mockedFs.unlinkSync).toHaveBeenCalledWith(mockFilePath);
+      expect(mockedFsPromises.unlink).toHaveBeenCalledWith(mockFilePath);
     });
 
     test('should not attempt to delete file if it does not exist after error', async () => {
       const mockFilePath = '/tmp/upload.jpg';
-      mockedFs.renameSync = jest.fn().mockImplementation(() => {
-        throw new Error('Rename failed');
-      });
+      mockedFsPromises.rename = jest.fn().mockRejectedValue(new Error('Rename failed'));
       mockedFs.existsSync = jest.fn().mockReturnValue(false);
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await expect(
         MediaService.saveImage(mockFilePath, mockUserId)
       ).rejects.toThrow();
 
-      expect(mockedFs.unlinkSync).not.toHaveBeenCalled();
+      expect(mockedFsPromises.unlink).not.toHaveBeenCalled();
     });
 
     test('should throw error with original error message', async () => {
       const mockFilePath = '/tmp/upload.jpg';
       const originalError = new Error('Disk full');
-      mockedFs.renameSync = jest.fn().mockImplementation(() => {
-        throw originalError;
-      });
+      mockedFsPromises.rename = jest.fn().mockRejectedValue(originalError);
       mockedFs.existsSync = jest.fn().mockReturnValue(false);
 
       await expect(
@@ -132,8 +128,9 @@ describe('MediaService', () => {
     test('should place file in IMAGES_DIR', async () => {
       const mockFilePath = '/tmp/upload.jpg';
       let capturedNewPath = '';
-      mockedFs.renameSync = jest.fn((oldPath, newPath) => {
+      mockedFsPromises.rename = jest.fn().mockImplementation((oldPath, newPath) => {
         capturedNewPath = newPath as string;
+        return Promise.resolve();
       });
 
       await MediaService.saveImage(mockFilePath, mockUserId);
@@ -148,31 +145,31 @@ describe('MediaService', () => {
     test('should delete image that starts with IMAGES_DIR', async () => {
       const mockUrl = `${IMAGES_DIR}/image.jpg`;
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await MediaService.deleteImage(mockUrl);
 
       expect(mockedFs.existsSync).toHaveBeenCalled();
-      expect(mockedFs.unlinkSync).toHaveBeenCalled();
+      expect(mockedFsPromises.unlink).toHaveBeenCalled();
     });
 
     test('should not delete image that does not start with IMAGES_DIR', async () => {
       const mockUrl = '/different/path/image.jpg';
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await MediaService.deleteImage(mockUrl);
 
-      expect(mockedFs.unlinkSync).not.toHaveBeenCalled();
+      expect(mockedFsPromises.unlink).not.toHaveBeenCalled();
     });
 
     test('should not delete if file does not exist', async () => {
       const mockUrl = `${IMAGES_DIR}/nonexistent.jpg`;
       mockedFs.existsSync = jest.fn().mockReturnValue(false);
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await MediaService.deleteImage(mockUrl);
 
-      expect(mockedFs.unlinkSync).not.toHaveBeenCalled();
+      expect(mockedFsPromises.unlink).not.toHaveBeenCalled();
     });
 
     test('should handle errors gracefully without throwing', async () => {
@@ -189,8 +186,9 @@ describe('MediaService', () => {
       const mockUrl = `${IMAGES_DIR}/user123-123456789.jpg`;
       let capturedPath = '';
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.unlinkSync = jest.fn(filePath => {
+      mockedFsPromises.unlink = jest.fn().mockImplementation((filePath) => {
         capturedPath = filePath as string;
+        return Promise.resolve();
       });
 
       await MediaService.deleteImage(mockUrl);
@@ -206,12 +204,12 @@ describe('MediaService', () => {
       const allFiles = [...userFiles, ...otherFiles];
 
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.readdirSync = jest.fn().mockReturnValue(allFiles as any);
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.readdir = jest.fn().mockResolvedValue(allFiles as any);
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await MediaService.deleteAllUserImages(mockUserId);
 
-      expect(mockedFs.readdirSync).toHaveBeenCalledWith(IMAGES_DIR);
+      expect(mockedFsPromises.readdir).toHaveBeenCalledWith(IMAGES_DIR);
       // The deleteAllUserImages filters files and calls deleteImage for each
       // deleteImage internally checks if the file starts with IMAGES_DIR
       // Since our mock files don't start with IMAGES_DIR, they won't be deleted
@@ -219,27 +217,25 @@ describe('MediaService', () => {
 
     test('should handle empty directory', async () => {
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.readdirSync = jest.fn().mockReturnValue([] as any);
+      mockedFsPromises.readdir = jest.fn().mockResolvedValue([] as any);
 
       await MediaService.deleteAllUserImages(mockUserId);
 
-      expect(mockedFs.readdirSync).toHaveBeenCalledWith(IMAGES_DIR);
+      expect(mockedFsPromises.readdir).toHaveBeenCalledWith(IMAGES_DIR);
     });
 
     test('should return early if IMAGES_DIR does not exist', async () => {
       mockedFs.existsSync = jest.fn().mockReturnValue(false);
-      mockedFs.readdirSync = jest.fn();
+      mockedFsPromises.readdir = jest.fn().mockResolvedValue([] as any);
 
       await MediaService.deleteAllUserImages(mockUserId);
 
-      expect(mockedFs.readdirSync).not.toHaveBeenCalled();
+      expect(mockedFsPromises.readdir).not.toHaveBeenCalled();
     });
 
     test('should handle errors gracefully without throwing', async () => {
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.readdirSync = jest.fn().mockImplementation(() => {
-        throw new Error('Permission denied');
-      });
+      mockedFsPromises.readdir = jest.fn().mockRejectedValue(new Error('Permission denied'));
 
       // Should not throw
       await expect(
@@ -257,13 +253,13 @@ describe('MediaService', () => {
       ];
 
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.readdirSync = jest.fn().mockReturnValue(files as any);
-      mockedFs.unlinkSync = jest.fn();
+      mockedFsPromises.readdir = jest.fn().mockResolvedValue(files as any);
+      mockedFsPromises.unlink = jest.fn().mockResolvedValue(undefined);
 
       await MediaService.deleteAllUserImages(mockUserId);
 
       // Should filter for files starting with 'user123-' exactly
-      const readdirResult = mockedFs.readdirSync(IMAGES_DIR) as string[];
+      const readdirResult = await mockedFsPromises.readdir(IMAGES_DIR) as string[];
       const filteredFiles = readdirResult.filter(file =>
         file.startsWith(mockUserId + '-')
       );
@@ -277,25 +273,23 @@ describe('MediaService', () => {
       const files = ['user456-image.jpg', 'user789-image.jpg'];
 
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.readdirSync = jest.fn().mockReturnValue(files as any);
+      mockedFsPromises.readdir = jest.fn().mockResolvedValue(files as any);
 
       await MediaService.deleteAllUserImages(mockUserId);
 
-      expect(mockedFs.readdirSync).toHaveBeenCalled();
+      expect(mockedFsPromises.readdir).toHaveBeenCalled();
     });
 
     test('should handle individual file deletion errors', async () => {
       const files = ['user123-1.jpg', 'user123-2.jpg'];
 
       mockedFs.existsSync = jest.fn().mockReturnValue(true);
-      mockedFs.readdirSync = jest.fn().mockReturnValue(files as any);
+      mockedFsPromises.readdir = jest.fn().mockResolvedValue(files as any);
       // First deletion fails, second should still be attempted
-      mockedFs.unlinkSync = jest
+      mockedFsPromises.unlink = jest
         .fn()
-        .mockImplementationOnce(() => {
-          throw new Error('Delete failed');
-        })
-        .mockImplementationOnce(() => {});
+        .mockRejectedValueOnce(new Error('Delete failed'))
+        .mockResolvedValueOnce(undefined);
 
       // Should not throw despite individual failures
       await expect(

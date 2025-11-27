@@ -12,7 +12,7 @@ export const authenticateToken: RequestHandler = async (
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader?.startsWith('Bearer ')) {
       res.status(401).json({
         error: 'Access denied',
         message: 'No token provided',
@@ -56,18 +56,19 @@ export const authenticateToken: RequestHandler = async (
 
     next();
   } catch (error) {
-    if (error instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({
-        error: 'Invalid token',
-        message: 'Token is malformed or expired',
-      });
-      return;
-    }
-
+    // Check TokenExpiredError first since it extends JsonWebTokenError
     if (error instanceof jwt.TokenExpiredError) {
       res.status(401).json({
         error: 'Token expired',
         message: 'Please login again',
+      });
+      return;
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      res.status(401).json({
+        error: 'Invalid token',
+        message: 'Token is malformed or expired',
       });
       return;
     }

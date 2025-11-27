@@ -76,8 +76,6 @@ export class AiVisionService {
         return 'image/jpeg';
       case '.png':
         return 'image/png';
-      case '.webp':
-        return 'image/webp';
       default:
         return 'image/jpeg';
     }

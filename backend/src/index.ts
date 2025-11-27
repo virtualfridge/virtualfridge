@@ -25,7 +25,7 @@ connectDB().catch((error: unknown) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log('🚀 Server running on port', PORT);
 
   // Start cron service for automated notifications
   cronService.start();

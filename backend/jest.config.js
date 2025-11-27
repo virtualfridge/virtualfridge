@@ -36,15 +36,21 @@ module.exports = {
   projects: [
     {
       ...baseConfig,
-      displayName: 'mocked',
-      testMatch: ['<rootDir>/src/__tests__/mocked/**/*.test.ts'],
-      coverageDirectory: 'coverage/mocked',
+      displayName: 'api-mocked',
+      testMatch: ['<rootDir>/src/__tests__/api-mocked/**/*.test.ts'],
+      coverageDirectory: 'coverage/api-mocked',
     },
     {
       ...baseConfig,
-      displayName: 'unmocked',
-      testMatch: ['<rootDir>/src/__tests__/unmocked/**/*.test.ts'],
-      coverageDirectory: 'coverage/unmocked',
+      displayName: 'api-unmocked',
+      testMatch: ['<rootDir>/src/__tests__/api-unmocked/**/*.test.ts'],
+      coverageDirectory: 'coverage/api-unmocked',
+    },
+    {
+      ...baseConfig,
+      displayName: 'unit',
+      testMatch: ['<rootDir>/src/__tests__/unit/**/*.test.ts'],
+      coverageDirectory: 'coverage/unit',
     },
   ],
 };
