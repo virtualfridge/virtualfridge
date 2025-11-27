@@ -95,12 +95,12 @@ export class FoodItemModel {
         return foodType;
       } else {
         throw new Error(
-          `FoodType with _id ${foodItem.typeId} not found in database`
+          `FoodType with _id ${foodItem.typeId.toString()} not found in database`
         );
       }
     } catch (error) {
       logger.error(
-        `Error finding associated foodType for foodItem ${foodItem._id}:`,
+        `Error finding associated foodType for foodItem ${foodItem._id.toString()}:`,
         error
       );
       throw new Error('Failed to find associated foodType');

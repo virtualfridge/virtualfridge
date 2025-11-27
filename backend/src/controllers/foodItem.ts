@@ -56,7 +56,10 @@ export class FoodItemController {
         data: { foodItem },
       });
     } catch (error) {
-      logger.error(`Failed to update foodItem with ID ${req.body._id}:`, error);
+      logger.error(
+        `Failed to update foodItem with ID ${req.body._id.toString()}:`,
+        error
+      );
 
       if (error instanceof Error) {
         return res.status(500).json({
@@ -127,7 +130,7 @@ export class FoodItemController {
       });
     } catch (error) {
       logger.error(
-        `Failed to delete foodItem with ID ${req.params._id}:`,
+        `Failed to delete foodItem with ID ${req.params._id.toString()}:`,
         error
       );
 
