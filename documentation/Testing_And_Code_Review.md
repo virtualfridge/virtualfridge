@@ -63,75 +63,80 @@
 
 3. **Set Up Environment Variables**:
 
-   - Create a `.env` file in the `backend` directory with the required environment variables:
+   - Create a `.env.test` file in the `backend` directory with the required environment variables:
      ```
-     PORT=3000
-     JWT_SECRET=your-jwt-secret
-     GOOGLE_CLIENT_ID=your-google-client-id
-     MONGODB_URI=your-mongodb-uri
-     MONGODB_USER=your-mongodb-user
-     MONGODB_PASS=your-mongodb-password
-     GEMINI_API_KEY=your-gemini-api-key
-     FIREBASE_SERVICE_ACCOUNT=your-firebase-service-account-json
+     JWT_SECRET=test-jwt-secret
+     GOOGLE_CLIENT_ID=test-google-client-id
+     GEMINI_API_KEY=test-gemini-api-key
      ```
    - **Note**: Tests use an in-memory MongoDB database, so MongoDB connection variables are not required for testing.
 
 4. **Run All Tests**:
 
-   - To run all tests (both mocked and unmocked):
+   - To run all tests in the test suite:
      ```bash
      npm test
      ```
 
-5. **Run Only Mocked Tests**:
+5. **Run All API Tests (Both Mocked and Unmocked)**:
 
-   - To run only tests that use mocks (tests with external API/service mocking):
+   - To run all API tests (both mocked and unmocked):
      ```bash
-     npm run test:mocked
+     npm run test:api
      ```
 
-6. **Run Only Unmocked Tests**:
+6. **Run Only Mocked API Tests**:
 
-   - To run only tests without mocks (pure integration tests):
+   - To run only API tests with external service mocking:
      ```bash
-     npm run test:unmocked
+     npm run test:api-mocked
      ```
 
-7. **Run Tests with Coverage**:
+7. **Run Only Unmocked API Tests**:
+
+   - To run only API tests without external service mocking:
+     ```bash
+     npm run test:api-unmocked
+     ```
+
+8. **Run Tests with Coverage**:
 
    - To run all tests with coverage report:
      ```bash
      npm run test:coverage
      ```
-   - For mocked tests only:
+   - For all API tests with coverage (both mocked and unmocked):
      ```bash
-     npm run test:coverage:mocked
+     npm run test:coverage:api
      ```
-   - For unmocked tests only:
+   - For mocked API tests with coverage:
      ```bash
-     npm run test:coverage:unmocked
+     npm run test:coverage:api-mocked
+     ```
+   - For unmocked API tests with coverage:
+     ```bash
+     npm run test:coverage:api-unmocked
      ```
 
-8. **Run Tests in Watch Mode**:
+9. **Run Tests in Watch Mode**:
 
-   - To run tests in watch mode (automatically re-runs on file changes):
+   - To run all tests in watch mode (automatically re-runs on file changes):
      ```bash
      npm run test:watch
      ```
-   - For mocked tests in watch mode:
+   - For mocked API tests in watch mode:
      ```bash
-     npm run test:watch:mocked
+     npm run test:watch:api-mocked
      ```
-   - For unmocked tests in watch mode:
+   - For unmocked API tests in watch mode:
      ```bash
-     npm run test:watch:unmocked
+     npm run test:watch:api-unmocked
      ```
 
-9. **View Test Results**:
+10. **View Test Results**:
    - Test results will be displayed in the terminal
    - Coverage reports are generated in the `backend/coverage` directory
-   - Mocked test coverage: `backend/coverage/mocked`
-   - Unmocked test coverage: `backend/coverage/unmocked`
+   - API test coverage report: `backend/API_TEST_COVERAGE_FINAL_REPORT.md`
 
 ### 2.2. GitHub Actions Configuration Location
 
