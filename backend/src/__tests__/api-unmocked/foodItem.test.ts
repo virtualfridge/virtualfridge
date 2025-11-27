@@ -2,12 +2,12 @@ import { describe, expect, test, beforeAll, afterAll, afterEach } from '@jest/gl
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { createTestApp } from '../../helpers/testApp';
-import * as dbHandler from '../../helpers/dbHandler';
-import { userModel } from '../../../models/user';
-import { foodTypeModel } from '../../../models/foodType';
-import { foodItemModel } from '../../../models/foodItem';
-import { mockGoogleUserInfo, mockFoodType, mockFoodItem } from '../../helpers/testData';
+import { createTestApp } from '../helpers/testApp';
+import * as dbHandler from '../helpers/dbHandler';
+import { userModel } from '../../models/user';
+import { foodTypeModel } from '../../models/foodType';
+import { foodItemModel } from '../../models/foodItem';
+import { mockGoogleUserInfo, mockFoodType, mockFoodItem } from '../helpers/testData';
 
 describe('FoodItem Controller Integration Tests', () => {
   const app = createTestApp();
