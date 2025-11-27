@@ -37,7 +37,7 @@ export class RecipeController {
       logger.debug('Fetched recipe from TheMealDB:', recipe);
 
       return res.status(200).json({
-        message: 'Recipes etched successfully',
+        message: 'Recipes fetched successfully',
         data: {
           recipe,
         },
