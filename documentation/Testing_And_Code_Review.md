@@ -135,8 +135,6 @@
 
 10. **View Test Results**:
    - Test results will be displayed in the terminal
-   - Coverage reports are generated in the `backend/coverage` directory
-   - API test coverage report: `backend/API_TEST_COVERAGE_FINAL_REPORT.md`
 
 ### 2.2. GitHub Actions Configuration Location
 
