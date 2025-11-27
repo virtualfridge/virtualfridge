@@ -88,7 +88,7 @@ router.get('/debug', async (req: Request, res: Response) => {
         fcmTokenFull: user.fcmToken, // TEMPORARY: Show full token for debugging
         totalItems: foodItems.length,
         itemsWithExpiry: itemsWithExpiry.length,
-        expiryThreshold: user.notificationPreferences?.expiryThresholdDays || 2,
+        expiryThreshold: user.notificationPreferences?.expiryThresholdDays ?? 2,
       });
     }
 
