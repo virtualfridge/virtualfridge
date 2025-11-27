@@ -3,7 +3,7 @@ title Use Case 3: View Fridge
 
 actor User
 participant "Frontend" as Frontend
-participant "AuthMiddleware" as Auth
+participant "Auth" as Auth
 participant "Fridge" as Controller
 participant "FoodItem" as FoodItemModel
 participant "FoodType" as FoodTypeModel
