@@ -2,11 +2,11 @@
 title Use Case 3: View Fridge
 
 actor User
-participant "Frontend\n(Android)" as Frontend
+participant "Frontend" as Frontend
 participant "AuthMiddleware" as Auth
-participant "FridgeController" as Controller
-participant "FoodItemModel" as FoodItemModel
-participant "FoodTypeModel" as FoodTypeModel
+participant "Fridge" as Controller
+participant "FoodItem" as FoodItemModel
+participant "FoodType" as FoodTypeModel
 database "MongoDB" as DB
 
 User -> Frontend: Navigates to home page

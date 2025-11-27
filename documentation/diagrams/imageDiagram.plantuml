@@ -2,12 +2,12 @@
 title Use Case 1: Log Food via Image
 
 actor User
-participant "Frontend\n(Android)" as Frontend
-participant "MediaController" as Controller
-participant "AiVisionService" as AiVision
+participant "Frontend" as Frontend
+participant "Media" as Controller
+participant "AiVision" as AiVision
 participant "Gemini API" as Gemini
-participant "FoodTypeModel" as FoodTypeModel
-participant "FoodItemModel" as FoodItemModel
+participant "FoodType" as FoodTypeModel
+participant "FoodItem" as FoodItemModel
 database "MongoDB" as DB
 
 User -> Frontend: Selects "Add Food"\nand chooses image option
