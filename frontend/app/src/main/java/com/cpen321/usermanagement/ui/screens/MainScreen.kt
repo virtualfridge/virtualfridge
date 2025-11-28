@@ -28,9 +28,11 @@ import com.cpen321.usermanagement.ui.components.FridgeItemCard
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
+import com.cpen321.usermanagement.ui.viewmodels.FridgeUiState
 import com.cpen321.usermanagement.ui.viewmodels.FridgeViewModel
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
+import com.cpen321.usermanagement.ui.viewmodels.SortOption
 
 @OptIn(ExperimentalMaterial3Api::class)
 /*
@@ -90,7 +92,11 @@ fun MainScreen(
                 showScanner = false
                 mainViewModel.handleScannedBarcode(barcode)
             },
-            onScannerClose = { showScanner = false },
+            onScannerClose = {
+                showScanner = false
+                // Reload the fridge items from the backend so we can see the changes
+                fridgeViewModel.loadFridgeItems()
+            },
             onSuccessMessageShown = {
                 mainViewModel.clearSuccessMessage()
                 fridgeViewModel.clearSuccessMessage()
@@ -223,10 +229,10 @@ private fun SortOptionsRow(
             Button(onClick = { showSortMenu = !showSortMenu }) {
                 Text(
                     text = when (sortOption) {
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                        SortOption.EXPIRATION_DATE -> "Expiration Date"
+                        SortOption.ADDED_DATE -> "Added Date"
+                        SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                        SortOption.NAME -> "Name"
                     }
                 )
             }
@@ -235,15 +241,15 @@ private fun SortOptionsRow(
                 expanded = showSortMenu,
                 onDismissRequest = { showSortMenu = false }
             ) {
-                com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
+                SortOption.entries.forEach { option ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = when (option) {
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                                    SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                    SortOption.ADDED_DATE -> "Added Date"
+                                    SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                    SortOption.NAME -> "Name"
                                 }
                             )
                         },
@@ -305,7 +311,7 @@ private fun MainContent(
 
 private data class MainContentState(
     val mainUiState: MainUiState,
-    val fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    val fridgeUiState: FridgeUiState,
     val snackBarHostState: SnackbarHostState,
     val showScanner: Boolean,
 )
@@ -320,7 +326,7 @@ private data class MainContentActions(
     val onItemSelected: (String) -> Unit,
     val onItemPercentChanged: (String, Int) -> Unit,
     val onItemRemove: (String) -> Unit,
-    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    val onSortOptionChanged: (SortOption) -> Unit,
     val onTestBarcodeClick: () -> Unit,
     val onRecipeButtonClick: () -> Unit
 )
@@ -394,7 +400,7 @@ private fun MainSnackbarHost(
 private fun FridgeListBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
-    fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    fridgeUiState: FridgeUiState,
     actions: FridgeListActions,
     modifier: Modifier = Modifier
 ) {
@@ -453,7 +459,7 @@ private data class FridgeListActions(
     val onItemSelected: (String) -> Unit,
     val onItemPercentChanged: (String, Int) -> Unit,
     val onItemRemove: (String) -> Unit,
-    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    val onSortOptionChanged: (SortOption) -> Unit,
 )
 
 @Composable
