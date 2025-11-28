@@ -9,16 +9,13 @@ import {
   RecipeApiResponse,
   RecipeApiMeal,
   IRecipe,
-  AiRecipeData,
   ApiKeyError,
   recipeSchema,
-  GetRecipesResponse,
 } from '../types/recipe';
 import { foodTypeModel } from '../models/foodType';
 import { IFoodType, INutrients } from '../types/foodType';
 import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
 import { GeminiResponse } from '../types/ai';
-import { ZodError } from 'zod';
 
 const DEFAULT_API_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
 const FILTER_ENDPOINT = '/filter.php';

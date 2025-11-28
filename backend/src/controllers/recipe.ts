@@ -6,7 +6,6 @@ import {
   GetRecipesResponse,
   defaultRecipeIngredients,
   AiRecipeRequestBody,
-  AiRecipeResponse,
   ApiKeyError,
 } from '../types/recipe';
 import logger from '../util/logger';
@@ -68,7 +67,7 @@ export class RecipeController {
       res.status(200).json({
         message: 'AI recipe generated successfully',
         data: {
-          recipe: recipe,
+          recipe,
         },
       });
     } catch (error) {
