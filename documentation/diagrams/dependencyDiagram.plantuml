@@ -41,10 +41,7 @@ GoogleNotifications_Front --> Frontend
 GoogleAuth <-- Frontend
 
 ' --- Frontend to Backend ---
-' Frontend --> Fridge
-Frontend --> FoodItem
-Frontend --> FoodType
-' Frontend --> aiVision
+Frontend --> Fridge
 Frontend --> Media
 Frontend --> User
 Frontend --> Recipe
@@ -52,13 +49,16 @@ Frontend --> Notification
 
 ' --- Backend internal and external connections ---
 Fridge --> OpenFoodFacts
-Fridge --> DB
-FoodItem --> Fridge
-FoodType --> Fridge
+Fridge --> FoodType
+Fridge --> FoodItem
+FoodItem --> DB
+FoodType --> DB
 aiVision --> Gemini
 Media --> aiVision
+Media --> FoodType
+Media --> FoodItem
 User --> DB
-Recipe --> DB
+Recipe --> FoodType
 Recipe --> TheMealDB
 Recipe --> Gemini
 Notification --> GoogleNotifications_Back

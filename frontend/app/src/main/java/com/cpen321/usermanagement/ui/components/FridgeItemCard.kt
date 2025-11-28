@@ -718,31 +718,6 @@ private fun NutritionalFactsDialog(
 }
 
 @Composable
-private fun NutritionSection(
-    title: String,
-    items: List<Pair<String, String?>>
-) {
-    val validItems = items.filter { it.second != null && it.second!!.isNotBlank() }
-
-    if (validItems.isNotEmpty()) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            validItems.forEach { (name, value) ->
-                NutritionItem(name = name, value = value ?: "")
-            }
-        }
-    }
-}
-
-@Composable
 private fun NutritionItem(
     name: String,
     value: String
