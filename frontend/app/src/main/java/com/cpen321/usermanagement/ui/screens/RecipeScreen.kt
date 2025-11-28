@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.cpen321.usermanagement.R
 import com.cpen321.usermanagement.data.remote.dto.Recipe
+import com.cpen321.usermanagement.ui.components.RecipeCard
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
 import com.cpen321.usermanagement.ui.viewmodels.IngredientOption
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
@@ -182,9 +183,11 @@ private fun RecipeScreenContent(
             }
 
             uiState.aiRecipe != null -> {
-                AiRecipeSection(
-                    uiState = uiState,
-                    aiRecipe = uiState.aiRecipe,
+                RecipeCard(
+                    title = "✨ AI Chef Recipe",
+                    recipe = uiState.aiRecipe,
+                    cardColor = MaterialTheme.colorScheme.secondaryContainer,
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
         }
@@ -394,48 +397,6 @@ private fun RawJsonSection(
         }
     }
 }
-
-@Composable
-private fun AiRecipeSection(
-    uiState: MainUiState,
-    aiRecipe: String,
-    modifier: Modifier = Modifier
-) {
-    val spacing = LocalSpacing.current
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(spacing.medium)
-    ) {
-        Text(
-            text = "Gemini Suggestion",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        if (uiState.aiIngredients.isNotEmpty()) {
-            Text(
-                text = "Ingredients: ${uiState.aiIngredients.joinToString(", ")}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        uiState.aiModel?.let { model ->
-            Text(
-                text = "Model: $model",
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-
-        SelectionContainer {
-            Text(
-                text = aiRecipe,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
 
 @Composable
 private fun LoadingRow(
