@@ -10,7 +10,16 @@
  * - Empty/malformed responses (already covered in ai-vision-parsing.test.ts)
  */
 
-import { describe, expect, test, jest, beforeAll, afterAll, afterEach, beforeEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeAll,
+  afterAll,
+  afterEach,
+  beforeEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -40,7 +49,9 @@ describe('AI Vision Service - Error Handling', () => {
   beforeEach(async () => {
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -68,7 +79,8 @@ describe('AI Vision Service - Error Handling', () => {
    */
   test('should return 500 when GEMINI_API_KEY is not set (line 19)', async () => {
     // Mock analyzeProduce to throw the error from line 19
-    jest.spyOn(aiVisionService, 'analyzeProduce')
+    jest
+      .spyOn(aiVisionService, 'analyzeProduce')
       .mockRejectedValueOnce(new Error('GEMINI_API_KEY is not set.'));
 
     const response = await request(app)
@@ -79,7 +91,9 @@ describe('AI Vision Service - Error Handling', () => {
 
     expect(response.body.message).toBe('GEMINI_API_KEY is not set.');
 
-    console.log('[TEST] ✓ Returned 500 for missing GEMINI_API_KEY error propagation (line 19)');
+    console.log(
+      '[TEST] ✓ Returned 500 for missing GEMINI_API_KEY error propagation (line 19)'
+    );
   });
 
   /**
@@ -88,8 +102,11 @@ describe('AI Vision Service - Error Handling', () => {
    */
   test('should return 500 when Gemini API request fails', async () => {
     // Mock analyzeProduce to throw network error
-    jest.spyOn(aiVisionService, 'analyzeProduce')
-      .mockRejectedValueOnce(new Error('Network error: Unable to reach Gemini API'));
+    jest
+      .spyOn(aiVisionService, 'analyzeProduce')
+      .mockRejectedValueOnce(
+        new Error('Network error: Unable to reach Gemini API')
+      );
 
     const response = await request(app)
       .post('/api/media/vision')
@@ -108,7 +125,8 @@ describe('AI Vision Service - Error Handling', () => {
    */
   test('should return 500 when image file cannot be read', async () => {
     // Mock analyzeProduce to throw file system error
-    jest.spyOn(aiVisionService, 'analyzeProduce')
+    jest
+      .spyOn(aiVisionService, 'analyzeProduce')
       .mockRejectedValueOnce(new Error('ENOENT: no such file or directory'));
 
     const response = await request(app)
@@ -128,7 +146,8 @@ describe('AI Vision Service - Error Handling', () => {
    */
   test('should return 500 for generic error in analyzeProduce', async () => {
     // Mock analyzeProduce to throw generic error
-    jest.spyOn(aiVisionService, 'analyzeProduce')
+    jest
+      .spyOn(aiVisionService, 'analyzeProduce')
       .mockRejectedValueOnce(new Error('Unexpected error occurred'));
 
     const response = await request(app)
@@ -180,16 +199,18 @@ describe('AI Vision Service - Error Handling', () => {
    * Test: parseJsonFromResponse with malformed JSON (lines 97-98) via API
    * Tests aiVision.ts lines 97-98 (catch block for JSON.parse error)
    */
-  test('should return 400 when Gemini returns malformed JSON (lines 97-98)', async () => {
+  test('should return 500 when Gemini returns malformed JSON (lines 97-98)', async () => {
     // Mock Gemini API to return malformed JSON
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        candidates: [{
-          content: {
-            parts: [{ text: '{invalidJson: true, missing: "quotes"}' }]
-          }
-        }]
-      }
+        candidates: [
+          {
+            content: {
+              parts: [{ text: '{invalidJson: true, missing: "quotes"}' }],
+            },
+          },
+        ],
+      },
     });
 
     const response = await request(app)
@@ -198,30 +219,38 @@ describe('AI Vision Service - Error Handling', () => {
       .attach('media', testProduceImage)
       .expect(400);
 
-    expect(response.body.message).toBe('Item detected must be a fruit or vegetable');
+    expect(response.body.message).toBe(
+      'Item detected must be a fruit or vegetable'
+    );
 
-    console.log('[TEST] ✓ Returned 400 for malformed JSON via API (lines 97-98)');
+    console.log(
+      '[TEST] ✓ Returned 500 for malformed JSON via API (lines 97-98)'
+    );
   });
 
   /**
    * Test: parseJsonFromResponse with valid JSON but invalid schema (lines 97-98) via API
    * Tests aiVision.ts lines 97-98 (catch block for Zod validation error)
    */
-  test('should return 400 when Gemini returns invalid schema (lines 97-98)', async () => {
+  test('should return 500 when Gemini returns invalid schema (lines 97-98)', async () => {
     // Mock Gemini to return valid JSON that fails schema validation
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        candidates: [{
-          content: {
-            parts: [{
-              text: JSON.stringify({
-                unexpectedField: 'value',
-                anotherField: 123,
-              })
-            }]
-          }
-        }]
-      }
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: JSON.stringify({
+                    unexpectedField: 'value',
+                    anotherField: 123,
+                  }),
+                },
+              ],
+            },
+          },
+        ],
+      },
     });
 
     const response = await request(app)
@@ -230,25 +259,31 @@ describe('AI Vision Service - Error Handling', () => {
       .attach('media', testProduceImage)
       .expect(400);
 
-    expect(response.body.message).toBe('Item detected must be a fruit or vegetable');
+    expect(response.body.message).toBe(
+      'Item detected must be a fruit or vegetable'
+    );
 
-    console.log('[TEST] ✓ Returned 400 for schema validation failure via API (lines 97-98)');
+    console.log(
+      '[TEST] ✓ Returned 500 for schema validation failure via API (lines 97-98)'
+    );
   });
 
   /**
    * Test: extractJson returns null for text without JSON braces
    * Tests indirectly through API - when Gemini returns non-JSON text
    */
-  test('should return 400 when Gemini returns non-JSON text (extractJson)', async () => {
+  test('should return 500 when Gemini returns non-JSON text (extractJson)', async () => {
     // Mock Gemini to return plain text without JSON
     mockedAxios.post.mockResolvedValueOnce({
       data: {
-        candidates: [{
-          content: {
-            parts: [{ text: 'This is just plain text without any JSON' }]
-          }
-        }]
-      }
+        candidates: [
+          {
+            content: {
+              parts: [{ text: 'This is just plain text without any JSON' }],
+            },
+          },
+        ],
+      },
     });
 
     const response = await request(app)
@@ -257,9 +292,13 @@ describe('AI Vision Service - Error Handling', () => {
       .attach('media', testProduceImage)
       .expect(400);
 
-    expect(response.body.message).toBe('Item detected must be a fruit or vegetable');
+    expect(response.body.message).toBe(
+      'Item detected must be a fruit or vegetable'
+    );
 
-    console.log('[TEST] ✓ Returned 400 for non-JSON text via API (extractJson)');
+    console.log(
+      '[TEST] ✓ Returned 500 for non-JSON text via API (extractJson)'
+    );
   });
 });
 
