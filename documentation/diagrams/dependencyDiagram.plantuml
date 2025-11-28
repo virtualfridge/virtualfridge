@@ -41,10 +41,10 @@ GoogleNotifications_Front --> Frontend
 GoogleAuth <-- Frontend
 
 ' --- Frontend to Backend ---
-Frontend --> Fridge
+' Frontend --> Fridge
 Frontend --> FoodItem
 Frontend --> FoodType
-Frontend --> aiVision
+' Frontend --> aiVision
 Frontend --> Media
 Frontend --> User
 Frontend --> Recipe
@@ -56,6 +56,7 @@ Fridge --> DB
 FoodItem --> Fridge
 FoodType --> Fridge
 aiVision --> Gemini
+Media --> aiVision
 User --> DB
 Recipe --> DB
 Recipe --> TheMealDB
