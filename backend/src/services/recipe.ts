@@ -11,11 +11,14 @@ import {
   IRecipe,
   AiRecipeData,
   ApiKeyError,
+  recipeSchema,
+  GetRecipesResponse,
 } from '../types/recipe';
 import { foodTypeModel } from '../models/foodType';
 import { IFoodType, INutrients } from '../types/foodType';
 import { GEMINI_API_HOST, GEMINI_MODEL } from '../config/constants';
 import { GeminiResponse } from '../types/ai';
+import { ZodError } from 'zod';
 
 const DEFAULT_API_BASE_URL = 'https://www.themealdb.com/api/json/v1/1';
 const FILTER_ENDPOINT = '/filter.php';
@@ -220,7 +223,7 @@ export class RecipeService {
     return `${this.apiBaseUrl}${FILTER_ENDPOINT}`;
   }
 
-  async generateRecipe(ingredients: string[]): Promise<AiRecipeData> {
+  async generateRecipe(ingredients: string[]): Promise<IRecipe> {
     if (!this.apiKey) {
       throw new ApiKeyError('GEMINI_API_KEY is not set');
     }
@@ -284,20 +287,13 @@ export class RecipeService {
       }
     );
 
-    const recipe = this.extractRecipeText(data);
+    const recipe = this.extractRecipe(data);
 
     if (!recipe) {
-      throw new Error('Gemini returned an empty response.');
+      throw new Error('Gemini returned an invalid response');
     }
 
-    return {
-      ingredients: ingredients.map(ingredient =>
-        this.formatDisplayIngredient(ingredient)
-      ),
-      prompt,
-      recipe,
-      model: data.modelVersion ?? GEMINI_MODEL,
-    };
+    return recipe;
   }
 
   private buildPrompt(toml: string): string {
@@ -337,7 +333,7 @@ export class RecipeService {
     return lines.join('\n');
   }
 
-  private extractRecipeText(response: GeminiResponse): string | null {
+  private extractRecipe(response: GeminiResponse): IRecipe | null {
     const firstCandidate = response.candidates?.[0];
     if (!firstCandidate?.content?.parts) {
       return null;
@@ -349,7 +345,12 @@ export class RecipeService {
       .join('\n\n')
       .trim();
 
-    return text || null;
+    try {
+      const recipe = recipeSchema.parse(text);
+      return recipe;
+    } catch (e: unknown) {
+      return null;
+    }
   }
 
   private formatDisplayIngredient(raw: string): string {
