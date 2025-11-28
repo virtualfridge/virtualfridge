@@ -344,9 +344,9 @@ export class RecipeService {
       .filter(Boolean)
       .join('\n\n')
       .trim();
-
+    const recipeObject = JSON.parse(text);
     try {
-      const recipe = recipeSchema.parse(text);
+      const recipe = recipeSchema.parse(recipeObject);
       return recipe;
     } catch (e: unknown) {
       return null;
