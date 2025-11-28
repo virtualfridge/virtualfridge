@@ -9,7 +9,6 @@ import javax.inject.Singleton
 sealed class NavigationEvent {
     object NavigateToAuth : NavigationEvent()
     object NavigateToMain : NavigationEvent()
-//    object NavigateToProfileCompletion : NavigationEvent()
     object NavigateToProfile : NavigationEvent()
     object NavigateToManageProfile : NavigationEvent()
     data class NavigateToAuthWithMessage(val message: String) : NavigationEvent()
@@ -95,11 +94,6 @@ class NavigationStateManager @Inject constructor() {
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.MAIN)
     }
 
-//    fun navigateToProfileCompletion() {
-//        _navigationEvent.value = NavigationEvent.NavigateToProfileCompletion
-//        _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.PROFILE_COMPLETION)
-//    }
-
     fun navigateToProfile() {
         _navigationEvent.value = NavigationEvent.NavigateToProfile
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.PROFILE)
@@ -113,10 +107,6 @@ class NavigationStateManager @Inject constructor() {
     fun navigateToRecipe() {
         _navigationEvent.value = NavigationEvent.NavigateToRecipe
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.RECIPE)
-    }
-
-    fun navigateToScanner() {
-        _navigationEvent.value = NavigationEvent.NavigateToScanner
     }
 
     fun navigateToBarcodeResult() {
@@ -151,16 +141,6 @@ class NavigationStateManager @Inject constructor() {
             isLoading = false,
         )
         navigateToAuthWithMessage("Signed out successfully!")
-    }
-
-    fun handleProfileCompletion() {
-        _navigationState.value = _navigationState.value.copy(needsProfileCompletion = false)
-        navigateToMain()
-    }
-
-    fun handleProfileCompletionWithMessage(message: String) {
-        _navigationState.value = _navigationState.value.copy(needsProfileCompletion = false)
-        navigateToMainWithMessage(message)
     }
 
     fun clearNavigationEvent() {
