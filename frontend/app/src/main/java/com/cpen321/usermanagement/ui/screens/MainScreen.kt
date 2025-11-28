@@ -27,10 +27,13 @@ import com.cpen321.usermanagement.data.remote.dto.FridgeItem
 import com.cpen321.usermanagement.ui.components.FridgeItemCard
 import com.cpen321.usermanagement.ui.components.MessageSnackbar
 import com.cpen321.usermanagement.ui.components.MessageSnackbarState
+import com.cpen321.usermanagement.ui.components.RecipeCard
 import com.cpen321.usermanagement.ui.theme.LocalSpacing
+import com.cpen321.usermanagement.ui.viewmodels.FridgeUiState
 import com.cpen321.usermanagement.ui.viewmodels.FridgeViewModel
 import com.cpen321.usermanagement.ui.viewmodels.MainUiState
 import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
+import com.cpen321.usermanagement.ui.viewmodels.SortOption
 
 @OptIn(ExperimentalMaterial3Api::class)
 /*
@@ -89,7 +92,11 @@ fun MainScreen(
                 showScanner = false
                 mainViewModel.handleScannedBarcode(barcode)
             },
-            onScannerClose = { showScanner = false },
+            onScannerClose = {
+                showScanner = false
+                // Reload the fridge items from the backend so we can see the changes
+                fridgeViewModel.loadFridgeItems()
+            },
             onSuccessMessageShown = {
                 mainViewModel.clearSuccessMessage()
                 fridgeViewModel.clearSuccessMessage()
@@ -221,10 +228,10 @@ private fun SortOptionsRow(
             Button(onClick = { showSortMenu = !showSortMenu }) {
                 Text(
                     text = when (sortOption) {
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                        com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                        SortOption.EXPIRATION_DATE -> "Expiration Date"
+                        SortOption.ADDED_DATE -> "Added Date"
+                        SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                        SortOption.NAME -> "Name"
                     }
                 )
             }
@@ -233,15 +240,15 @@ private fun SortOptionsRow(
                 expanded = showSortMenu,
                 onDismissRequest = { showSortMenu = false }
             ) {
-                com.cpen321.usermanagement.ui.viewmodels.SortOption.entries.forEach { option ->
+                SortOption.entries.forEach { option ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = when (option) {
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.EXPIRATION_DATE -> "Expiration Date"
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.ADDED_DATE -> "Added Date"
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
-                                    com.cpen321.usermanagement.ui.viewmodels.SortOption.NAME -> "Name"
+                                    SortOption.EXPIRATION_DATE -> "Expiration Date"
+                                    SortOption.ADDED_DATE -> "Added Date"
+                                    SortOption.NUTRITIONAL_VALUE -> "Nutritional Value"
+                                    SortOption.NAME -> "Name"
                                 }
                             )
                         },
@@ -302,7 +309,7 @@ private fun MainContent(
 
 private data class MainContentState(
     val mainUiState: MainUiState,
-    val fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    val fridgeUiState: FridgeUiState,
     val snackBarHostState: SnackbarHostState,
     val showScanner: Boolean,
 )
@@ -390,7 +397,7 @@ private fun MainSnackbarHost(
 private fun FridgeListBody(
     paddingValues: PaddingValues,
     showScanner: Boolean,
-    fridgeUiState: com.cpen321.usermanagement.ui.viewmodels.FridgeUiState,
+    fridgeUiState: FridgeUiState,
     actions: FridgeListActions,
     modifier: Modifier = Modifier
 ) {
@@ -449,7 +456,7 @@ private data class FridgeListActions(
     val onItemSelected: (String) -> Unit,
     val onItemPercentChanged: (String, Int) -> Unit,
     val onItemRemove: (String) -> Unit,
-    val onSortOptionChanged: (com.cpen321.usermanagement.ui.viewmodels.SortOption) -> Unit,
+    val onSortOptionChanged: (SortOption) -> Unit,
 )
 
 @Composable
@@ -952,86 +959,23 @@ private fun RecipeResultsBottomSheet(
             }
 
             if (mainUiState.recipe != null) {
-                Text(
-                    text = "🍳 Recipes from MealDB",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Ingredients: ${mainUiState.recipe.ingredients.joinToString(", ") { ingredient -> ingredient.name }}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = mainUiState.recipe.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        mainUiState.recipe.thumbnail?.takeIf { it.isNotBlank() }?.let { url ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Image: $url",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // AI Recipe Results
-        mainUiState.aiRecipe?.let { aiRecipeText ->
-            Text(
-                text = "✨ AI Chef Recipe",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-
-            if (mainUiState.aiIngredients.isNotEmpty()) {
-                Text(
-                    text = "Ingredients: ${mainUiState.aiIngredients.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                RecipeCard(
+                    title = "🍳 Recipe from MealDB",
+                    recipe = mainUiState.recipe,
+                    cardColor = MaterialTheme.colorScheme.primaryContainer,
+                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
-            mainUiState.aiModel?.let { model ->
-                Text(
-                    text = "Generated by: $model",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            // AI Recipe Results
+            mainUiState.aiRecipe?.let { aiRecipe ->
+                RecipeCard(
+                    title = "✨ AI Chef Recipe",
+                    recipe = aiRecipe,
+                    cardColor = MaterialTheme.colorScheme.secondaryContainer,
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             }
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Text(
-                    text = aiRecipeText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
