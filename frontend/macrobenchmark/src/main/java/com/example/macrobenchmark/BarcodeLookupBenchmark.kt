@@ -33,11 +33,18 @@ class BarcodeLookupBenchmark {
             pressHome()
         }
     ) {
-        // Launch the app's default launcher Activity (no custom intent)
-        startActivityAndWait()
-
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val device = androidx.test.uiautomator.UiDevice.getInstance(instrumentation)
+
+        // Launch with custom intent to trigger test barcode
+        val intent = Intent().apply {
+            action = "com.cpen321.usermanagement.TEST_BARCODE"
+            setPackage("com.cpen321.usermanagement")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+        instrumentation.context.startActivity(intent)
+        device.wait(Until.hasObject(By.pkg("com.cpen321.usermanagement")), 5_000)
 
         // Handle Android 13+ notification permission dialog if it appears
         // Try resource ids first, then fallback to text
@@ -69,15 +76,11 @@ class BarcodeLookupBenchmark {
             acct1?.click()
         }
 
-        // Navigate to the Test Barcode screen via the bottom bar "Test" button
-        val testButton = device.wait(Until.findObject(By.text("Test")), 10_000)
-        testButton?.click()
+        // Wait for main screen to load (Virtual Fridge title)
+        device.wait(Until.hasObject(By.textContains("Virtual Fridge")), 10_000)
 
-        // Trigger the "Send Test Barcode" action to start the traced section (wrapped in the app code)
-        val sendTestButton = device.wait(Until.findObject(By.text("Send Test Barcode")), 5_000)
-        sendTestButton?.click()
-
-        // Wait until the product details appear to ensure the flow completed
-        device.wait(Until.hasObject(By.text("Product Details")), 12_000)
+        // The intent handler will automatically trigger testSendBarcode() after authentication
+        // Wait for Nutella to appear in the fridge list, indicating the barcode was processed
+        device.wait(Until.hasObject(By.textContains("Nutella")), 15_000)
     }
 }

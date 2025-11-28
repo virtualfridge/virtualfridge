@@ -36,6 +36,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Intent filter for test barcode action (used by macrobenchmarks) -->
+            <intent-filter>
+                <action android:name="com.cpen321.usermanagement.TEST_BARCODE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <provider
