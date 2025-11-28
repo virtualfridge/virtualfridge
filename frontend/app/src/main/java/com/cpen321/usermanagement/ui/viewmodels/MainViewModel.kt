@@ -160,13 +160,13 @@ class MainViewModel @Inject constructor(
     }
 
     /**
-     * Test method for E2E tests to send Prime bottle barcode
+     * Test method for E2E tests to send Prince biscuit barcode
      * Used for testing sorting functionality with different products
      */
     fun testSendPrimeBarcode() {
         viewModelScope.launch {
-            val testBarcode = "850048338094" // Prime Hydration barcode
-            Log.d("BarcodeTest", "Sending Prime test barcode: $testBarcode")
+            val testBarcode = "7622210449283" // LU Prince chocolate biscuits barcode
+            Log.d("BarcodeTest", "Sending Prince test barcode: $testBarcode")
 
             _uiState.value = _uiState.value.copy(
                 isSendingTestBarcode = true,
@@ -180,14 +180,14 @@ class MainViewModel @Inject constructor(
                 val result = barcodeRepository.sendBarcode(testBarcode)
                 result.fold(
                     onSuccess = { barcodeResult ->
-                        Log.d("BarcodeTest", "Successfully sent Prime test barcode")
+                        Log.d("BarcodeTest", "Successfully sent Prince test barcode")
                         _uiState.value = _uiState.value.copy(
                             testBarcodeResponse = barcodeResult,
                             isSendingTestBarcode = false
                         )
                     },
                     onFailure = { error ->
-                        Log.e("BarcodeTest", "Failed to send Prime test barcode: ${error.message}", error)
+                        Log.e("BarcodeTest", "Failed to send Prince test barcode: ${error.message}", error)
                         setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
                         _uiState.value = _uiState.value.copy(isSendingTestBarcode = false)
                     }
