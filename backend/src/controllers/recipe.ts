@@ -6,7 +6,6 @@ import {
   GetRecipesResponse,
   defaultRecipeIngredients,
   AiRecipeRequestBody,
-  AiRecipeResponse,
   ApiKeyError,
 } from '../types/recipe';
 import logger from '../util/logger';
@@ -57,17 +56,19 @@ export class RecipeController {
 
   generateAiRecipe = async (
     req: Request<unknown, unknown, AiRecipeRequestBody>,
-    res: Response<AiRecipeResponse>,
+    res: Response<GetRecipesResponse>,
     next: NextFunction
   ) => {
     try {
-      const data = await this.recipeService.generateRecipe(
+      const recipe = await this.recipeService.generateRecipe(
         req.body.ingredients
       );
 
       res.status(200).json({
         message: 'AI recipe generated successfully',
-        data,
+        data: {
+          recipe,
+        },
       });
     } catch (error) {
       logger.error('Failed to generate AI recipe', error);
@@ -80,7 +81,7 @@ export class RecipeController {
           .status(502)
           .json({ message: 'Failed to connect to Gemini servers' });
       }
-      // Response was empty
+      // Response was invalid
       if (error instanceof Error) {
         return res.status(502).json({
           message: 'Failed to generate recipe with Gemini.',

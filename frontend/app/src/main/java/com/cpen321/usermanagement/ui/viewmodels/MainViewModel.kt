@@ -39,10 +39,7 @@ data class MainUiState(
     val isFetchingRecipes: Boolean = false,
 
     // AI recipe data
-    val aiRecipe: String? = null,
-    val aiPrompt: String? = null,
-    val aiIngredients: List<String> = emptyList(),
-    val aiModel: String? = null,
+    val aiRecipe: Recipe? = null,
     val isGeneratingAiRecipe: Boolean = false,
     val aiError: String? = null,
     val selectedIngredientKeys: Set<String> = emptySet()
@@ -175,9 +172,6 @@ class MainViewModel @Inject constructor(
                 recipesJson = null,
                 recipe = null,
                 aiRecipe = null,
-                aiPrompt = null,
-                aiIngredients = emptyList(),
-                aiModel = null,
                 aiError = null
             )
 
@@ -250,9 +244,6 @@ class MainViewModel @Inject constructor(
                 isGeneratingAiRecipe = true,
                 aiError = null,
                 aiRecipe = null,
-                aiPrompt = null,
-                aiIngredients = emptyList(),
-                aiModel = null,
                 recipesJson = null,
                 recipe = null,
                 recipeError = null
@@ -262,10 +253,7 @@ class MainViewModel @Inject constructor(
             result.fold(
                 onSuccess = { aiResult ->
                     _uiState.value = _uiState.value.copy(
-                        aiRecipe = aiResult.formattedRecipe,
-                        aiPrompt = aiResult.recipeData.prompt,
-                        aiIngredients = formatIngredients(aiResult.recipeData.ingredients),
-                        aiModel = aiResult.recipeData.model,
+                        aiRecipe = aiResult.recipe,
                         isGeneratingAiRecipe = false
                     )
                 },
@@ -281,12 +269,6 @@ class MainViewModel @Inject constructor(
 
     fun clearAiError() {
         _uiState.value = _uiState.value.copy(aiError = null)
-    }
-
-    private fun formatIngredients(rawIngredients: List<String>): List<String> {
-        return rawIngredients.mapNotNull { ingredient ->
-            formatIngredient(ingredient)
-        }
     }
 
     private fun formatIngredient(rawIngredient: String): String? {

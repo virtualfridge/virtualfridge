@@ -33,6 +33,23 @@ export interface RecipeApiSummaryResponse {
   meals: RecipeApiSummary[] | null;
 }
 
+export const recipeSchema = z.object({
+  name: z.string(),
+  instructions: z.string(),
+  thumbnail: z.string().optional(),
+  youtube: z.string().optional(),
+  ingredients: z
+    .array(
+      z.object({
+        name: z.string(),
+        measure: z.string(),
+      })
+    )
+    .min(1),
+  source: z.string().optional(),
+  image: z.string().optional(),
+});
+
 export interface IRecipe {
   name: string;
   instructions: string;

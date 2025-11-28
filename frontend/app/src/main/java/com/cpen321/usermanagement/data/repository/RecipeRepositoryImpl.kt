@@ -3,6 +3,7 @@ package com.cpen321.usermanagement.data.repository
 import android.util.Log
 import com.cpen321.usermanagement.data.remote.api.AiRecipeRequest
 import com.cpen321.usermanagement.data.remote.api.RecipeInterface
+import com.cpen321.usermanagement.data.remote.dto.RecipeData
 import com.google.gson.GsonBuilder
 import com.cpen321.usermanagement.utils.JsonUtils.parseErrorMessage
 import retrofit2.HttpException
@@ -78,11 +79,11 @@ class RecipeRepositoryImpl @Inject constructor(
 
             if (response.isSuccessful) {
                 val data = response.body()?.data
-                if (data != null) {
+                if (data != null && data.recipe != null) {
                     Result.success(
                         AiRecipeFetchResult(
                             recipeData = data,
-                            formattedRecipe = data.recipe
+                            recipe = data.recipe
                         )
                     )
                 } else {
