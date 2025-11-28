@@ -10,10 +10,10 @@ import {
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import axios, { AxiosError } from 'axios';
-import { createTestApp } from '../../helpers/testApp';
-import * as dbHandler from '../../helpers/dbHandler';
-import { userModel } from '../../../models/user';
-import { mockGoogleUserInfo } from '../../helpers/testData';
+import { createTestApp } from '../helpers/testApp';
+import * as dbHandler from '../helpers/dbHandler';
+import { userModel } from '../../models/user';
+import { mockGoogleUserInfo } from '../helpers/testData';
 
 // Mock axios
 jest.mock('axios');
@@ -42,6 +42,22 @@ describe('Recipe Controller Integration Tests', () => {
   });
 
   describe('GET /api/recipes', () => {
+    test('should return 404 when no recipes found', async () => {
+      // Mock TheMealDB API to return no meals (null)
+      mockedAxios.get.mockResolvedValueOnce({
+        data: { meals: null },
+      });
+
+      const response = await request(app)
+        .get('/api/recipes')
+        .set('Authorization', `Bearer ${authToken}`)
+        .query({ ingredients: 'nonexistent-ingredient' })
+        .expect(404);
+
+      expect(response.body.message).toBe('No recipes found');
+      expect(response.body).not.toHaveProperty('data');
+    });
+
     test('should handle API errors gracefully', async () => {
       mockedAxios.get.mockRejectedValueOnce(
         new AxiosError('External API error')

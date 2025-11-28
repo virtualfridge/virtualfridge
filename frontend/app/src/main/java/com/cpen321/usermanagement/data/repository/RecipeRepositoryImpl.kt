@@ -33,10 +33,10 @@ class RecipeRepositoryImpl @Inject constructor(
 
             if (response.isSuccessful) {
                 val body = response.body()
-                val data = body?.data
-                if (data != null) {
+                val recipe = body?.data?.recipe
+                if (recipe != null) {
                     val rawJson = gson.toJson(body)
-                    Result.success(RecipeFetchResult(data, rawJson))
+                    Result.success(RecipeFetchResult(recipe, rawJson))
                 } else {
                     Result.failure(Exception("Empty recipe data received from server."))
                 }

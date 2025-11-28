@@ -10,12 +10,13 @@ import { foodTypeModel } from '../models/foodType';
 import axios from 'axios';
 import { dateDiffInDays, parseDate } from '../util/dates';
 import { IFoodType } from '../types/foodType';
+
 export class FridgeService {
-  async findAllFridgeItemsByUserId(
+  findAllFridgeItemsByUserId = async (
     req: Request,
     res: Response<FridgeItemsResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (!req.user) {
         logger.error(
@@ -55,12 +56,13 @@ export class FridgeService {
 
       next(error);
     }
-  }
-  async createFromBarcode(
+  };
+
+  createFromBarcode = async (
     req: Request<unknown, unknown, barcodeRequestBody>,
     res: Response<FridgeItemResponse>,
     next: NextFunction
-  ) {
+  ) => {
     try {
       if (!req.user) {
         logger.error(
@@ -181,7 +183,7 @@ export class FridgeService {
       }
       next(error);
     }
-  }
+  };
 }
 
 export const fridgeService = new FridgeService();

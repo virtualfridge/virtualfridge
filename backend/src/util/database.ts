@@ -23,7 +23,7 @@ export const connectDB = async (): Promise<void> => {
       authSource: 'admin', // Authentication database - configured automatically by the MongoDB docker image
     });
 
-    console.log(`✅ MongoDB connected successfully`);
+    console.log('✅ MongoDB connected successfully');
 
     mongoose.connection.on('error', error => {
       console.error('❌ MongoDB connection error:', error);
