@@ -2,9 +2,9 @@
 
 ## 1. Change History
 
-| **Change Date**   | **Modified Sections** | **Rationale** |
-| ----------------- | --------------------- | ------------- |
-| _Nothing to show_ |
+| **Change Date**   | **Modified Sections** |   **Rationale**  |
+| ----------------- | --------------------- | -----------------|
+| 27/11/25          | 2.1.1, 2.1.2, 2.1.3   | Updated to match
 
 ---
 
@@ -16,27 +16,29 @@
 
 | **Interface**                        | **Describe Group Location, No Mocks**                                          | **Describe Group Location, With Mocks**                                          | **Mocked Components**                    |
 | ------------------------------------ | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ---------------------------------------- |
-| **POST /api/auth/google**            | N/A                                                                            | [`backend/src/__tests__/controllers/auth.test.ts#L38`](../backend/src/__tests__/controllers/auth.test.ts#L38) | Google OAuth2Client                      |
-| **POST /api/auth/signup**            | N/A                                                                            | [`backend/src/__tests__/controllers/auth.test.ts#L135`](../backend/src/__tests__/controllers/auth.test.ts#L135) | Google OAuth2Client                      |
-| **POST /api/auth/signin**            | N/A                                                                            | [`backend/src/__tests__/controllers/auth.test.ts#L238`](../backend/src/__tests__/controllers/auth.test.ts#L238) | Google OAuth2Client                      |
-| **GET /api/user/profile**            | N/A                                                                            | [`backend/src/__tests__/controllers/user.test.ts#L43`](../backend/src/__tests__/controllers/user.test.ts#L43) | Google OAuth2Client                      |
-| **POST /api/user/profile**           | N/A                                                                            | [`backend/src/__tests__/controllers/user.test.ts#L72`](../backend/src/__tests__/controllers/user.test.ts#L72) | Google OAuth2Client                      |
-| **DELETE /api/user/profile**         | N/A                                                                            | [`backend/src/__tests__/controllers/user.test.ts#L152`](../backend/src/__tests__/controllers/user.test.ts#L152) | Google OAuth2Client                      |
-| **POST /api/food-item**              | [`backend/src/__tests__/controllers/foodItem.test.ts#L40`](../backend/src/__tests__/controllers/foodItem.test.ts#L40) | N/A                                                                              | None                                     |
-| **PUT /api/food-item**               | [`backend/src/__tests__/controllers/foodItem.test.ts#L101`](../backend/src/__tests__/controllers/foodItem.test.ts#L101) | N/A                                                                              | None                                     |
-| **GET /api/food-item/:_id**          | [`backend/src/__tests__/controllers/foodItem.test.ts#L177`](../backend/src/__tests__/controllers/foodItem.test.ts#L177) | N/A                                                                              | None                                     |
-| **DELETE /api/food-item/:_id**       | [`backend/src/__tests__/controllers/foodItem.test.ts#L235`](../backend/src/__tests__/controllers/foodItem.test.ts#L235) | N/A                                                                              | None                                     |
-| **POST /api/food-type**              | [`backend/src/__tests__/controllers/foodType.test.ts#L36`](../backend/src/__tests__/controllers/foodType.test.ts#L36) | N/A                                                                              | None                                     |
-| **GET /api/food-type/:id**           | [`backend/src/__tests__/controllers/foodType.test.ts#L89`](../backend/src/__tests__/controllers/foodType.test.ts#L89) | N/A                                                                              | None                                     |
-| **GET /api/food-type/barcode/:id**   | [`backend/src/__tests__/controllers/foodType.test.ts#L133`](../backend/src/__tests__/controllers/foodType.test.ts#L133) | N/A                                                                              | None                                     |
-| **PATCH /api/food-type/:id**         | [`backend/src/__tests__/controllers/foodType.test.ts#L175`](../backend/src/__tests__/controllers/foodType.test.ts#L175) | N/A                                                                              | None                                     |
-| **DELETE /api/food-type/:id**        | [`backend/src/__tests__/controllers/foodType.test.ts#L236`](../backend/src/__tests__/controllers/foodType.test.ts#L236) | N/A                                                                              | None                                     |
-| **GET /api/hobbies**                 | [`backend/src/__tests__/controllers/hobby.test.ts#L26`](../backend/src/__tests__/controllers/hobby.test.ts#L26) | N/A                                                                              | None                                     |
-| **POST /api/notifications/test**     | N/A                                                                            | [`backend/src/__tests__/controllers/notification.test.ts#L58`](../backend/src/__tests__/controllers/notification.test.ts#L58) | Firebase Admin SDK                       |
-| **POST /api/media/upload**           | N/A                                                                            | [`backend/src/__tests__/controllers/media.test.ts#L55`](../backend/src/__tests__/controllers/media.test.ts#L55) | File system (multer), Storage service    |
-| **POST /api/media/analyze-produce**  | N/A                                                                            | [`backend/src/__tests__/controllers/media.test.ts#L160`](../backend/src/__tests__/controllers/media.test.ts#L160) | Gemini AI Vision API                     |
-| **GET /api/recipes**                 | N/A                                                                            | [`backend/src/__tests__/controllers/recipe.test.ts#L34`](../backend/src/__tests__/controllers/recipe.test.ts#L34) | Gemini AI API                            |
-| **POST /api/recipes/ai**             | N/A                                                                            | [`backend/src/__tests__/controllers/recipe.test.ts#L111`](../backend/src/__tests__/controllers/recipe.test.ts#L111) | Gemini AI API                            |
+| **POST /api/auth/google**            | N/A                                                                            | [`backend/src/__tests__/api-mocked/auth.test.ts#L32`](../backend/src/__tests__/api-mocked/auth.test.ts#L32) | Google OAuth2Client                      |
+| **POST /api/auth/signup**            | N/A                                                                            | [`backend/src/__tests__/api-mocked/auth.test.ts#L299`](../backend/src/__tests__/api-mocked/auth.test.ts#L299) | Google OAuth2Client                      |
+| **POST /api/auth/signin**            | N/A                                                                            | [`backend/src/__tests__/api-mocked/auth.test.ts#L570`](../backend/src/__tests__/api-mocked/auth.test.ts#L570) | Google OAuth2Client                      |
+| **GET /api/user/profile**            | N/A                                                                            | [`backend/src/__tests__/api-mocked/user.test.ts`](../backend/src/__tests__/api-mocked/user.test.ts) | In-memory MongoDB                        |
+| **POST /api/user/profile**           | N/A                                                                            | [`backend/src/__tests__/api-mocked/user.test.ts`](../backend/src/__tests__/api-mocked/user.test.ts) | In-memory MongoDB                        |
+| **DELETE /api/user**                 | N/A                                                                            | [`backend/src/__tests__/api-mocked/user.test.ts`](../backend/src/__tests__/api-mocked/user.test.ts) | In-memory MongoDB                        |
+| **POST /api/food-item**              | [`backend/src/__tests__/api-unmocked/foodItem.test.ts`](../backend/src/__tests__/api-unmocked/foodItem.test.ts) | [`backend/src/__tests__/api-mocked/foodItem.test.ts`](../backend/src/__tests__/api-mocked/foodItem.test.ts) | In-memory MongoDB                        |
+| **PATCH /api/food-item/:id**         | [`backend/src/__tests__/api-unmocked/foodItem.test.ts`](../backend/src/__tests__/api-unmocked/foodItem.test.ts) | [`backend/src/__tests__/api-mocked/foodItem.test.ts`](../backend/src/__tests__/api-mocked/foodItem.test.ts) | In-memory MongoDB                        |
+| **GET /api/food-item/:id**           | [`backend/src/__tests__/api-unmocked/foodItem.test.ts`](../backend/src/__tests__/api-unmocked/foodItem.test.ts) | [`backend/src/__tests__/api-mocked/foodItem.test.ts`](../backend/src/__tests__/api-mocked/foodItem.test.ts) | In-memory MongoDB                        |
+| **DELETE /api/food-item/:id**        | [`backend/src/__tests__/api-unmocked/foodItem.test.ts`](../backend/src/__tests__/api-unmocked/foodItem.test.ts) | [`backend/src/__tests__/api-mocked/foodItem.test.ts`](../backend/src/__tests__/api-mocked/foodItem.test.ts) | In-memory MongoDB                        |
+| **GET /api/fridge**                  | [`backend/src/__tests__/api-unmocked/fridge.test.ts`](../backend/src/__tests__/api-unmocked/fridge.test.ts) | [`backend/src/__tests__/api-mocked/fridge.test.ts`](../backend/src/__tests__/api-mocked/fridge.test.ts) | In-memory MongoDB                        |
+| **POST /api/food-type**              | [`backend/src/__tests__/api-unmocked/foodType.test.ts`](../backend/src/__tests__/api-unmocked/foodType.test.ts) | [`backend/src/__tests__/api-mocked/foodType.test.ts`](../backend/src/__tests__/api-mocked/foodType.test.ts) | In-memory MongoDB                        |
+| **GET /api/food-type**               | [`backend/src/__tests__/api-unmocked/foodType.test.ts`](../backend/src/__tests__/api-unmocked/foodType.test.ts) | [`backend/src/__tests__/api-mocked/foodType.test.ts`](../backend/src/__tests__/api-mocked/foodType.test.ts) | In-memory MongoDB                        |
+| **GET /api/food-type/:id**           | [`backend/src/__tests__/api-unmocked/foodType.test.ts`](../backend/src/__tests__/api-unmocked/foodType.test.ts) | [`backend/src/__tests__/api-mocked/foodType.test.ts`](../backend/src/__tests__/api-mocked/foodType.test.ts) | In-memory MongoDB                        |
+| **GET /api/food-type/barcode/:id**   | [`backend/src/__tests__/api-unmocked/foodType.test.ts`](../backend/src/__tests__/api-unmocked/foodType.test.ts) | [`backend/src/__tests__/api-mocked/foodType.test.ts`](../backend/src/__tests__/api-mocked/foodType.test.ts) | In-memory MongoDB                        |
+| **PATCH /api/food-type/:id**         | [`backend/src/__tests__/api-unmocked/foodType.test.ts`](../backend/src/__tests__/api-unmocked/foodType.test.ts) | [`backend/src/__tests__/api-mocked/foodType.test.ts`](../backend/src/__tests__/api-mocked/foodType.test.ts) | In-memory MongoDB                        |
+| **DELETE /api/food-type/:id**        | [`backend/src/__tests__/api-unmocked/foodType.test.ts`](../backend/src/__tests__/api-unmocked/foodType.test.ts) | [`backend/src/__tests__/api-mocked/foodType.test.ts`](../backend/src/__tests__/api-mocked/foodType.test.ts) | In-memory MongoDB                        |
+| **POST /api/notifications/check**    | N/A                                                                            | [`backend/src/__tests__/api-mocked/notification-check.test.ts`](../backend/src/__tests__/api-mocked/notification-check.test.ts) | Firebase Admin SDK, In-memory MongoDB    |
+| **POST /api/notifications/admin/trigger** | [`backend/src/__tests__/api-unmocked/notification-admin.test.ts`](../backend/src/__tests__/api-unmocked/notification-admin.test.ts) | [`backend/src/__tests__/api-mocked/notification-admin.test.ts`](../backend/src/__tests__/api-mocked/notification-admin.test.ts) | Firebase Admin SDK, In-memory MongoDB    |
+| **POST /api/media/upload**           | [`backend/src/__tests__/api-unmocked/media.test.ts`](../backend/src/__tests__/api-unmocked/media.test.ts) | [`backend/src/__tests__/api-mocked/media.test.ts`](../backend/src/__tests__/api-mocked/media.test.ts) | File system (multer), Storage service    |
+| **POST /api/media/analyze-produce**  | [`backend/src/__tests__/api-unmocked/ai-vision.test.ts`](../backend/src/__tests__/api-unmocked/ai-vision.test.ts) | [`backend/src/__tests__/api-mocked/media.test.ts`](../backend/src/__tests__/api-mocked/media.test.ts) | Gemini AI Vision API                     |
+| **GET /api/recipes**                 | N/A                                                                            | [`backend/src/__tests__/api-mocked/recipe.test.ts#L44`](../backend/src/__tests__/api-mocked/recipe.test.ts#L44) | TheMealDB API (axios)                    |
+| **POST /api/recipes/ai**             | N/A                                                                            | [`backend/src/__tests__/api-mocked/recipe.test.ts#L91`](../backend/src/__tests__/api-mocked/recipe.test.ts#L91) | Gemini AI API (axios)                    |
 
 #### 2.1.2. Commit Hash Where Tests Run
 
@@ -61,75 +63,78 @@
 
 3. **Set Up Environment Variables**:
 
-   - Create a `.env` file in the `backend` directory with the required environment variables:
+   - Create a `.env.test` file in the `backend` directory with the required environment variables:
      ```
-     PORT=3000
-     JWT_SECRET=your-jwt-secret
-     GOOGLE_CLIENT_ID=your-google-client-id
-     MONGODB_URI=your-mongodb-uri
-     MONGODB_USER=your-mongodb-user
-     MONGODB_PASS=your-mongodb-password
-     GEMINI_API_KEY=your-gemini-api-key
-     FIREBASE_SERVICE_ACCOUNT=your-firebase-service-account-json
+     JWT_SECRET=test-jwt-secret
+     GOOGLE_CLIENT_ID=test-google-client-id
+     GEMINI_API_KEY=test-gemini-api-key
      ```
    - **Note**: Tests use an in-memory MongoDB database, so MongoDB connection variables are not required for testing.
 
 4. **Run All Tests**:
 
-   - To run all tests (both mocked and unmocked):
+   - To run all tests in the test suite:
      ```bash
      npm test
      ```
 
-5. **Run Only Mocked Tests**:
+5. **Run All API Tests (Both Mocked and Unmocked)**:
 
-   - To run only tests that use mocks (tests with external API/service mocking):
+   - To run all API tests (both mocked and unmocked):
      ```bash
-     npm run test:mocked
+     npm run test:api
      ```
 
-6. **Run Only Unmocked Tests**:
+6. **Run Only Mocked API Tests**:
 
-   - To run only tests without mocks (pure integration tests):
+   - To run only API tests with external service mocking:
      ```bash
-     npm run test:unmocked
+     npm run test:api-mocked
      ```
 
-7. **Run Tests with Coverage**:
+7. **Run Only Unmocked API Tests**:
+
+   - To run only API tests without external service mocking:
+     ```bash
+     npm run test:api-unmocked
+     ```
+
+8. **Run Tests with Coverage**:
 
    - To run all tests with coverage report:
      ```bash
      npm run test:coverage
      ```
-   - For mocked tests only:
+   - For all API tests with coverage (both mocked and unmocked):
      ```bash
-     npm run test:coverage:mocked
+     npm run test:coverage:api
      ```
-   - For unmocked tests only:
+   - For mocked API tests with coverage:
      ```bash
-     npm run test:coverage:unmocked
+     npm run test:coverage:api-mocked
+     ```
+   - For unmocked API tests with coverage:
+     ```bash
+     npm run test:coverage:api-unmocked
      ```
 
-8. **Run Tests in Watch Mode**:
+9. **Run Tests in Watch Mode**:
 
-   - To run tests in watch mode (automatically re-runs on file changes):
+   - To run all tests in watch mode (automatically re-runs on file changes):
      ```bash
      npm run test:watch
      ```
-   - For mocked tests in watch mode:
+   - For mocked API tests in watch mode:
      ```bash
-     npm run test:watch:mocked
+     npm run test:watch:api-mocked
      ```
-   - For unmocked tests in watch mode:
+   - For unmocked API tests in watch mode:
      ```bash
-     npm run test:watch:unmocked
+     npm run test:watch:api-unmocked
      ```
 
-9. **View Test Results**:
+10. **View Test Results**:
    - Test results will be displayed in the terminal
-   - Coverage reports are generated in the `backend/coverage` directory
-   - Mocked test coverage: `backend/coverage/mocked`
-   - Unmocked test coverage: `backend/coverage/unmocked`
 
 ### 2.2. GitHub Actions Configuration Location
 
@@ -137,18 +142,15 @@
 
 ### 2.3. Jest Coverage Report Screenshots for Tests Without Mocking
 
-![](images/unmocked_1.png)
-![](images/unmocked_2.png)
+<img width="815" height="106" alt="image" src="https://github.com/user-attachments/assets/7c0391a4-cf4e-4e87-a22f-9c4b97afb456" />
 
 ### 2.4. Jest Coverage Report Screenshots for Tests With Mocking
 
-![](images/mocked_1.png)
-![](images/mocked_2.png)
+<img width="836" height="117" alt="image" src="https://github.com/user-attachments/assets/96312bc0-fc5c-4ea6-96e0-a903479ed272" />
 
 ### 2.5. Jest Coverage Report Screenshots for Both Tests With and Without Mocking
 
-![](images/both_test_1.png)
-![](images/both_test_2.png)
+<img width="797" height="87" alt="image" src="https://github.com/user-attachments/assets/37bc62b9-2dc0-4a28-bb52-64f0cbab92e3" />
 
 ---
 
