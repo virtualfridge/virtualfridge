@@ -4,7 +4,6 @@ import logger from '../util/logger';
 import { foodTypeModel } from './foodType';
 import { IFoodType } from '../types/foodType';
 
-// TODO: move nutritional info to the food type definition only and as SSOT
 const foodItemSchema = new Schema<IFoodItem>({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   typeId: { type: mongoose.Schema.Types.ObjectId, required: true },
@@ -65,18 +64,6 @@ export class FoodItemModel {
       throw new Error('Failed to find foodItem by id');
     }
   }
-
-  // async findByUserId(
-  //   userId: mongoose.Types.ObjectId
-  // ): Promise<IFoodItem | null> {
-  //   try {
-  //     const foodItem = await this.foodItem.findOne({ userId });
-  //     return foodItem;
-  //   } catch (error) {
-  //     logger.error('Error finding foodItem by userId:', error);
-  //     throw new Error('Failed to find foodItem by userId');
-  //   }
-  // }
 
   async findAllByUserId(userId: mongoose.Types.ObjectId): Promise<IFoodItem[]> {
     try {
