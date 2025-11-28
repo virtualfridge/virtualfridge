@@ -142,18 +142,15 @@
 
 ### 2.3. Jest Coverage Report Screenshots for Tests Without Mocking
 
-![](images/unmocked_1.png)
-![](images/unmocked_2.png)
+<img width="815" height="106" alt="image" src="https://github.com/user-attachments/assets/7c0391a4-cf4e-4e87-a22f-9c4b97afb456" />
 
 ### 2.4. Jest Coverage Report Screenshots for Tests With Mocking
 
-![](images/mocked_1.png)
-![](images/mocked_2.png)
+<img width="836" height="117" alt="image" src="https://github.com/user-attachments/assets/96312bc0-fc5c-4ea6-96e0-a903479ed272" />
 
 ### 2.5. Jest Coverage Report Screenshots for Both Tests With and Without Mocking
 
-![](images/both_test_1.png)
-![](images/both_test_2.png)
+<img width="797" height="87" alt="image" src="https://github.com/user-attachments/assets/37bc62b9-2dc0-4a28-bb52-64f0cbab92e3" />
 
 ---
 
