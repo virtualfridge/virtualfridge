@@ -1,7 +1,7 @@
 package com.cpen321.usermanagement.data.repository
 
-import com.cpen321.usermanagement.data.remote.dto.AiRecipeData
 import com.cpen321.usermanagement.data.remote.dto.Recipe
+import com.cpen321.usermanagement.data.remote.dto.RecipeData
 
 data class RecipeFetchResult(
     val recipe: Recipe,
@@ -9,8 +9,8 @@ data class RecipeFetchResult(
 )
 
 data class AiRecipeFetchResult(
-    val recipeData: AiRecipeData,
-    val formattedRecipe: String
+    val recipeData: RecipeData,
+    val recipe: Recipe
 )
 
 interface RecipeRepository {

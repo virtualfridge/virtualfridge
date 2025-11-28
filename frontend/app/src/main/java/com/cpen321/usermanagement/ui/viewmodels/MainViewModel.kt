@@ -262,10 +262,10 @@ class MainViewModel @Inject constructor(
             result.fold(
                 onSuccess = { aiResult ->
                     _uiState.value = _uiState.value.copy(
-                        aiRecipe = aiResult.formattedRecipe,
-                        aiPrompt = aiResult.recipeData.prompt,
-                        aiIngredients = formatIngredients(aiResult.recipeData.ingredients),
-                        aiModel = aiResult.recipeData.model,
+                        aiRecipe = aiResult.recipe.instructions,
+                        aiPrompt = null, // RecipeData doesn't have prompt field
+                        aiIngredients = aiResult.recipe.ingredients.map { it.name },
+                        aiModel = null, // RecipeData doesn't have model field
                         isGeneratingAiRecipe = false
                     )
                 },

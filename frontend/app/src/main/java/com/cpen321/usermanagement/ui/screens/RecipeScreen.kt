@@ -296,12 +296,64 @@ private fun MealDbResultsSection(
         )
 
         if (uiState.recipe != null) {
-            Text(
-                text = "Ingredients: ${uiState.recipe.ingredients.joinToString(", ") { ingredient -> ingredient.name }}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-            RecipeCard(uiState.recipe)
+            RecipeDetails(recipe = uiState.recipe)
         }
+    }
+}
+
+@Composable
+private fun RecipeDetails(
+    recipe: Recipe,
+    modifier: Modifier = Modifier
+) {
+    val spacing = LocalSpacing.current
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = spacing.medium),
+        verticalArrangement = Arrangement.spacedBy(spacing.medium)
+    ) {
+        Text(
+            text = recipe.name,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "Ingredients",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Column {
+            recipe.ingredients.forEach { ingredient ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = ingredient.name,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = ingredient.measure,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = "Instructions",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Text(
+            text = recipe.instructions,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
@@ -384,41 +436,6 @@ private fun AiRecipeSection(
     }
 }
 
-@Composable
-private fun RecipeCard(
-    recipe: Recipe,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = recipe.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Instructions: ${recipe.instructions}",
-                style = MaterialTheme.typography.labelMedium
-            )
-
-            recipe.thumbnail?.takeIf { it.isNotBlank() }?.let { url ->
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Image: $url",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun LoadingRow(
