@@ -2,10 +2,9 @@
 title Use Case 5: View Nutritional Facts
 
 actor User
-participant "Frontend\n(Android)" as Frontend
-participant "FoodItemController" as Controller
-participant "FoodItemModel" as FoodItemModel
-participant "FoodTypeModel" as FoodTypeModel
+participant "Frontend" as Frontend
+participant "FoodItem" as Controller
+participant "FoodType" as FoodTypeModel
 database "MongoDB" as DB
 
 User -> Frontend: Clicks on food item\nin fridge list
@@ -16,27 +15,19 @@ User -> Frontend: Clicks "Nutrition Info"
 Frontend -> Controller: GET /api/food-item/{itemId}/nutrition\n(Authorization: Bearer <JWT>)
 activate Controller
 
-Controller -> FoodItemModel: findById(itemId)
-activate FoodItemModel
-FoodItemModel -> DB: db.fooditems.findOne({_id: itemId})
+Controller -> DB: db.fooditems.findOne({_id: itemId})
 activate DB
-DB --> FoodItemModel: FoodItem document
+DB --> Controller: FoodItem document
 deactivate DB
-FoodItemModel --> Controller: FoodItem(userId, typeId, expirationDate, percentLeft)
-deactivate FoodItemModel
 
-Controller -> FoodItemModel: getAssociatedFoodType(foodItem)
-activate FoodItemModel
-FoodItemModel -> FoodTypeModel: findById(typeId)
+Controller -> FoodTypeModel: findById(typeId)
 activate FoodTypeModel
 FoodTypeModel -> DB: db.foodtypes.findOne({_id: typeId})
 activate DB
 DB --> FoodTypeModel: FoodType document
 deactivate DB
-FoodTypeModel --> FoodItemModel: FoodType(name, nutrients, shelfLifeDays)
+FoodTypeModel --> Controller: FoodType(name, nutrients, shelfLifeDays)
 deactivate FoodTypeModel
-FoodItemModel --> Controller: FoodType with nutrients
-deactivate FoodItemModel
 
 alt Nutritional data exists in FoodType.nutrients
     Controller --> Frontend: 200 OK\nNutritionInfo\n(calories, protein, fat, carbs,\nsaturatedFat, fiber, sugars, etc.)

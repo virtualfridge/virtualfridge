@@ -2,12 +2,12 @@
 title Use Case 2: Log Food via Barcode
 
 actor User
-participant "Frontend\n(Android)" as Frontend
-participant "ML Kit\nBarcode Scanner" as MLKit
-participant "FridgeController" as Controller
+participant "Frontend" as Frontend
+participant "Barcode Scanner" as MLKit
+participant "Fridge" as Controller
 participant "Open Food Facts\nAPI" as OpenFood
-participant "FoodTypeModel" as FoodTypeModel
-participant "FoodItemModel" as FoodItemModel
+participant "FoodType" as FoodTypeModel
+participant "FoodItem" as FoodItemModel
 database "MongoDB" as DB
 
 User -> Frontend: Clicks "Add Food"\nand chooses barcode option

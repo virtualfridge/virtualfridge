@@ -9,7 +9,6 @@ skinparam rectangle {
 }
 
 ' --- External modules on the left ---
-rectangle "Camera" as Camera
 rectangle "Barcode Scanner" as BarcodeScanner
 rectangle "Google Notifications" as GoogleNotifications_Front
 rectangle "Google Auth" as GoogleAuth
@@ -19,9 +18,13 @@ rectangle "Frontend" as Frontend
 
 ' --- Backend with internal components ---
 rectangle "Backend" as Backend {
-    rectangle "FoodItem" as FoodItem
+    rectangle "Fridge" as Fridge
+		rectangle "Food Item" as FoodItem 
+		rectangle "Food Type" as FoodType
+		rectangle "AI Vision" as aiVision
+		rectangle "Media" as Media
     rectangle "User" as User
-    rectangle "Cron" as Cron
+    rectangle "Notification" as Notification
     rectangle "Recipe" as Recipe
 }
 
@@ -33,24 +36,31 @@ rectangle "TheMealDB API" as TheMealDB
 rectangle "Gemini" as Gemini
 
 ' --- Connections (Left side to Frontend) ---
-Camera <-- Frontend
 BarcodeScanner <-- Frontend
 GoogleNotifications_Front --> Frontend
 GoogleAuth <-- Frontend
 
 ' --- Frontend to Backend ---
+' Frontend --> Fridge
 Frontend --> FoodItem
+Frontend --> FoodType
+' Frontend --> aiVision
+Frontend --> Media
 Frontend --> User
 Frontend --> Recipe
-Frontend --> Cron
+Frontend --> Notification
 
 ' --- Backend internal and external connections ---
-FoodItem --> OpenFoodFacts
-FoodItem --> DB
+Fridge --> OpenFoodFacts
+Fridge --> DB
+FoodItem --> Fridge
+FoodType --> Fridge
+aiVision --> Gemini
+Media --> aiVision
 User --> DB
 Recipe --> DB
 Recipe --> TheMealDB
 Recipe --> Gemini
-Cron --> GoogleNotifications_Back
+Notification --> GoogleNotifications_Back
 
 @enduml

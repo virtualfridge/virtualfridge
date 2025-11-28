@@ -2,11 +2,10 @@
 title Use Case 4: Generate Recipe Suggestions
 
 actor User
-participant "Frontend\n(Android)" as Frontend
-participant "RecipeController" as Controller
-participant "RecipeService" as RecipeService
+participant "Frontend" as Frontend
+participant "Recipe" as Controller
 participant "TheMealDB API" as MealDB
-participant "AiRecipeService" as AiRecipe
+participant "AiRecipe" as AiRecipe
 participant "Gemini API" as Gemini
 
 User -> Frontend: Selects items from fridge\n(e.g., apple, chicken, rice)
@@ -20,29 +19,24 @@ activate Controller
 
 Controller -> Controller: Parse query params\ningredients = ["apple", "chicken", "rice"]
 
-Controller -> RecipeService: fetchRecipesFromMealDB(ingredients)
-activate RecipeService
-
 loop For each selected ingredient
-    RecipeService -> MealDB: GET /api/json/v1/1/filter.php?i={ingredient}
+    Controller -> MealDB: GET /api/json/v1/1/filter.php?i={ingredient}
     activate MealDB
-    MealDB --> RecipeService: JSON response\n{meals: [{idMeal, strMeal, strMealThumb}]}
+    MealDB --> Controller: JSON response\n{meals: [{idMeal, strMeal, strMealThumb}]}
     deactivate MealDB
 end
 
-RecipeService -> RecipeService: Aggregate recipes\nFilter by matching ≥2 ingredients\nLimit to top 3 recipes
+Controller -> Controller: Aggregate recipes\nFilter by matching ≥2 ingredients\nLimit to top 3 recipes
 
 alt Recipes found (≥1 recipe matches)
-    RecipeService --> Controller: RecipeResult[]\n{id, title, thumbnail, sourceUrl}
-    deactivate RecipeService
+    Controller --> Controller: RecipeResult[]\n{id, title, thumbnail, sourceUrl}
     Controller --> Frontend: 200 OK\n{recipes: [3 recipe summaries with links]}
     deactivate Controller
     Frontend --> User: Display recipe dropdown\nwith 3 recipe cards
     User -> Frontend: Clicks on recipe card
     Frontend --> User: Open external link in browser\n(TheMealDB recipe details)
 else No recipes found
-    RecipeService --> Controller: Empty array []
-    deactivate RecipeService
+    Controller --> Controller: Empty array []
     Controller --> Frontend: 404 Not Found\n{error: "No matching recipes"}
     deactivate Controller
     Frontend --> User: Display message:\n"No recipes found,\ntry different ingredients"
