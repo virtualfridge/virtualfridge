@@ -117,11 +117,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // --- Test sending a static barcode (e.g., Nutella) ---
+    /**
+     * Test method for E2E tests to send a hardcoded barcode (Nutella)
+     * This method is used by automated tests only - no UI button in production
+     */
     fun testSendBarcode() {
         viewModelScope.launch {
-            val testBarcode = "0072745068393" // perdue chicken breast
-            // "3017620425035" // Nutella barcode
+            val testBarcode = "3017620425035" // Nutella barcode
             Log.d("BarcodeTest", "Sending test barcode: $testBarcode")
 
             _uiState.value = _uiState.value.copy(
@@ -144,6 +146,45 @@ class MainViewModel @Inject constructor(
                     },
                     onFailure = { error ->
                         Log.e("BarcodeTest", "Failed to send test barcode: ${error.message}", error)
+                        setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
+                        _uiState.value = _uiState.value.copy(isSendingTestBarcode = false)
+                    }
+                )
+            } finally {
+                if (Trace.isEnabled()) Trace.endSection()
+            }
+        }
+    }
+
+    /**
+     * Test method for E2E tests to send Prince biscuit barcode
+     * Used for testing sorting functionality with different products
+     */
+    fun testSendPrimeBarcode() {
+        viewModelScope.launch {
+            val testBarcode = "7622210449283" // LU Prince chocolate biscuits barcode
+            Log.d("BarcodeTest", "Sending Prince test barcode: $testBarcode")
+
+            _uiState.value = _uiState.value.copy(
+                isSendingTestBarcode = true,
+                testBarcodeResponse = null,
+                scanError = null,
+                successMessage = null
+            )
+
+            if (Trace.isEnabled()) Trace.beginSection("ScanToApiResponse")
+            try {
+                val result = barcodeRepository.sendBarcode(testBarcode)
+                result.fold(
+                    onSuccess = { barcodeResult ->
+                        Log.d("BarcodeTest", "Successfully sent Prince test barcode")
+                        _uiState.value = _uiState.value.copy(
+                            testBarcodeResponse = barcodeResult,
+                            isSendingTestBarcode = false
+                        )
+                    },
+                    onFailure = { error ->
+                        Log.e("BarcodeTest", "Failed to send Prince test barcode: ${error.message}", error)
                         setScanError("Test barcode failed: ${error.message ?: "Unknown error"}")
                         _uiState.value = _uiState.value.copy(isSendingTestBarcode = false)
                     }

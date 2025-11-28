@@ -77,7 +77,7 @@ export class FridgeService {
       logger.debug('Received barcode:', barcode);
 
       let foodType = await foodTypeModel.findByBarcode(barcode);
-      // Only call OpenFoodFacts if we don’t already have this food type
+      
       if (!foodType) {
         const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json?lc=en`;
         const { data } = await axios.get(url);
