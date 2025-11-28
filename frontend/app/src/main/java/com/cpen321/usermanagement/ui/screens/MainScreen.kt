@@ -49,7 +49,6 @@ fun MainScreen(
     mainViewModel: MainViewModel,
     fridgeViewModel: FridgeViewModel,
     onProfileClick: () -> Unit,
-    onRecipeClick: () -> Unit,
     onBarcodeResultClick: () -> Unit,
     onFridgeClick: () -> Unit
 ) {

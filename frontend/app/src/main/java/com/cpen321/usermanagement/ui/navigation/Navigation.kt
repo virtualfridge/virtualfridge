@@ -20,7 +20,6 @@ object NavRoutes {
     const val MANAGE_PROFILE = "manage_profile"
     const val PROFILE_COMPLETION = "profile_completion"
     const val SCANNER = "scanner"
-    const val RECIPE = "recipe"
     const val BARCODE_RESULT = "barcode_result"
     const val FRIDGE = "fridge"
 }
@@ -86,7 +85,6 @@ private fun handleNavigationEvent(
         is NavigationEvent.NavigateToProfile -> navController.navigate(NavRoutes.PROFILE)
         is NavigationEvent.NavigateToManageProfile -> navController.navigate(NavRoutes.MANAGE_PROFILE)
         is NavigationEvent.NavigateToScanner -> navController.navigate(NavRoutes.SCANNER)
-        is NavigationEvent.NavigateToRecipe -> navController.navigate(NavRoutes.RECIPE)
         is NavigationEvent.NavigateToBarcodeResult -> navController.navigate(NavRoutes.BARCODE_RESULT)
         is NavigationEvent.NavigateToFridge -> navController.navigate(NavRoutes.FRIDGE)
         is NavigationEvent.NavigateBack -> navController.popBackStack()
@@ -138,7 +136,6 @@ private fun AppNavHost(
                 mainViewModel = mainViewModel,
                 fridgeViewModel = hiltViewModel(),
                 onProfileClick = { navigationStateManager.navigateToProfile() },
-                onRecipeClick = { navigationStateManager.navigateToRecipe() },
                 onBarcodeResultClick = { navigationStateManager.navigateToBarcodeResult() },
                 onFridgeClick = { navigationStateManager.navigateToFridge() }
             )
@@ -166,13 +163,6 @@ private fun AppNavHost(
 
         // Placeholder for scanner screen; implement separately
         composable(NavRoutes.SCANNER) {
-        }
-
-        composable(NavRoutes.RECIPE) {
-            RecipeScreen(
-                mainViewModel = mainViewModel,
-                onBackClick = { navigationStateManager.navigateBack() }
-            )
         }
 
 
