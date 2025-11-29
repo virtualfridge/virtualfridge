@@ -98,7 +98,11 @@ describe('Recipe Controller Integration Tests', () => {
               content: {
                 parts: [
                   {
-                    text: '## Test Recipe\n\n### Ingredients\n- Chicken\n\n### Steps\n1. Cook chicken',
+                    text: JSON.stringify({
+                      name: 'Test Recipe',
+                      instructions: '1. Cook chicken',
+                      ingredients: [{ name: 'Chicken', measure: '1' }],
+                    }),
                   },
                 ],
               },
@@ -117,8 +121,8 @@ describe('Recipe Controller Integration Tests', () => {
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('recipe');
-      expect(response.body.data).toHaveProperty('ingredients');
-      expect(response.body.data).toHaveProperty('model');
+      expect(response.body.data.recipe).toHaveProperty('ingredients');
+      expect(response.body.data.recipe).toHaveProperty('instructions');
     });
 
     test('should return 400 for empty ingredients', async () => {
