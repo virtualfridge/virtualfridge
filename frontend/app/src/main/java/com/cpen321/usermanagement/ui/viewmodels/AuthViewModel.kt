@@ -197,17 +197,13 @@ class AuthViewModel @Inject constructor(
 
     fun registerFcmToken(fcmToken: String) {
         viewModelScope.launch {
-            try {
-                profileRepository.updateFcmToken(fcmToken)
-                    .onSuccess {
-                        Log.d(TAG, "FCM token registered successfully")
-                    }
-                    .onFailure { error ->
-                        Log.e(TAG, "Failed to register FCM token: ${error.message}")
-                    }
-            } catch (e: RuntimeException) {
-                Log.e(TAG, "Runtime error registering FCM token: ${e.message}")
-            }
+            profileRepository.updateFcmToken(fcmToken)
+                .onSuccess {
+                    Log.d(TAG, "FCM token registered successfully")
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Failed to register FCM token: ${error.message}")
+                }
         }
     }
 
@@ -217,17 +213,13 @@ class AuthViewModel @Inject constructor(
      */
     fun checkExpiringItems() {
         viewModelScope.launch {
-            try {
-                notificationRepository.checkNotifications()
-                    .onSuccess { response ->
-                        Log.d(TAG, "Notification check: ${response.itemsExpiring} items expiring")
-                    }
-                    .onFailure { error ->
-                        Log.e(TAG, "Failed to check notifications: ${error.message}")
-                    }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error checking expiring items", e)
-            }
+            notificationRepository.checkNotifications()
+                .onSuccess { response ->
+                    Log.d(TAG, "Notification check: ${response.itemsExpiring} items expiring")
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Failed to check notifications: ${error.message}")
+                }
         }
     }
 }
