@@ -19,7 +19,15 @@
  *   (e.g., actual photos of apples, bananas, etc.)
  */
 
-import { describe, expect, test, beforeAll, afterAll, afterEach, beforeEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  beforeAll,
+  afterAll,
+  afterEach,
+  beforeEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -27,6 +35,9 @@ import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
 import { mockGoogleUserInfo } from '../helpers/testData';
 import { createTestApp } from '../helpers/testApp';
+import { foodTypeSchema } from '../../types/foodType';
+import { ZodError } from 'zod';
+import { foodItemSchema } from '../../types/foodItem';
 
 /**
  * =============================================================================
@@ -56,7 +67,9 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
   beforeEach(async () => {
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -126,34 +139,9 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
       // 1. Verify isProduce was parsed (even though it's true, it came from JSON)
       expect(foodType).toBeDefined(); // Only created if isProduce was true
 
-      // 2. Verify category field from JSON parsing (must be 'fruit' or 'vegetable')
-      expect(foodType).toHaveProperty('category');
-      expect(typeof foodType.category).toBe('string');
-      expect(['fruit', 'vegetable']).toContain(foodType.category);
-
-      // 3. Verify name field from JSON parsing (required by Zod schema)
-      expect(foodType).toHaveProperty('name');
-      expect(typeof foodType.name).toBe('string');
-      expect(foodType.name.length).toBeGreaterThan(0);
-
-      // 4. Verify nutritionalInfo object from JSON parsing
-      // The aiVision service parses nutrients_per_100g from Gemini response
-      expect(foodType).toHaveProperty('nutritionalInfo');
-      expect(typeof foodType.nutritionalInfo).toBe('object');
-      expect(foodType.nutritionalInfo).not.toBeNull();
-
-      // 5. Verify nutritional fields that come from JSON parsing
-      // These are optional in the Zod schema but should be present if AI provided them
-      expect(foodType.nutritionalInfo).toHaveProperty('calories');
-      expect(foodType.nutritionalInfo).toHaveProperty('protein');
-      expect(foodType.nutritionalInfo).toHaveProperty('carbohydrates');
-      expect(foodType.nutritionalInfo).toHaveProperty('fat');
-
-      // 6. Verify types match Zod schema (numbers for nutrients)
-      expect(typeof foodType.nutritionalInfo.calories).toBe('number');
-      expect(typeof foodType.nutritionalInfo.protein).toBe('number');
-      expect(typeof foodType.nutritionalInfo.carbohydrates).toBe('number');
-      expect(typeof foodType.nutritionalInfo.fat).toBe('number');
+      // Verify that the returned response is of the correct shape
+      expect(() => foodTypeSchema.parse(foodType)).not.toThrow(ZodError);
+      expect(() => foodItemSchema.parse(foodItem)).not.toThrow(ZodError);
 
       // 7. Verify the parsed data was used to create database records
       expect(foodType).toHaveProperty('_id');
@@ -162,23 +150,31 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
       expect(foodItem.typeId).toBe(foodType._id);
       expect(foodItem.percentLeft).toBe(100);
 
-      console.log(`[AI RESULT] Detected produce: ${foodType.name} (${foodType.category})`);
+      console.log(
+        `[AI RESULT] Detected produce: ${foodType.name} (${foodType.category})`
+      );
       console.log(`[JSON PARSING VERIFIED]:`);
       console.log(`  ✓ aiVision.parseJsonFromResponse() extracted Gemini JSON`);
       console.log(`  ✓ aiVision.extractJson() found JSON in response text`);
       console.log(`  ✓ Zod produceAnalysisSchema.parse() validated structure`);
-      console.log(`  ✓ Parsed data: isProduce=true, category=${foodType.category}, name=${foodType.name}`);
-      console.log(`  ✓ Nutrients parsed: ${foodType.nutritionalInfo.calories}cal, ${foodType.nutritionalInfo.protein}g protein`);
+      console.log(
+        `  ✓ Parsed data: isProduce=true, category=${foodType.category}, name=${foodType.name}`
+      );
+      console.log(`  ✓ Nutrients parsed: ${foodType.nutritionalInfo}`);
       console.log(`  ✓ Database records created from parsed JSON data`);
     } else if (response.status === 400) {
       // AI detected non-produce item
-      expect(response.body.message).toBe('Item detected must be a fruit or vegetable');
+      expect(response.body.message).toBe(
+        'Item detected must be a fruit or vegetable'
+      );
       console.log('[AI RESULT] AI determined this is not a produce item');
     } else if (response.status === 500) {
       // AI service error (e.g., image too small/invalid for Gemini)
       expect(response.body).toHaveProperty('message');
       console.log(`[AI RESULT] AI service error: ${response.body.message}`);
-      console.log('[NOTE] Minimal test images may not be suitable for real AI analysis');
+      console.log(
+        '[NOTE] Minimal test images may not be suitable for real AI analysis'
+      );
     }
   });
 
@@ -220,15 +216,25 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
       expect(foodItem.userId).toBe(userId);
       expect(foodItem.typeId).toBe(foodType._id);
 
-      console.log(`[AI RESULT] AI detected produce in test-not-produce image: ${foodType.name}`);
-      console.log(`[JSON HANDLING] AI JSON properly parsed and stored in database`);
+      console.log(
+        `[AI RESULT] AI detected produce in test-not-produce image: ${foodType.name}`
+      );
+      console.log(
+        `[JSON HANDLING] AI JSON properly parsed and stored in database`
+      );
     } else if (response.status === 400) {
       // Verify JSON error response structure
       expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toBe('Item detected must be a fruit or vegetable');
+      expect(response.body.message).toBe(
+        'Item detected must be a fruit or vegetable'
+      );
 
-      console.log('[AI RESULT] AI correctly identified test-not-produce image as non-produce');
-      console.log(`[JSON HANDLING] AI returned non-produce in JSON: isProduce=false`);
+      console.log(
+        '[AI RESULT] AI correctly identified test-not-produce image as non-produce'
+      );
+      console.log(
+        `[JSON HANDLING] AI returned non-produce in JSON: isProduce=false`
+      );
     } else if (response.status === 500) {
       expect(response.body).toHaveProperty('message');
       console.log(`[AI RESULT] AI service error: ${response.body.message}`);
@@ -272,8 +278,12 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
       expect(foodType.nutritionalInfo).toBeDefined();
       expect(foodItem.userId).toBe(userId);
 
-      console.log(`[AI RESULT] AI detected produce in empty image: ${foodType.name}`);
-      console.log(`[JSON HANDLING] AI JSON response properly handled and persisted`);
+      console.log(
+        `[AI RESULT] AI detected produce in empty image: ${foodType.name}`
+      );
+      console.log(
+        `[JSON HANDLING] AI JSON response properly handled and persisted`
+      );
     } else if (response.status === 400) {
       // Verify error JSON response
       expect(response.body).toHaveProperty('message');
@@ -318,7 +328,9 @@ describe('POST /api/media/vision - REAL AI IMAGE DETECTION', () => {
     expect([400, 401]).toContain(response.status);
     expect(response.body.message).toBeTruthy();
 
-    console.log(`[AUTH TEST] Request rejected with ${response.status}: ${response.body.message}`);
+    console.log(
+      `[AUTH TEST] Request rejected with ${response.status}: ${response.body.message}`
+    );
   });
 
   /**

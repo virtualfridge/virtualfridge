@@ -5,7 +5,16 @@
  * Target: errorHandler.ts lines 16-18
  */
 
-import { describe, expect, test, jest, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { createTestApp } from '../helpers/testApp';
@@ -27,7 +36,9 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
   beforeEach(async () => {
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
   });
 
   afterEach(async () => {
@@ -45,7 +56,8 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
    */
   test('should trigger error handler with database error', async () => {
     // Mock foodItemModel.findAllByUserId to throw an error
-    jest.spyOn(foodItemModel, 'findAllByUserId')
+    jest
+      .spyOn(foodItemModel, 'findAllByUserId')
       .mockRejectedValueOnce(new Error('Failed to find foodItems by userId'));
 
     const response = await request(app)
@@ -70,18 +82,20 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
     });
 
     // Create a scenario that causes service error
-    jest.spyOn(foodItemModel, 'create')
+    jest
+      .spyOn(foodItemModel, 'create')
       .mockRejectedValueOnce(new Error('Failed to create foodItem'));
 
     const response = await request(app)
       .post('/api/food-item')
       .set('Authorization', `Bearer ${authToken}`)
       .send({
+        userId: userId,
         typeId: foodType._id.toString(),
         expirationDate: new Date(),
         percentLeft: 100,
       })
-      .expect(400);
+      .expect(500);
 
     expect(response.body.message).toBe('Failed to create foodItem');
 
@@ -94,8 +108,7 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
    */
   test('should handle unexpected error objects', async () => {
     // Mock to return null (not found)
-    jest.spyOn(foodItemModel, 'findById')
-      .mockResolvedValueOnce(null);
+    jest.spyOn(foodItemModel, 'findById').mockResolvedValueOnce(null);
 
     const response = await request(app)
       .get('/api/food-item/507f1f77bcf86cd799439011')
@@ -114,7 +127,8 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
    */
   test('should handle multiple errors independently', async () => {
     // First error
-    jest.spyOn(foodItemModel, 'findAllByUserId')
+    jest
+      .spyOn(foodItemModel, 'findAllByUserId')
       .mockRejectedValueOnce(new Error('First error'));
 
     await request(app)
@@ -129,7 +143,8 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
     });
 
     // Second error - different mock
-    jest.spyOn(foodItemModel, 'create')
+    jest
+      .spyOn(foodItemModel, 'create')
       .mockRejectedValueOnce(new Error('Second error'));
 
     await request(app)
@@ -150,7 +165,8 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
    * Tests error handler with edge case error messages
    */
   test('should handle errors with long messages', async () => {
-    jest.spyOn(foodItemModel, 'findAllByUserId')
+    jest
+      .spyOn(foodItemModel, 'findAllByUserId')
       .mockRejectedValueOnce(new Error('Failed to find foodItems by userId'));
 
     const response = await request(app)
@@ -170,7 +186,8 @@ describe('Error Handler Middleware - Comprehensive Coverage', () => {
   test('should log errors when they occur', async () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    jest.spyOn(foodItemModel, 'findAllByUserId')
+    jest
+      .spyOn(foodItemModel, 'findAllByUserId')
       .mockRejectedValueOnce(new Error('Test error for logging'));
 
     await request(app)

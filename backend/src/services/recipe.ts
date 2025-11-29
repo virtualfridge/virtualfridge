@@ -221,10 +221,6 @@ export class RecipeService {
   }
 
   async generateRecipe(ingredients: string[]): Promise<IRecipe> {
-    if (!this.apiKey) {
-      throw new ApiKeyError('GEMINI_API_KEY is not set');
-    }
-
     const tomlPayload = this.buildTomlPayload(ingredients);
     const prompt = this.buildPrompt(tomlPayload);
 

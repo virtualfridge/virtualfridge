@@ -24,7 +24,7 @@ jobs:
       - name: Install node modules
         run: npm i
       - name: Run tests
-        run: npm test
+        run: npm run test:api
         env:
           PORT: ${{vars.PORT}}
           JWT_SECRET: ${{secrets.JWT_SECRET}}

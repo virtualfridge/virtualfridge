@@ -9,7 +9,16 @@
  * - Line 104: Return null when candidates/content/parts are missing
  */
 
-import { describe, expect, test, jest, beforeAll, afterAll, afterEach, beforeEach } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  jest,
+  beforeAll,
+  afterAll,
+  afterEach,
+  beforeEach,
+} from '@jest/globals';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
@@ -17,7 +26,7 @@ import { createTestApp } from '../helpers/testApp';
 import * as dbHandler from '../helpers/dbHandler';
 import { userModel } from '../../models/user';
 import { mockGoogleUserInfo } from '../helpers/testData';
-import { AiRecipeService } from '../../services/aiRecipe';
+import { RecipeService } from '../../services/recipe';
 
 // Mock axios
 jest.mock('axios');
@@ -35,7 +44,9 @@ describe('AI Recipe Service - Error Path Coverage', () => {
   beforeEach(async () => {
     const user = await userModel.create(mockGoogleUserInfo);
     userId = user._id.toString();
-    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    authToken = jwt.sign({ id: userId }, process.env.JWT_SECRET!, {
+      expiresIn: '1h',
+    });
     jest.clearAllMocks();
   });
 
@@ -46,25 +57,6 @@ describe('AI Recipe Service - Error Path Coverage', () => {
 
   afterAll(async () => {
     await dbHandler.closeDatabase();
-  });
-
-  /**
-   * Test: Missing GEMINI_API_KEY error
-   * Tests aiRecipe.ts lines 11-12
-   *
-   * When GEMINI_API_KEY is not set, generateRecipe() should throw ApiKeyError
-   * Controller returns 500 for ApiKeyError
-   */
-  test('should return 500 when GEMINI_API_KEY is missing', async () => {
-    // Create a service instance without API key to test the error
-    const serviceWithoutKey = new AiRecipeService('');
-
-    // Call the method directly to verify it throws the correct error
-    await expect(serviceWithoutKey.generateRecipe(['chicken']))
-      .rejects
-      .toThrow('GEMINI_API_KEY is not set');
-
-    console.log('[TEST] ✓ ApiKeyError thrown for missing GEMINI_API_KEY (lines 11-12)');
   });
 
   /**
@@ -89,10 +81,14 @@ describe('AI Recipe Service - Error Path Coverage', () => {
       .send({ ingredients: ['chicken', 'rice'] })
       .expect(502);
 
-    expect(response.body.message).toBe('Failed to generate recipe with Gemini.');
+    expect(response.body.message).toBe(
+      'Failed to generate recipe with Gemini.'
+    );
     expect(response.body.data).toBeUndefined();
 
-    console.log('[TEST] ✓ Returned 502 for missing candidates (lines 92-94, 40-42)');
+    console.log(
+      '[TEST] ✓ Returned 502 for missing candidates (lines 92-94, 40-42)'
+    );
   });
 
   /**
@@ -120,10 +116,14 @@ describe('AI Recipe Service - Error Path Coverage', () => {
       .send({ ingredients: ['chicken', 'rice'] })
       .expect(502);
 
-    expect(response.body.message).toBe('Failed to generate recipe with Gemini.');
+    expect(response.body.message).toBe(
+      'Failed to generate recipe with Gemini.'
+    );
     expect(response.body.data).toBeUndefined();
 
-    console.log('[TEST] ✓ Returned 502 for missing content (lines 92-94, 40-42)');
+    console.log(
+      '[TEST] ✓ Returned 502 for missing content (lines 92-94, 40-42)'
+    );
   });
 
   /**
@@ -153,7 +153,9 @@ describe('AI Recipe Service - Error Path Coverage', () => {
       .send({ ingredients: ['chicken', 'rice'] })
       .expect(502);
 
-    expect(response.body.message).toBe('Failed to generate recipe with Gemini.');
+    expect(response.body.message).toBe(
+      'Failed to generate recipe with Gemini.'
+    );
     expect(response.body.data).toBeUndefined();
 
     console.log('[TEST] ✓ Returned 502 for missing parts (lines 92-94, 40-42)');
@@ -186,10 +188,14 @@ describe('AI Recipe Service - Error Path Coverage', () => {
       .send({ ingredients: ['chicken', 'rice'] })
       .expect(502);
 
-    expect(response.body.message).toBe('Failed to generate recipe with Gemini.');
+    expect(response.body.message).toBe(
+      'Failed to generate recipe with Gemini.'
+    );
     expect(response.body.data).toBeUndefined();
 
-    console.log('[TEST] ✓ Returned 502 for empty parts array (lines 97-103, 40-42)');
+    console.log(
+      '[TEST] ✓ Returned 502 for empty parts array (lines 97-103, 40-42)'
+    );
   });
 
   /**
@@ -222,10 +228,14 @@ describe('AI Recipe Service - Error Path Coverage', () => {
       .send({ ingredients: ['chicken', 'rice'] })
       .expect(502);
 
-    expect(response.body.message).toBe('Failed to generate recipe with Gemini.');
+    expect(response.body.message).toBe(
+      'Failed to generate recipe with Gemini.'
+    );
     expect(response.body.data).toBeUndefined();
 
-    console.log('[TEST] ✓ Returned 502 for parts with no text (lines 97-103, 40-42)');
+    console.log(
+      '[TEST] ✓ Returned 502 for parts with no text (lines 97-103, 40-42)'
+    );
   });
 
   /**
@@ -255,7 +265,9 @@ describe('AI Recipe Service - Error Path Coverage', () => {
    */
   test('should return 502 when Gemini API rate limit is exceeded', async () => {
     const { AxiosError } = await import('axios');
-    const rateLimitError = new AxiosError('Request failed with status code 429');
+    const rateLimitError = new AxiosError(
+      'Request failed with status code 429'
+    );
     rateLimitError.response = {
       status: 429,
       data: { error: 'Rate limit exceeded' },

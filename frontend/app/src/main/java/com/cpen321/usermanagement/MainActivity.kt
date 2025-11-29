@@ -32,6 +32,8 @@ import javax.inject.Inject
 import android.app.Activity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
+import com.cpen321.usermanagement.ui.viewmodels.MainViewModel
 
 
 @AndroidEntryPoint
@@ -40,6 +42,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var themePreferencesManager: ThemePreferencesManager
+
+    private var shouldTriggerTestBarcode = false
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -58,6 +62,12 @@ class MainActivity : ComponentActivity() {
         // Request notification permission first
         requestNotificationPermission()
 
+        // Check if this is a test barcode intent
+        if (intent?.action == "com.cpen321.usermanagement.TEST_BARCODE") {
+            shouldTriggerTestBarcode = true
+            Log.d(TAG, "Test barcode intent detected, will trigger after authentication")
+        }
+
         // Observe authentication state and register token when user is authenticated
         lifecycleScope.launch {
             authViewModel.uiState.collect { state ->
@@ -65,6 +75,15 @@ class MainActivity : ComponentActivity() {
                     getFcmToken()
                     // Check for expiring items when app opens
                     authViewModel.checkExpiringItems()
+
+                    // Trigger test barcode if requested
+                    if (shouldTriggerTestBarcode) {
+                        shouldTriggerTestBarcode = false
+                        Log.d(TAG, "Authenticated, triggering test barcode")
+                        kotlinx.coroutines.delay(2000) // Wait for UI to settle
+                        val mainViewModel = ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
+                        mainViewModel.testSendBarcode()
+                    }
                 }
             }
         }
@@ -81,6 +100,25 @@ class MainActivity : ComponentActivity() {
                 }
 
                 UserManagementApp()
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        if (intent.action == "com.cpen321.usermanagement.TEST_BARCODE") {
+            // If already authenticated, trigger immediately
+            if (authViewModel.uiState.value.isAuthenticated) {
+                Log.d(TAG, "Test barcode intent received (already authenticated), triggering now")
+                lifecycleScope.launch {
+                    kotlinx.coroutines.delay(2000)
+                    val mainViewModel = ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
+                    mainViewModel.testSendBarcode()
+                }
+            } else {
+                // Otherwise set flag to trigger after authentication
+                shouldTriggerTestBarcode = true
+                Log.d(TAG, "Test barcode intent received (not authenticated), will trigger after auth")
             }
         }
     }
