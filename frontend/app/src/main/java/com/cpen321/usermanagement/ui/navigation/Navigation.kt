@@ -147,11 +147,6 @@ private fun AppNavHost(
             )
         }
 
-        // Placeholder for scanner screen; implement separately
-        composable(NavRoutes.SCANNER) {
-        }
-
-
         composable(NavRoutes.BARCODE_RESULT) {
             BarcodeResultScreen(
                 mainViewModel = mainViewModel,

@@ -103,10 +103,6 @@ class NavigationStateManager @Inject constructor() {
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.MANAGE_PROFILE)
     }
 
-    fun navigateToScanner() {
-        _navigationEvent.value = NavigationEvent.NavigateToScanner
-    }
-
     fun navigateToBarcodeResult() {
         _navigationEvent.value = NavigationEvent.NavigateToBarcodeResult
         _navigationState.value = _navigationState.value.copy(currentRoute = NavRoutes.BARCODE_RESULT)
