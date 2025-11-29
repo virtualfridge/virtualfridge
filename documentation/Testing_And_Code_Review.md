@@ -345,8 +345,8 @@ Before running the tests, ensure you have the following:
    - Select "Open an Existing Project"
    - Navigate to and select the `frontend` directory
 
-2. **Start the Backend Server**:
-   - Before running frontend tests, ensure the backend server is running
+2. **Start the Backend Server Locally**:
+   - Before running frontend tests, ensure the backend server is running locally. 
    - From the project root directory, run:
      ```bash
      cd backend
