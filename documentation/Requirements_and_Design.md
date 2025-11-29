@@ -5,10 +5,17 @@
 | **Change Date**   | **Modified Sections** | **Rationale** |
 | ----------------- | --------------------- | ------------- |
 | 20/09/25          | All                   | Initial Commit |
-| 27/09/25          | 3.3 Actors Description | Added Gemini API which was missing |
-| 27/09/25          | 3.5 Formal Use Case Specifications | Fix failure scenario numbering, do not use authentication as a major use case, make naming more consistent|
-| 27/09/25          | 4.4 Frameworks | Filled this in more completely; before it just had express|
-|27/09/25          | 4.2 Databases|Added more details with the actual fields in the database|
+| 27/10/25          | 3.3 Actors Description | Added Gemini API which was missing |
+| 27/10/25          | 3.5 Formal Use Case Specifications | Fix failure scenario numbering, do not use authentication as a major use case, make naming more consistent |
+| 27/10/25          | 4.4 Frameworks | Filled this in more completely; before it just had Express |
+| 27/10/25          | 4.2 Databases | Added more details with the actual fields in the database |
+| 27/10/25          | All diagrams | Changed image formats from PNG to SVG, fixed diagrams |
+| 27/10/25          | 3.3, 3.5 | Combined the two Gemini actors, added signOut usecase |
+| 27/10/25          | 4.1 | Added actual interface descriptions |
+| 27/10/25          | 1.0 | Added changelog section |
+| 13/11/25          | 3.5 | Updated formal use case specifications |
+| 19/11/25          | 3.3 | Removed Gemini API from requirements (moved to implementation detail) |
+| 19/11/25          | 6.1, 6.2 | Revised test setup and success criteria for NFRs, removed image recognition accuracy test details |
 
 ---
 

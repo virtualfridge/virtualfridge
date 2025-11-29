@@ -2,9 +2,16 @@
 
 ## 1. Change History
 
-| **Change Date**   | **Modified Sections** |   **Rationale**  |
-| ----------------- | --------------------- | -----------------|
-| 27/11/25          | 2.1.1, 2.1.2, 2.1.3   | Updated to match
+| **Change Date**   | **Modified Sections** | **Rationale** |
+| ----------------- | --------------------- | ------------- |
+| 05/11/25          | All                   | Initial documentation with API test specifications |
+| 09/11/25          | 2.1.1, 2.1.2, 2.1.3   | Updated test locations and commit hash |
+| 24/11/25          | 5.4                   | Added justifications for Codacy issues (Math.random usage) |
+| 26/11/25          | 5.4                   | Added justifications for fs calls with variable filenames |
+| 27/11/25          | 2.1.1, 2.1.2, 2.1.3   | Updated test setup, removed detailed coverage info, updated commit hash |
+| 27/11/25          | 2.3, 2.4, 2.5         | Updated Jest coverage report images |
+| 27/11/25          | 4.2                   | Added frontend testing documentation |
+| 28/11/25          | 2.1.1, 2.1.2, 2.1.3   | Updated API test locations to api-mocked/api-unmocked structure, updated commit hash and test commands
 
 ---
 
