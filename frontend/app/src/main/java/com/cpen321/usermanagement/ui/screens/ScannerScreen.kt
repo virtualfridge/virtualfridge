@@ -173,22 +173,32 @@ fun ScannerScreen(
                         Log.w("ScannerScreen", "ImageCapture not ready")
                     } else {
                         val photoFile = createTempImageFile(context.cacheDir)
-                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                        val outputOptions =
+                            ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
                         captureUseCase.takePicture(
                             outputOptions,
                             cameraExecutor,
                             object : ImageCapture.OnImageSavedCallback {
-                            override fun onError(exception: ImageCaptureException) {
-                                Log.e("ScannerScreen", "Photo capture failed: ${exception.message}", exception)
-                                try { photoFile.delete() } catch (_: Exception) {}
-                            }
-
-                            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                                Log.d("ScannerScreen", "Photo capture succeeded: ${photoFile.absolutePath}")
-                                // Send to backend in IO thread
-                                scope.launch(Dispatchers.IO) {
+                                override fun onError(exception: ImageCaptureException) {
+                                    Log.e(
+                                        "ScannerScreen",
+                                        "Photo capture failed: ${exception.message}",
+                                        exception
+                                    )
                                     try {
+                                        photoFile.delete()
+                                    } catch (_: Exception) {
+                                    }
+                                }
+
+                                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                    Log.d(
+                                        "ScannerScreen",
+                                        "Photo capture succeeded: ${photoFile.absolutePath}"
+                                    )
+                                    // Send to backend in IO thread
+                                    scope.launch(Dispatchers.IO) {
                                         val ok = uploadImageToBackend(photoFile)
                                         if (ok) {
                                             // Navigate back on success
@@ -203,19 +213,9 @@ fun ScannerScreen(
                                                 )
                                             }
                                         }
-                                    } catch (e: Exception) {
-                                        Log.e("ScannerScreen", "Upload failed", e)
-                                        kotlinx.coroutines.withContext(Dispatchers.Main) {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Item detected must be a fruit or vegetable",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                    } finally {
-                                        try { photoFile.delete() } catch (_: Exception) {}
+                                        photoFile.delete()
                                     }
                                 }
-                            }
                             }
                         )
                     }
@@ -269,7 +269,7 @@ private fun processImageProxy(
 
 private fun createTempImageFile(cacheDir: File): File {
     val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-    return File.createTempFile("scan_${'$'}timeStamp", ".jpg", cacheDir)
+    return File.createTempFile("scan_${timeStamp}", ".jpg", cacheDir)
 }
 
 private suspend fun uploadImageToBackend(file: File): Boolean {
@@ -284,8 +284,17 @@ private suspend fun uploadImageToBackend(file: File): Boolean {
             Log.e("ScannerScreen", "Produce scan failed: ${response.errorBody()?.string()}")
             false
         }
-    } catch (e: Exception) {
-        Log.e("ScannerScreen", "Upload exception", e)
+    } catch (e: java.net.SocketTimeoutException) {
+        Log.e("ScannerScreen", "Network timeout while uploading image", e)
+        false
+    } catch (e: java.net.UnknownHostException) {
+        Log.e("ScannerScreen", "Network connection failed while uploading image", e)
+        false
+    } catch (e: java.io.IOException) {
+        Log.e("ScannerScreen", "IO error while uploading image", e)
+        false
+    } catch (e: retrofit2.HttpException) {
+        Log.e("ScannerScreen", "HTTP error while uploading image: ${e.code()}", e)
         false
     }
 }

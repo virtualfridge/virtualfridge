@@ -54,9 +54,6 @@ class FridgeRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while fetching fridge items", e)
             Result.failure(e)
-        } catch (e: RuntimeException) {
-            Log.e(TAG, "Unexpected runtime error while fetching fridge items", e)
-            Result.failure(e)
         }
     }
 
@@ -91,9 +88,6 @@ class FridgeRepositoryImpl @Inject constructor(
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while updating food item", e)
             Result.failure(e)
-        } catch (e: RuntimeException) {
-            Log.e(TAG, "Unexpected runtime error while updating food item", e)
-            Result.failure(e)
         }
     }
 
@@ -123,9 +117,6 @@ class FridgeRepositoryImpl @Inject constructor(
             Result.failure(e)
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while deleting food item", e)
-            Result.failure(e)
-        } catch (e: RuntimeException) {
-            Log.e(TAG, "Unexpected runtime error while deleting food item", e)
             Result.failure(e)
         }
     }
@@ -160,9 +151,6 @@ class FridgeRepositoryImpl @Inject constructor(
             Result.failure(e)
         } catch (e: HttpException) {
             Log.e(TAG, "HTTP error while sending barcode", e)
-            Result.failure(e)
-        } catch (e: RuntimeException) {
-            Log.e(TAG, "Unexpected runtime error while sending barcode", e)
             Result.failure(e)
         }
     }

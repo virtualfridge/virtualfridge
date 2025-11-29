@@ -86,12 +86,9 @@ class ProfileViewModel @Inject constructor(
 
     fun deleteProfile() {
         viewModelScope.launch {
-            val user = _uiState.value.user
-            if (user == null) {
-                Log.e("ProfileViewModel", "Cannot delete profile: user is null")
-                return@launch
-            }
-            profileRepository.deleteProfile(user)
+            _uiState.value.user?.let { user ->
+                profileRepository.deleteProfile(user)
+            } ?: Log.e("ProfileViewModel", "Cannot delete profile: user is null")
         }
     }
 
@@ -115,7 +112,11 @@ class ProfileViewModel @Inject constructor(
                 val result = profileRepository.updateProfile(null, null, imageResult.getOrNull()!!)
                 if (result.isSuccess) {
                     val updatedUser = currentUser.copy(profilePicture = pictureUri.toString())
-                    _uiState.value = _uiState.value.copy(isLoadingPhoto = false, user= updatedUser, successMessage = "Profile picture updated successfully!")
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingPhoto = false,
+                        user = updatedUser,
+                        successMessage = "Profile picture updated successfully!"
+                    )
                 } else {
                     val error = result.exceptionOrNull()
                     Log.e(TAG, "Failed to upload photo", error)
