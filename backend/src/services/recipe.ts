@@ -9,7 +9,6 @@ import {
   RecipeApiResponse,
   RecipeApiMeal,
   IRecipe,
-  ApiKeyError,
   recipeSchema,
 } from '../types/recipe';
 import { foodTypeModel } from '../models/foodType';

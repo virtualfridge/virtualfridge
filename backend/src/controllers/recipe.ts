@@ -6,7 +6,6 @@ import {
   GetRecipesResponse,
   defaultRecipeIngredients,
   AiRecipeRequestBody,
-  ApiKeyError,
 } from '../types/recipe';
 import logger from '../util/logger';
 import { AxiosError } from 'axios';
@@ -72,10 +71,6 @@ export class RecipeController {
       });
     } catch (error) {
       logger.error('Failed to generate AI recipe', error);
-      if (error instanceof ApiKeyError) {
-        // We shouldn't let the user know that we have not set Gemini Api key correctly
-        return res.status(500).json({ message: 'Internal server error' });
-      }
       if (error instanceof AxiosError) {
         return res
           .status(502)

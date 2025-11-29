@@ -151,5 +151,3 @@ export interface AiRecipeResponse {
   message: string;
   data?: AiRecipeData;
 }
-
-export class ApiKeyError extends Error {}
